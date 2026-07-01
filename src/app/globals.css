@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --journey-red: #d71920;
+  --journey-black: #050505;
+  --journey-gray: #f4f4f4;
+}
+
+* {
+  box-sizing: border-box;
+  letter-spacing: 0;
+}
+
+html {
+  min-height: 100%;
+  background: var(--journey-black);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: #f4f4f4;
+  color: #050505;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+body.skin-standard {
+  --skin-accent: #d71920;
+  --skin-foil: #d71920;
+  --skin-deep: #050505;
+  --skin-sea: #111111;
+  --skin-line: #d8d8d8;
+}
+
+body.skin-odyssey {
+  --skin-accent: #d71920;
+  --skin-foil: #c9a84d;
+  --skin-deep: #02080b;
+  --skin-sea: #071820;
+  --skin-line: rgba(201, 168, 77, 0.35);
+}
+
+body.skin-dune_3 {
+  --skin-accent: #d71920;
+  --skin-foil: #c8a46a;
+  --skin-deep: #070504;
+  --skin-sea: #17100a;
+  --skin-line: rgba(200, 164, 106, 0.35);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #d71920;
+  color: #ffffff;
+}
+
+.cinema-surface {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(180deg, #050505 0%, #111111 54%, #050505 100%);
+  background-size:
+    72px 72px,
+    auto;
+}
+
+.skin-odyssey .cinema-surface {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(201, 168, 77, 0.14), transparent 28%),
+    linear-gradient(90deg, rgba(201, 168, 77, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, var(--skin-deep) 0%, var(--skin-sea) 48%, #050505 100%);
+  background-size:
+    auto,
+    72px 72px,
+    auto;
+}
+
+.skin-odyssey .odyssey-gold {
+  color: var(--skin-foil);
+}
+
+.odyssey-frame {
+  border-color: var(--skin-line);
+  box-shadow:
+    inset 0 0 0 1px rgba(201, 168, 77, 0.18),
+    0 22px 70px rgba(0, 0, 0, 0.22);
+}
+
+.film-grain::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.09;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.32) 0 1px, transparent 1px),
+    radial-gradient(circle at 82% 42%, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 44% 72%, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px);
+  background-size: 36px 36px, 52px 52px, 74px 74px;
+}
+
+.film-perf {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 18px,
+    rgba(255, 255, 255, 0.22) 18px,
+    rgba(255, 255, 255, 0.22) 30px,
+    transparent 30px,
+    transparent 48px
+  );
+}
+
+.projection-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.projection-sweep::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: -40% auto -40% -30%;
+  width: 36%;
+  transform: skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12),
+    transparent
+  );
+  animation: projectionSweep 8s ease-in-out infinite;
+}
+
+.fleet-ocean {
+  position: relative;
+  overflow: hidden;
+  min-height: 520px;
+  border: 1px solid var(--skin-line);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.09), transparent 24%),
+    linear-gradient(180deg, rgba(7, 24, 32, 0.9), rgba(2, 8, 11, 0.98));
+}
+
+.fleet-ocean::before,
+.fleet-ocean::after {
+  content: "";
+  position: absolute;
+  left: -20%;
+  width: 140%;
+  height: 130px;
+  background:
+    radial-gradient(70px 20px at 50% 100%, rgba(255, 255, 255, 0.24), transparent 72%),
+    radial-gradient(90px 24px at 0% 100%, rgba(201, 168, 77, 0.18), transparent 72%);
+  background-size: 190px 70px;
+  opacity: 0.65;
+  animation: waveDrift 12s linear infinite;
+}
+
+.fleet-ocean::before {
+  bottom: 24px;
+}
+
+.fleet-ocean::after {
+  bottom: 92px;
+  opacity: 0.32;
+  animation-duration: 18s;
+  animation-direction: reverse;
+}
+
+.fleet-lane {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: var(--lane-top);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+}
+
+.fleet-boat {
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--boat-progress) * 1%);
+  top: var(--boat-top);
+  width: 96px;
+  transform: translate(-50%, -50%);
+  animation: boatBob 3.6s ease-in-out infinite;
+}
+
+.fleet-sail {
+  position: relative;
+  width: 74px;
+  height: 58px;
+  margin-inline: auto;
+}
+
+.fleet-sail::before,
+.fleet-sail::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.fleet-sail::before {
+  left: 32px;
+  border-width: 0 0 58px 30px;
+  border-color: transparent transparent rgba(255, 255, 255, 0.92) transparent;
+}
+
+.fleet-sail::after {
+  right: 34px;
+  border-width: 30px 22px 0 0;
+  border-color: var(--skin-foil) transparent transparent transparent;
+}
+
+.fleet-mast {
+  position: absolute;
+  left: 48px;
+  top: 0;
+  z-index: 2;
+  height: 66px;
+  width: 3px;
+  background: var(--skin-foil);
+}
+
+.fleet-hull {
+  height: 17px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, #d71920, #7a0c10);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.fleet-rank {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  display: flex;
+  min-width: 36px;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1px solid var(--skin-line);
+  background: rgba(5, 5, 5, 0.86);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 4px 6px;
+}
+
+@keyframes waveDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(190px);
+  }
+}
+
+@keyframes boatBob {
+  0%,
+  100% {
+    transform: translate(-50%, -52%) rotate(-1deg);
+  }
+  50% {
+    transform: translate(-50%, -46%) rotate(1.5deg);
+  }
+}
+
+@keyframes projectionSweep {
+  0% {
+    transform: translateX(0) skewX(-18deg);
+  }
+  45%,
+  100% {
+    transform: translateX(420%) skewX(-18deg);
+  }
+}
+
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline-color: #d71920;
+}
