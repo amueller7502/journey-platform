@@ -3,14 +3,37 @@
 import { Save } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { useJourneyState } from "@/lib/journey-state";
+
+const editableFields = [
+  ["Chapter name", "name"],
+  ["Chapter subtitle", "subtitle"],
+  ["Start date", "startDate"],
+  ["End date", "endDate"],
+  ["Community goal", "communityGoalMiles"],
+  ["Theme label", "themeLabel"],
+  ["Active", "active"],
+  ["Visual tagline", "visualTagline"],
+  ["Theme note", "themeNote"],
+] as const;
 
 export function ChapterSettingsEditor({
   settings,
 }: {
   settings: string[][];
 }) {
+  const { state, updateState } = useJourneyState();
   const [fields, setFields] = useState(() =>
-    settings.map(([label, value]) => ({ label, value })),
+    editableFields.map(([label, key]) => ({
+      label,
+      key,
+      value:
+        key === "active"
+          ? state.chapter.active
+            ? "Yes"
+            : "No"
+          : String(state.chapter[key] ?? settings.find(([item]) => item === label)?.[1] ?? ""),
+    })),
   );
   const [saved, setSaved] = useState(false);
 
@@ -26,6 +49,32 @@ export function ChapterSettingsEditor({
       className="grid gap-4"
       onSubmit={(event) => {
         event.preventDefault();
+        updateState((current) => {
+          const values = Object.fromEntries(
+            fields.map((field) => [field.key, field.value]),
+          );
+
+          return {
+            ...current,
+            chapter: {
+              ...current.chapter,
+              name: values.name || current.chapter.name,
+              subtitle: values.subtitle || current.chapter.subtitle,
+              startDate: values.startDate || current.chapter.startDate,
+              endDate: values.endDate || current.chapter.endDate,
+              communityGoalMiles: Math.max(
+                1,
+                Number(values.communityGoalMiles) ||
+                  current.chapter.communityGoalMiles,
+              ),
+              themeLabel: values.themeLabel || current.chapter.themeLabel,
+              active: String(values.active).toLowerCase().startsWith("y"),
+              visualTagline: values.visualTagline || current.chapter.visualTagline,
+              themeNote: values.themeNote || current.chapter.themeNote,
+              imaxReference: `${values.communityGoalMiles || current.chapter.communityGoalMiles} Miles - a nod to IMAX 1570 film.`,
+            },
+          };
+        });
         setSaved(true);
       }}
     >
@@ -53,7 +102,7 @@ export function ChapterSettingsEditor({
         </Button>
         {saved ? (
           <p className="text-sm font-black text-journey-red">
-            Chapter settings saved in this browser session.
+            Chapter settings saved.
           </p>
         ) : null}
       </div>

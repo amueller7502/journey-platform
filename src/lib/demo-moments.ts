@@ -1,6 +1,6 @@
 import type { StandardId } from "@/lib/types";
 
-export type DemoMoment = {
+export type JourneyMoment = {
   id: string;
   employeeId: string;
   employeeName: string;
@@ -14,33 +14,38 @@ export type DemoMoment = {
   managerName: string;
 };
 
-const STORAGE_KEY = "journey-demo-moments";
-const EVENT_NAME = "journey-demo-moments";
+export type DemoMoment = JourneyMoment;
 
-export function getDemoMoments() {
+const STORAGE_KEY = "journey-moments";
+const LEGACY_STORAGE_KEY = "journey-demo-moments";
+const EVENT_NAME = "journey-moments";
+
+export function getJourneyMoments() {
   if (typeof window === "undefined") {
     return [];
   }
 
   try {
-    const value = window.localStorage.getItem(STORAGE_KEY);
-    return value ? (JSON.parse(value) as DemoMoment[]) : [];
+    const value =
+      window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem(LEGACY_STORAGE_KEY);
+    return value ? (JSON.parse(value) as JourneyMoment[]) : [];
   } catch {
     return [];
   }
 }
 
-export function saveDemoMoment(moment: DemoMoment) {
+export function saveJourneyMoment(moment: JourneyMoment) {
   if (typeof window === "undefined") {
     return;
   }
 
-  const nextMoments = [moment, ...getDemoMoments()].slice(0, 12);
+  const nextMoments = [moment, ...getJourneyMoments()].slice(0, 24);
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextMoments));
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
-export function subscribeToDemoMoments(callback: () => void) {
+export function subscribeToJourneyMoments(callback: () => void) {
   if (typeof window === "undefined") {
     return () => {};
   }
@@ -54,3 +59,7 @@ export function subscribeToDemoMoments(callback: () => void) {
     window.removeEventListener("storage", handler);
   };
 }
+
+export const getDemoMoments = getJourneyMoments;
+export const saveDemoMoment = saveJourneyMoment;
+export const subscribeToDemoMoments = subscribeToJourneyMoments;

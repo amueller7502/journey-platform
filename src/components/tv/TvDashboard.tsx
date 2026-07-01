@@ -17,82 +17,103 @@ import { PreviewModeBadge } from "@/components/PreviewModeBadge";
 import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
 import { DepartmentProgress } from "@/components/dashboard/DepartmentProgress";
 import {
-  type DemoMoment,
-  getDemoMoments,
-  subscribeToDemoMoments,
+  type JourneyMoment,
+  getJourneyMoments,
+  subscribeToJourneyMoments,
 } from "@/lib/demo-moments";
 import {
-  chapter,
   chapterStats,
   fleetStandings,
-  getAction,
-  getEmployee,
   recognitions,
-  rewards,
   tvPanels,
 } from "@/lib/data";
+import { useJourneyState } from "@/lib/journey-state";
 import { daysRemaining, formatMiles } from "@/lib/utils";
 
-const panels = tvPanels;
-
 export function TvDashboard() {
+  const { state } = useJourneyState();
+  const panels = useMemo(() => {
+    if (state.skinEnabled && state.activeSkinId !== "standard") {
+      return tvPanels;
+    }
+
+    return tvPanels.filter(
+      (panel) => panel !== "North Stars Fleet" && panel !== "15,700 / IMAX 1570",
+    );
+  }, [state.activeSkinId, state.skinEnabled]);
   const [index, setIndex] = useState(0);
-  const [demoMoments, setDemoMoments] = useState<DemoMoment[]>([]);
+  const [journeyMoments, setJourneyMoments] = useState<JourneyMoment[]>([]);
   const spotlight = recognitions.find((recognition) => recognition.spotlight) ?? recognitions[0];
-  const demoSpotlight = demoMoments[0];
-  const rewardSpotlight = rewards.find((reward) => reward.spotlight) ?? rewards[0];
-  const activePanel = panels[index];
+  const journeySpotlight = journeyMoments[0];
+  const rewardSpotlight =
+    state.rewards.find((reward) => reward.spotlight && reward.enabled) ??
+    state.rewards.find((reward) => reward.enabled) ??
+    state.rewards[0];
+  const activeIndex = panels.length ? index % panels.length : 0;
+  const activePanel = panels[activeIndex] ?? panels[0];
+  const communityMiles = state.departments.reduce(
+    (total, department) => total + department.progressMiles,
+    0,
+  );
+  const activeEmployees = state.employees.filter(
+    (employee) => employee.role === "employee" && employee.active !== false,
+  ).length;
 
   function enterFullscreen() {
     document.documentElement.requestFullscreen?.();
   }
 
   useEffect(() => {
-    const loadMoments = () => setDemoMoments(getDemoMoments());
+    const loadMoments = () => setJourneyMoments(getJourneyMoments());
     loadMoments();
-    return subscribeToDemoMoments(loadMoments);
+    return subscribeToJourneyMoments(loadMoments);
   }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % panels.length);
+      setIndex((current) => (current + 1) % Math.max(panels.length, 1));
     }, 7000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [panels.length]);
 
   const panel = useMemo(() => {
     if (activePanel === "Community Progress") {
       return (
-        <TvPanel icon={Route} eyebrow="Community Progress" title={chapter.phrase}>
+        <TvPanel icon={Route} eyebrow="Community Progress" title={state.chapter.phrase}>
           <ChapterProgress inverse />
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <TvStat label="Miles Today" value={`+${formatMiles(chapterStats.todayMiles)}`} />
-            <TvStat label="Remaining" value={formatMiles(chapterStats.remainingMiles)} />
-            <TvStat label="Active Crew" value={`${chapterStats.activeEmployees}`} />
+            <TvStat
+              label="Remaining"
+              value={formatMiles(state.chapter.communityGoalMiles - communityMiles)}
+            />
+            <TvStat label="Active Crew" value={`${activeEmployees}`} />
           </div>
         </TvPanel>
       );
     }
 
     if (activePanel === "Today's Spotlight") {
-      const employee = getEmployee(spotlight.employeeId);
-      const action = getAction(spotlight.recognitionTypeId);
+      const employee = state.employees.find((item) => item.id === spotlight.employeeId);
+      const action = state.recognitionTypes.find(
+        (item) => item.id === spotlight.recognitionTypeId,
+      );
       return (
         <TvPanel
           icon={Sparkles}
           eyebrow="Today's Spotlight"
-          title={demoSpotlight?.employeeName ?? employee?.name ?? ""}
+          title={journeySpotlight?.employeeName ?? employee?.name ?? ""}
         >
           <div className="max-w-4xl">
             <p className="text-3xl font-black text-journey-white sm:text-5xl">
-              {demoSpotlight?.note ?? spotlight.note}
+              {journeySpotlight?.note ?? spotlight.note}
             </p>
             <p className="mt-6 text-2xl font-bold text-journey-line">
-              {demoSpotlight?.recognitionTypeName ?? action?.name}
+              {journeySpotlight?.recognitionTypeName ?? action?.name}
             </p>
             <p className="mt-4 text-5xl font-black text-journey-red">
-              +{demoSpotlight?.miles ?? spotlight.miles} Miles Earned
+              +{journeySpotlight?.miles ?? spotlight.miles} Miles Earned
             </p>
           </div>
         </TvPanel>
@@ -208,7 +229,7 @@ export function TvDashboard() {
       return (
         <TvPanel icon={Megaphone} eyebrow="Recognition Wall" title="Journey Moments">
           <div className="grid gap-4 xl:grid-cols-3">
-            {demoMoments.slice(0, 3).map((moment) => (
+            {journeyMoments.slice(0, 3).map((moment) => (
               <article
                 key={moment.id}
                 className="rounded-lg border border-journey-red bg-journey-coal p-5"
@@ -228,8 +249,12 @@ export function TvDashboard() {
               </article>
             ))}
             {recognitions.slice(0, 6).map((recognition) => {
-              const employee = getEmployee(recognition.employeeId);
-              const action = getAction(recognition.recognitionTypeId);
+              const employee = state.employees.find(
+                (item) => item.id === recognition.employeeId,
+              );
+              const action = state.recognitionTypes.find(
+                (item) => item.id === recognition.recognitionTypeId,
+              );
               return (
                 <article
                   key={recognition.id}
@@ -282,19 +307,30 @@ export function TvDashboard() {
     }
 
     return (
-      <TvPanel icon={CalendarClock} eyebrow="Countdown" title={chapter.name}>
+      <TvPanel icon={CalendarClock} eyebrow="Countdown" title={state.chapter.name}>
         <div className="max-w-4xl">
           <p className="text-8xl font-black text-journey-white sm:text-9xl">
-            {daysRemaining(chapter.endDate)}
+            {daysRemaining(state.chapter.endDate)}
           </p>
           <p className="mt-4 text-3xl font-black text-journey-red">Days Remaining</p>
           <p className="mt-6 text-2xl font-bold text-journey-line">
-            {chapter.subtitle} - 15,700 Miles
+            {state.chapter.subtitle} - {formatMiles(state.chapter.communityGoalMiles)} Miles
           </p>
         </div>
       </TvPanel>
     );
-  }, [activePanel, demoMoments, demoSpotlight, rewardSpotlight, spotlight]);
+  }, [
+    activeEmployees,
+    activePanel,
+    communityMiles,
+    journeyMoments,
+    journeySpotlight,
+    rewardSpotlight,
+    spotlight,
+    state.chapter,
+    state.employees,
+    state.recognitionTypes,
+  ]);
 
   return (
     <main className="cinema-surface film-grain relative min-h-screen overflow-hidden text-journey-white">
@@ -315,7 +351,7 @@ export function TvDashboard() {
           </button>
           <div className="text-right">
             <p className="text-xs font-black uppercase text-journey-red">
-              {chapter.subtitle}
+              {state.chapter.subtitle}
             </p>
             <p className="font-bold text-journey-line">{activePanel}</p>
           </div>
@@ -340,7 +376,7 @@ export function TvDashboard() {
           <div
             key={panelName}
             className={`h-full flex-1 ${
-              panelIndex === index ? "bg-journey-red" : "bg-journey-steel"
+              panelIndex === activeIndex ? "bg-journey-red" : "bg-journey-steel"
             }`}
           />
         ))}

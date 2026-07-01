@@ -974,7 +974,7 @@ export const launchReadinessChecklist = [
   { label: "Print Journey Cards", status: "Needs print run" },
   { label: "Test TV dashboard", status: "Ready" },
   { label: "Test manager recognition", status: "Ready" },
-  { label: "Test reward redemption", status: "Prototype" },
+  { label: "Test reward redemption", status: "Configurable" },
   { label: "Test Journey Card batch entry", status: "Ready" },
 ];
 

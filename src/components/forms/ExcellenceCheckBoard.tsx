@@ -3,9 +3,13 @@
 import { useState } from "react";
 import { CheckCircle2, Circle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { excellenceCheckTypes } from "@/lib/data";
+import { useJourneyState } from "@/lib/journey-state";
 
 export function ExcellenceCheckBoard() {
+  const { state } = useJourneyState();
+  const excellenceCheckTypes = state.recognitionTypes
+    .filter((type) => type.enabled && type.type === "excellence_check")
+    .sort((a, b) => a.sortOrder - b.sortOrder);
   const [completed, setCompleted] = useState<string[]>([
     "lobby_excellence",
     "theater_excellence",
@@ -13,6 +17,12 @@ export function ExcellenceCheckBoard() {
 
   return (
     <div className="grid gap-3 md:grid-cols-2">
+      {!excellenceCheckTypes.length ? (
+        <div className="rounded-lg border border-journey-line bg-journey-white p-4 text-sm font-bold text-journey-steel md:col-span-2">
+          No enabled excellence checks are available. Add or enable checks in Admin /
+          Recognition Library.
+        </div>
+      ) : null}
       {excellenceCheckTypes.map((check) => {
         const isComplete = completed.includes(check.id);
         return (

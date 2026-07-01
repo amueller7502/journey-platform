@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { RecognitionCard } from "@/components/dashboard/RecognitionCard";
 import { StandardBadge } from "@/components/ui/StandardBadge";
 import {
-  type DemoMoment,
-  getDemoMoments,
-  subscribeToDemoMoments,
+  type JourneyMoment,
+  getJourneyMoments,
+  subscribeToJourneyMoments,
 } from "@/lib/demo-moments";
 import type { Recognition } from "@/lib/types";
 import { formatShortDateTime } from "@/lib/utils";
@@ -16,17 +16,17 @@ export function RecentMomentsFeed({
 }: {
   initialRecognitions: Recognition[];
 }) {
-  const [demoMoments, setDemoMoments] = useState<DemoMoment[]>([]);
+  const [journeyMoments, setJourneyMoments] = useState<JourneyMoment[]>([]);
 
   useEffect(() => {
-    const loadMoments = () => setDemoMoments(getDemoMoments());
+    const loadMoments = () => setJourneyMoments(getJourneyMoments());
     loadMoments();
-    return subscribeToDemoMoments(loadMoments);
+    return subscribeToJourneyMoments(loadMoments);
   }, []);
 
   return (
     <div className="grid gap-4">
-      {demoMoments.slice(0, 2).map((moment) => (
+      {journeyMoments.slice(0, 2).map((moment) => (
         <article
           key={moment.id}
           className="rounded-lg border border-journey-red bg-journey-white p-4 shadow-line"

@@ -4,13 +4,15 @@ import { Plus, Save, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { RewardCard } from "@/components/dashboard/RewardCard";
 import { Button } from "@/components/ui/Button";
+import { useJourneyState } from "@/lib/journey-state";
 import type { Reward } from "@/lib/types";
 
 const rewardCategories: Reward["category"][] = ["Food", "Cinema", "Gear", "Experience"];
 
 export function RewardInventoryEditor({ initialRewards }: { initialRewards: Reward[] }) {
-  const [catalog, setCatalog] = useState(initialRewards);
+  const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
+  const catalog = state.rewards.length ? state.rewards : initialRewards;
 
   const activeRewards = useMemo(
     () => catalog.filter((reward) => reward.enabled).sort((a, b) => a.sortOrder - b.sortOrder),
@@ -19,35 +21,44 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
 
   function updateReward(id: string, patch: Partial<Reward>) {
     setSaved(false);
-    setCatalog((current) =>
-      current.map((reward) => (reward.id === id ? { ...reward, ...patch } : reward)),
-    );
+    updateState((current) => ({
+      ...current,
+      rewards: current.rewards.map((reward) =>
+        reward.id === id ? { ...reward, ...patch } : reward,
+      ),
+    }));
   }
 
   function addReward() {
     setSaved(false);
-    setCatalog((current) => [
+    updateState((current) => ({
       ...current,
-      {
-        id: `reward-draft-${current.length + 1}`,
-        chapterId: initialRewards[0]?.chapterId ?? "chapter-one-odyssey",
-        name: "New Reward",
-        description: "Describe what the crew member receives.",
-        milesCost: 100,
-        inventoryCount: 5,
-        imageUrl: "/brand/celebration-c-frame.png",
-        category: "Experience",
-        enabled: true,
-        sortOrder: current.length * 10 + 10,
-        redemptionLimitPerEmployee: 1,
-        fulfillmentNotes: "Add pickup or approval notes.",
-      },
-    ]);
+      rewards: [
+        ...current.rewards,
+        {
+          id: `reward-draft-${Date.now()}`,
+          chapterId: initialRewards[0]?.chapterId ?? "chapter-one-odyssey",
+          name: "New Reward",
+          description: "Describe what the crew member receives.",
+          milesCost: 100,
+          inventoryCount: 5,
+          imageUrl: "/brand/celebration-c-frame.png",
+          category: "Experience",
+          enabled: true,
+          sortOrder: current.rewards.length * 10 + 10,
+          redemptionLimitPerEmployee: 1,
+          fulfillmentNotes: "Add pickup or approval notes.",
+        },
+      ],
+    }));
   }
 
   function removeReward(id: string) {
     setSaved(false);
-    setCatalog((current) => current.filter((reward) => reward.id !== id));
+    updateState((current) => ({
+      ...current,
+      rewards: current.rewards.filter((reward) => reward.id !== id),
+    }));
   }
 
   return (
@@ -55,8 +66,8 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-journey-steel">
-            Prototype editor. Saving here updates the local preview state; Supabase
-            persistence is modeled in the schema.
+            Reward changes are saved to this configurable build and reflected in the
+            employee Trading Post on this browser.
           </p>
           {saved ? (
             <p className="mt-2 text-sm font-black text-journey-red">

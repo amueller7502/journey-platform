@@ -1,33 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
   chapter,
   iconNames,
   recognitionStandards,
-  recognitionTypes,
 } from "@/lib/data";
+import { makeSlugId, useJourneyState } from "@/lib/journey-state";
 import type { RecognitionType } from "@/lib/types";
 
-const blankType: RecognitionType = {
-  id: "new-recognition-type",
-  chapterId: chapter.id,
-  name: "",
-  description: "",
-  category: "Guest Experience",
-  standardId: "guest_welcome",
-  milesValue: 10,
-  icon: "Sparkles",
-  enabled: true,
-  requiresManagerVerification: true,
-  sortOrder: 999,
-  type: "recognition",
-};
+function createBlankType(sortOrder: number): RecognitionType {
+  return {
+    id: "new-recognition-type",
+    chapterId: chapter.id,
+    name: "",
+    description: "",
+    category: "Guest Experience",
+    standardId: "guest_welcome",
+    milesValue: 10,
+    icon: "Sparkles",
+    enabled: true,
+    requiresManagerVerification: true,
+    sortOrder,
+    type: "recognition",
+  };
+}
 
 export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
-  const existing = recognitionTypes.find((type) => type.id === typeId);
+  const { state, updateState } = useJourneyState();
+  const existing = useMemo(
+    () => state.recognitionTypes.find((type) => type.id === typeId),
+    [state.recognitionTypes, typeId],
+  );
+  const blankType = useMemo(
+    () =>
+      createBlankType(
+        Math.max(0, ...state.recognitionTypes.map((type) => type.sortOrder)) + 10,
+      ),
+    [state.recognitionTypes],
+  );
   const [form, setForm] = useState<RecognitionType>(existing ?? blankType);
   const [saved, setSaved] = useState(false);
 
@@ -36,6 +49,31 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
       className="grid gap-5"
       onSubmit={(event) => {
         event.preventDefault();
+        const id =
+          form.id === "new-recognition-type"
+            ? `${makeSlugId(form.name, "recognition_type")}-${Date.now()}`
+            : form.id;
+        const nextType = {
+          ...form,
+          id,
+          name: form.name.trim() || "Untitled Recognition Type",
+          description: form.description.trim() || "Manager verified Journey Moment.",
+          milesValue: Math.max(1, Number(form.milesValue)),
+        };
+
+        updateState((current) => {
+          const exists = current.recognitionTypes.some((type) => type.id === id);
+
+          return {
+            ...current,
+            recognitionTypes: exists
+              ? current.recognitionTypes.map((type) =>
+                  type.id === id ? nextType : type,
+                )
+              : [...current.recognitionTypes, nextType],
+          };
+        });
+        setForm(nextType);
         setSaved(true);
       }}
     >
@@ -178,7 +216,8 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
 
       {saved ? (
         <div className="rounded-lg border border-journey-red bg-journey-white p-4 text-sm font-bold text-journey-black">
-          Prototype save complete. In Supabase this writes to `recognition_types`.
+          Recognition type saved to the configurable library. Supabase persistence
+          maps to `recognition_types` when connected.
         </div>
       ) : null}
     </form>

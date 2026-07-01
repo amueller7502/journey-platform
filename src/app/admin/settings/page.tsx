@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChapterSettingsEditor } from "@/components/admin/ChapterSettingsEditor";
+import { FeatureBuildoutPanel } from "@/components/admin/FeatureBuildoutPanel";
 import { MenuConfigurationPanel } from "@/components/admin/MenuConfigurationPanel";
 import { SkinSettingsPanel } from "@/components/admin/SkinSettingsPanel";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -87,7 +88,7 @@ export default function SettingsPage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
         <Panel>
-          <PanelHeader title="Skin Manager" eyebrow="Chapter visuals" />
+          <PanelHeader title="Skin Developer" eyebrow="Chapter visuals" />
           <SkinSettingsPanel skins={journeySkins} activeSkinId={activeSkin.id} />
         </Panel>
         <Panel>
@@ -103,6 +104,11 @@ export default function SettingsPage() {
       <Panel className="mt-5">
         <PanelHeader title="Chapter Settings" eyebrow="Editable fields" />
         <ChapterSettingsEditor settings={chapterSettings} />
+      </Panel>
+
+      <Panel className="mt-5">
+        <PanelHeader title="Feature Buildout" eyebrow="Launch readiness" />
+        <FeatureBuildoutPanel />
       </Panel>
     </AppShell>
   );

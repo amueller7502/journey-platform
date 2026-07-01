@@ -1,10 +1,14 @@
-import { departments } from "@/lib/data";
+"use client";
+
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useJourneyState } from "@/lib/journey-state";
 
 export function DepartmentProgress({ inverse = false }: { inverse?: boolean }) {
+  const { state } = useJourneyState();
+
   return (
     <div className="space-y-4">
-      {departments.map((department) => (
+      {state.departments.map((department) => (
         <ProgressBar
           key={department.id}
           label={department.name}

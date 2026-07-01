@@ -64,6 +64,7 @@ export type Employee = {
   initials: string;
   passportId: string;
   passportQrUrl: string;
+  active?: boolean;
   miles: number;
   weeklyMiles: number;
   reliabilityStreak: number;

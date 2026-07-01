@@ -78,7 +78,7 @@ export default function WelcomePage() {
             </div>
             <div className="mt-5 grid gap-3">
               <LinkButton href="/home" icon={UserRound} className="justify-start">
-                Employee Demo
+                Employee Workspace
               </LinkButton>
               <LinkButton
                 href="/manager/recognize"
@@ -86,7 +86,7 @@ export default function WelcomePage() {
                 variant="dark"
                 className="justify-start"
               >
-                Manager Demo
+                Manager Workspace
               </LinkButton>
               <LinkButton
                 href="/admin/dashboard"
@@ -94,7 +94,7 @@ export default function WelcomePage() {
                 variant="secondary"
                 className="justify-start"
               >
-                Admin/GM Demo
+                Admin/GM Workspace
               </LinkButton>
               <LinkButton
                 href="/tv"

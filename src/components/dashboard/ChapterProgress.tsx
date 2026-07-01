@@ -1,9 +1,17 @@
-import { COMMUNITY_GOAL_MILES, chapter, chapterStats } from "@/lib/data";
+"use client";
+
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useJourneyState } from "@/lib/journey-state";
 import { formatMiles, percent } from "@/lib/utils";
 
 export function ChapterProgress({ inverse = false }: { inverse?: boolean }) {
-  const progress = percent(chapterStats.communityMiles, COMMUNITY_GOAL_MILES);
+  const { state } = useJourneyState();
+  const communityMiles = state.departments.reduce(
+    (total, department) => total + department.progressMiles,
+    0,
+  );
+  const communityGoal = state.chapter.communityGoalMiles;
+  const progress = percent(communityMiles, communityGoal);
 
   return (
     <div className="space-y-5">
@@ -15,7 +23,7 @@ export function ChapterProgress({ inverse = false }: { inverse?: boolean }) {
               : "text-sm font-black uppercase text-journey-red"
           }
         >
-          {chapter.subtitle}
+          {state.chapter.subtitle}
         </p>
         <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
           <p
@@ -34,15 +42,14 @@ export function ChapterProgress({ inverse = false }: { inverse?: boolean }) {
                 : "pb-2 text-lg font-bold text-journey-steel"
             }
           >
-            {formatMiles(chapterStats.communityMiles)} of{" "}
-            {formatMiles(COMMUNITY_GOAL_MILES)} miles
+            {formatMiles(communityMiles)} of {formatMiles(communityGoal)} miles
           </p>
         </div>
       </div>
       <ProgressBar
-        label={chapter.phrase}
-        value={chapterStats.communityMiles}
-        max={COMMUNITY_GOAL_MILES}
+        label={state.chapter.phrase}
+        value={communityMiles}
+        max={communityGoal}
         inverse={inverse}
       />
       <p
@@ -52,7 +59,7 @@ export function ChapterProgress({ inverse = false }: { inverse?: boolean }) {
             : "text-sm font-bold text-journey-steel"
         }
       >
-        {chapter.imaxReference}
+        {state.chapter.imaxReference}
       </p>
     </div>
   );

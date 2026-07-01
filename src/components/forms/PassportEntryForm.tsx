@@ -3,21 +3,33 @@
 import { useMemo, useState } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import {
-  enabledRecognitionTypes,
-  recognitionStandards,
-} from "@/lib/data";
+import { saveJourneyMoment } from "@/lib/demo-moments";
+import { recognitionStandards } from "@/lib/data";
+import { addMilesToEmployee, useJourneyState } from "@/lib/journey-state";
 import type { Employee } from "@/lib/types";
 
 export function PassportEntryForm({ employee }: { employee: Employee }) {
+  const { state } = useJourneyState();
+  const currentEmployee =
+    state.employees.find((item) => item.passportId === employee.passportId) ?? employee;
+  const enabledRecognitionTypes = useMemo(
+    () =>
+      state.recognitionTypes
+        .filter((type) => type.enabled)
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    [state.recognitionTypes],
+  );
   const [selected, setSelected] = useState<string[]>([
     "lobby_excellence",
     "guest_compliment",
   ]);
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const availableSelected = selected.filter((id) =>
+    enabledRecognitionTypes.some((type) => type.id === id),
+  );
   const selectedTypes = enabledRecognitionTypes.filter((type) =>
-    selected.includes(type.id),
+    availableSelected.includes(type.id),
   );
   const totalMiles = selectedTypes.reduce((total, type) => total + type.milesValue, 0);
 
@@ -27,7 +39,7 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
         standard,
         items: enabledRecognitionTypes.filter((type) => type.standardId === standard.id),
       })),
-    [],
+    [enabledRecognitionTypes],
   );
 
   if (submitted) {
@@ -38,11 +50,11 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
           Journey Card Batch Submitted
         </h2>
         <p className="mt-3 text-lg font-bold text-journey-steel">
-          {employee.name} earned {totalMiles} Miles from {selected.length} verified
+          {currentEmployee.name} earned {totalMiles} Miles from {selectedTypes.length} verified
           Journey Card items.
         </p>
         <p className="mt-4 text-sm font-bold text-journey-steel">
-          Batch preview: card-{employee.passportId.toLowerCase()}-today
+          Batch: card-{currentEmployee.passportId.toLowerCase()}-today
         </p>
       </div>
     );
@@ -53,6 +65,28 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
       className="pb-24"
       onSubmit={(event) => {
         event.preventDefault();
+        const createdAt = new Date().toISOString();
+        selectedTypes
+          .slice()
+          .reverse()
+          .forEach((type, index) => {
+            saveJourneyMoment({
+              id: `card-${currentEmployee.passportId}-${Date.now()}-${index}`,
+              employeeId: currentEmployee.id,
+              employeeName: currentEmployee.name,
+              employeeInitials: currentEmployee.initials,
+              recognitionTypeId: type.id,
+              recognitionTypeName: type.name,
+              standardId: type.standardId,
+              miles: type.milesValue,
+              note:
+                note.trim() ||
+                `${currentEmployee.name} had ${type.name.toLowerCase()} verified from a Journey Card.`,
+              createdAt,
+              managerName: "Jordan Ellis",
+            });
+          });
+        addMilesToEmployee(currentEmployee.id, totalMiles);
         setSubmitted(true);
       }}
     >
@@ -67,7 +101,7 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {items.map((item) => {
-                const checked = selected.includes(item.id);
+              const checked = availableSelected.includes(item.id);
                 return (
                   <label
                     key={item.id}
@@ -124,7 +158,7 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
           <div>
             <p className="text-xs font-black uppercase text-journey-red">Batch total</p>
             <p className="text-2xl font-black text-journey-black">
-              {totalMiles} Miles from {selected.length} items
+              {totalMiles} Miles from {selectedTypes.length} items
             </p>
           </div>
           <Button type="submit" icon={Send}>

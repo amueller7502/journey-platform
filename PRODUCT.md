@@ -33,4 +33,4 @@ Journey makes recognizing great work easier than overlooking it.
 
 ## Launch Scope
 
-Sprint Alpha is for management preview readiness. It prioritizes polish, clarity, demo confidence, and reusable structure over new production infrastructure.
+Sprint Alpha is for management preview readiness. It prioritizes polish, clarity, configurable workflows, and reusable structure over new production infrastructure.
