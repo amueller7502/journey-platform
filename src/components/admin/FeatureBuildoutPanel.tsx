@@ -34,7 +34,7 @@ const featureRows = [
   {
     area: "Authentication",
     status: "Configured",
-    detail: "Supabase Auth sign-in and optional role enforcement are built; preview codes remain fallback.",
+    detail: "Supabase Auth sign-in, account creation, and optional role enforcement are built.",
     icon: ShieldCheck,
   },
   {

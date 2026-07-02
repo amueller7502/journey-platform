@@ -104,6 +104,55 @@ insert into public.departments (id, slug, name, goal_miles, sort_order) values
   ('22222222-2222-4222-8222-222222222205', 'facilities', 'Facilities', 1800, 5),
   ('22222222-2222-4222-8222-222222222206', 'leadership', 'Leadership', 600, 6);
 
+insert into public.journey_card_areas (
+  id,
+  name,
+  description,
+  department_slugs,
+  enabled,
+  sort_order
+) values
+  (
+    'floor_lobby',
+    'Floor / Lobby',
+    'Guest-facing lobby, auditorium reset, queue flow, wayfinding, and presentation tasks.',
+    array['floor'],
+    true,
+    10
+  ),
+  (
+    'concessions',
+    'Concessions',
+    'Line speed, stock readiness, guest handoffs, condiment stations, and rush support.',
+    array['concessions'],
+    true,
+    20
+  ),
+  (
+    'kitchen_oscars',
+    'Kitchen / Oscar''s',
+    'Food accuracy, kitchen reset, Oscar''s presentation, expo communication, and safe handoffs.',
+    array['kitchen'],
+    true,
+    30
+  ),
+  (
+    'box_guest_services',
+    'Box Office / Guest Services',
+    'Greeting, queue clarity, guest recovery, membership support, and calm problem solving.',
+    array['box_office','guest_services'],
+    true,
+    40
+  ),
+  (
+    'facilities_exterior',
+    'Facilities / Exterior',
+    'Restroom readiness, exterior walks, utility organization, and building-detail saves.',
+    array['facilities'],
+    true,
+    50
+  );
+
 insert into public.recognition_standards (id, label, short_label, description, sort_order) values
   ('guest_welcome', 'Every Guest Feels Welcome', 'Guest Welcome', 'Warm greetings, helpful answers, and confident recoveries.', 1),
   ('space_exceptional', 'Every Space Looks Exceptional', 'Presentation', 'Clean, sharp, guest-ready spaces from curb to auditorium.', 2),

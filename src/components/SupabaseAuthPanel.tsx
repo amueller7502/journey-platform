@@ -2,17 +2,62 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogIn, UserPlus } from "lucide-react";
+import { HandHeart, LayoutDashboard, LogIn, UserPlus, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { appRoleForPlatformRole, platformRoleRank, routeForRole } from "@/lib/access-control";
+import {
+  appRoleForPlatformRole,
+  platformRoleRank,
+  roleCanAccess,
+  routeForRole,
+} from "@/lib/access-control";
 import { createClient, hasSupabaseBrowserEnv } from "@/lib/supabase/client";
 import type { PlatformRole, Role } from "@/lib/types";
 
 type AuthMode = "sign_in" | "create_account";
 
+const experienceOptions: Array<{
+  role: Role;
+  label: string;
+  description: string;
+  icon: typeof UserRound;
+}> = [
+  {
+    role: "employee",
+    label: "Employee",
+    description: "Today, My Experience, Rewards, Profile",
+    icon: UserRound,
+  },
+  {
+    role: "manager",
+    label: "Manager",
+    description: "Capture Moments and run shift tools",
+    icon: HandHeart,
+  },
+  {
+    role: "admin",
+    label: "Builder",
+    description: "Recognition, Rewards, Employees, Settings",
+    icon: LayoutDashboard,
+  },
+];
+
+function roleLabel(role: Role) {
+  if (role === "admin") {
+    return "Experience Builder";
+  }
+
+  if (role === "manager") {
+    return "Manager";
+  }
+
+  return "Employee";
+}
+
 export function SupabaseAuthPanel() {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>("sign_in");
+  const [selectedRole, setSelectedRole] = useState<Role>("employee");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -23,7 +68,12 @@ export function SupabaseAuthPanel() {
     setMessage("");
 
     if (!hasEnv) {
-      setMessage("Supabase is not connected yet. Use a preview access code below.");
+      setMessage("Supabase environment variables are required before accounts can be used.");
+      return;
+    }
+
+    if (mode === "create_account" && !fullName.trim()) {
+      setMessage("Name is required to create an account.");
       return;
     }
 
@@ -34,10 +84,42 @@ export function SupabaseAuthPanel() {
 
     setLoading(true);
     const supabase = createClient();
-    const authResult =
-      mode === "sign_in"
-        ? await supabase.auth.signInWithPassword({ email: email.trim(), password })
-        : await supabase.auth.signUp({ email: email.trim(), password });
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (mode === "create_account") {
+      const createResponse = await fetch("/api/auth/create-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: cleanEmail,
+          password,
+          role: selectedRole,
+        }),
+      });
+
+      const createPayload = (await createResponse.json()) as {
+        error?: string;
+        employeeId?: string;
+      };
+
+      if (!createResponse.ok) {
+        setMessage(createPayload.error ?? "Unable to create account.");
+        setLoading(false);
+        return;
+      }
+
+      if (createPayload.employeeId) {
+        window.localStorage.setItem("journey-active-account-id", createPayload.employeeId);
+      }
+    }
+
+    const authResult = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password,
+    });
 
     if (authResult.error) {
       setMessage(authResult.error.message);
@@ -89,7 +171,7 @@ export function SupabaseAuthPanel() {
 
     const { data: employeeProfile, error: employeeError } = await supabase
       .from("employees")
-      .select("id, role")
+      .select("id, app_id, role")
       .eq("auth_user_id", user.id)
       .maybeSingle();
 
@@ -107,10 +189,23 @@ export function SupabaseAuthPanel() {
       return;
     }
 
-    if (employeeProfile?.id) {
-      window.localStorage.setItem("journey-active-account-id", employeeProfile.id as string);
+    if (!roleCanAccess(resolvedRole, selectedRole)) {
+      setMessage(
+        `${roleLabel(resolvedRole)} accounts cannot open the ${roleLabel(
+          selectedRole,
+        )} experience.`,
+      );
+      setLoading(false);
+      return;
     }
-    router.push(routeForRole(resolvedRole));
+
+    if (employeeProfile?.id || employeeProfile?.app_id) {
+      window.localStorage.setItem(
+        "journey-active-account-id",
+        (employeeProfile.app_id as string | null) ?? (employeeProfile.id as string),
+      );
+    }
+    router.push(routeForRole(selectedRole));
     setLoading(false);
   }
 
@@ -119,10 +214,10 @@ export function SupabaseAuthPanel() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <p className="text-xs font-black uppercase text-journey-red">
-            Production Sign In
+            Account Access
           </p>
           <p className="text-sm font-bold text-journey-steel">
-            Supabase Auth with role-based routing.
+            Choose the experience you want to open.
           </p>
         </div>
         <div className="flex rounded-md border border-journey-line bg-journey-white p-1">
@@ -150,6 +245,51 @@ export function SupabaseAuthPanel() {
           </button>
         </div>
       </div>
+
+      <div className="grid gap-2">
+        {experienceOptions.map((option) => {
+          const Icon = option.icon;
+          const selected = selectedRole === option.role;
+          return (
+            <button
+              key={option.role}
+              type="button"
+              onClick={() => setSelectedRole(option.role)}
+              className={`focus-ring flex min-h-16 items-center gap-3 rounded-lg border p-3 text-left transition ${
+                selected
+                  ? "border-journey-red bg-journey-black text-journey-white"
+                  : "border-journey-line bg-journey-white text-journey-black hover:bg-journey-mist"
+              }`}
+            >
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
+                  selected ? "bg-journey-red text-journey-white" : "bg-journey-mist text-journey-red"
+                }`}
+              >
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block font-black">{option.label}</span>
+                <span className={`mt-1 block text-xs font-bold ${selected ? "text-journey-line" : "text-journey-steel"}`}>
+                  {option.description}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {mode === "create_account" ? (
+        <label className="grid gap-2 text-sm font-bold text-journey-black">
+          Name
+          <input
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3"
+            placeholder="Sam Carter"
+          />
+        </label>
+      ) : null}
 
       <label className="grid gap-2 text-sm font-bold text-journey-black">
         Email
@@ -188,8 +328,10 @@ export function SupabaseAuthPanel() {
       ) : (
         <p className="text-xs font-bold text-journey-steel">
           {hasEnv
-            ? "Create Supabase Auth users, then connect them to profiles/user_roles and employees by auth_user_id."
-            : "Supabase env vars are not present, so preview access codes remain available."}
+            ? mode === "create_account"
+              ? "Creating an account also creates the matching Experience profile and role."
+              : "Your account role controls which experiences you can open."
+            : "Supabase env vars are not present, so live account access is unavailable."}
         </p>
       )}
     </div>

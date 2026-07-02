@@ -56,7 +56,7 @@ Run all three before pushing to GitHub or deploying to Vercel.
 
 ## Environment Variables
 
-The app works with seeded demo data without Supabase Auth.
+Experience Lite uses Supabase for live account creation, sign-in, and shared state.
 
 Supabase variables:
 
@@ -68,7 +68,7 @@ NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=false
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
-Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after Supabase Auth users are created and connected to employee profile rows.
+Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after at least one Experience Builder account exists and has been tested.
 
 ## Supabase Setup
 
@@ -77,11 +77,11 @@ Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after Supabase Auth users a
 3. Run `supabase/schema.sql`.
 4. Run `supabase/seed.sql`.
 5. Add the environment variables above to `.env.local`.
-6. Create Supabase Auth users for employees, leaders, and Experience Designers.
-7. Connect each Auth user to the matching `profiles.auth_user_id`.
-8. Connect the same Auth user to the matching `employees.auth_user_id` when that person should have an in-app employee or leader account.
-9. Confirm `user_roles.role` is one of `employee`, `leader`, or `experience_designer`.
-10. Restart the dev server.
+6. Restart the dev server.
+7. Open the Welcome screen and use **Create** to create the first Experience Builder account.
+8. Sign in with that account and confirm it can open Experience Builder.
+9. Create manager and employee accounts from the Welcome screen or Employees Builder.
+10. After accounts are tested, set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` when you are ready to block direct route access for signed-out users.
 
 For an existing Supabase project that already ran an older schema, run:
 
@@ -105,36 +105,27 @@ The shared operating state lives in `journey_operating_state` for compatibility 
 Experience uses platform roles in `user_roles`:
 
 - `employee` routes to `/home`.
-- `leader` routes to `/leadership/dashboard`.
+- `leader` routes to `/manager/recognize` in Lite mode.
 - `experience_designer` routes to `/admin/dashboard`.
 
 The app still supports the legacy `employees.role` values `employee`, `manager`, and `admin` as a fallback while accounts are being migrated.
 
-To link a Supabase Auth user, copy the user UUID from Supabase Auth and update both tables:
+## Account Creation
 
-```sql
-update public.profiles
-set auth_user_id = 'AUTH_USER_UUID'
-where email = 'alex.rivera@north.example';
+The Welcome screen includes Sign In / Create Account tabs and experience toggles:
 
-update public.employees
-set auth_user_id = 'AUTH_USER_UUID'
-where email = 'alex.rivera@north.example';
-```
+- Employee
+- Manager
+- Experience Builder
 
-## Demo Access Codes
+Creating an account creates:
 
-Use the Welcome screen access code field:
+- Supabase Auth user
+- `profiles` row
+- `user_roles` row
+- `employees` row linked by `auth_user_id`
 
-- Employee: `AR1570`
-- Leader: `JE1570`
-- Experience Builder: `SC1570`
-
-Demo buttons:
-
-- Employee Experience -> `/home`
-- Manager Lite -> `/manager/recognize`
-- Experience Builder -> `/admin/dashboard`
+The preview access-code fallback has been removed from the Welcome screen.
 
 ## Main Routes
 

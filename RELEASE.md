@@ -1,5 +1,13 @@
 # Experience Release Notes
 
+## V1.7 Live Account Entry
+
+- Replaced the Welcome screen preview access-code fallback with Supabase account sign-in.
+- Added account creation that creates the Supabase Auth user, Experience profile, role, and employee/leader/builder account row together.
+- Added login experience toggles for Employee, Manager, and Experience Builder.
+- Sign-in now routes to the selected experience when the account role has permission.
+- Added missing Experience Card area seed data so `supabase/seed.sql` runs cleanly after the schema reset.
+
 ## V1.6 Builder Delete / Archive Safety
 
 Delete buttons now perform real actions in Lite-visible builders.
@@ -164,7 +172,7 @@ Moved Experience toward a commercial Employee Experience Platform where culture 
 - Added Supabase email/password sign-in on the Welcome screen.
 - Added optional role-enforcement middleware controlled by `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED`.
 - Added role routing for Employee, Leader, and Experience Designer/Admin paths.
-- Kept preview access codes as a non-production fallback.
+- Initially kept preview access codes as a non-production fallback; this fallback was removed in V1.7.
 
 ### Experience Studio
 
