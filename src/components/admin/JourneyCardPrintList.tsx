@@ -5,7 +5,10 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { CalendarDays, ClipboardCheck, FileDown, Trash2, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog, type ConfirmDialogState } from "@/components/ui/ConfirmDialog";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
+import { StatusToast, type StatusToastState } from "@/components/ui/StatusToast";
+import { isArchived } from "@/lib/archive";
 import { useJourneyState } from "@/lib/journey-state";
 import type {
   Employee,
@@ -282,7 +285,11 @@ export function JourneyCardPrintList() {
   const router = useRouter();
   const { state, updateState } = useJourneyState();
   const areas = useMemo(
-    () => state.journeyCardAreas.filter((area) => area.enabled).slice().sort(sortAreas),
+    () =>
+      state.journeyCardAreas
+        .filter((area) => area.enabled && !isArchived(area))
+        .slice()
+        .sort(sortAreas),
     [state.journeyCardAreas],
   );
   const activeCrew = state.employees
@@ -293,6 +300,8 @@ export function JourneyCardPrintList() {
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  const [toast, setToast] = useState<StatusToastState | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const assignments = state.journeyCardAssignments
     .filter((assignment) => assignment.shiftDate === shiftDate)
@@ -308,7 +317,7 @@ export function JourneyCardPrintList() {
   function tasksForArea(currentAreaId: string) {
     return state.recognitionTypes
       .filter((type) => {
-        if (!type.enabled || !type.journeyCardEligible) {
+        if (!type.enabled || isArchived(type) || !type.journeyCardEligible) {
           return false;
         }
 
@@ -375,12 +384,42 @@ export function JourneyCardPrintList() {
   }
 
   function removeAssignment(id: string) {
-    updateState((current) => ({
-      ...current,
-      journeyCardAssignments: current.journeyCardAssignments.filter(
-        (assignment) => assignment.id !== id,
+    const assignment = state.journeyCardAssignments.find((item) => item.id === id);
+    if (!assignment) {
+      setToast({ tone: "error", message: "That card assignment could not be found." });
+      return;
+    }
+
+    setConfirmDialog({
+      title: "Remove this print-run card?",
+      destructive: true,
+      confirmLabel: "Remove Card",
+      body: (
+        <p>
+          This only removes the draft card from today&apos;s print run. It does not
+          change employee XP or historical Experience Moments.
+        </p>
       ),
-    }));
+      onConfirm: () => {
+        try {
+          updateState((current) => ({
+            ...current,
+            journeyCardAssignments: current.journeyCardAssignments.filter(
+              (item) => item.id !== id,
+            ),
+          }));
+          setToast({ tone: "success", message: "Card removed from the print run." });
+        } catch (error) {
+          setToast({
+            tone: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to remove that print-run card.",
+          });
+        }
+      },
+    });
   }
 
   async function generatePdf() {
@@ -536,6 +575,9 @@ export function JourneyCardPrintList() {
                 {message}
               </p>
             ) : null}
+            <div className="mt-3">
+              <StatusToast toast={toast} />
+            </div>
 
             <div className="mt-4 grid max-h-[520px] gap-2 overflow-y-auto pr-1">
               {activeCrew.map((employee) => (
@@ -645,6 +687,7 @@ ${assignments
   .join("\n")}`}
         </pre>
       </Panel>
+      <ConfirmDialog dialog={confirmDialog} onClose={() => setConfirmDialog(null)} />
     </>
   );
 }

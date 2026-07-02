@@ -4,6 +4,7 @@ import { useId, useMemo, useState } from "react";
 import { Search, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { saveJourneyMoment, type JourneyMoment } from "@/lib/demo-moments";
+import { isArchived } from "@/lib/archive";
 import {
   addMilesToEmployee,
   replaceJourneyStateFromServer,
@@ -45,6 +46,7 @@ export function RecognitionForm() {
         .filter(
           (type) =>
             type.enabled &&
+            !isArchived(type) &&
             type.type !== "excellence_check" &&
             type.type !== "journey_card_task",
         )

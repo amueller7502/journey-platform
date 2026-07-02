@@ -12,7 +12,18 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/Button";
-import { chapter, iconNames, recognitionStandards } from "@/lib/data";
+import { ArchiveFilterControls } from "@/components/ui/ArchiveFilterControls";
+import { ConfirmDialog, type ConfirmDialogState } from "@/components/ui/ConfirmDialog";
+import { StatusToast, type StatusToastState } from "@/components/ui/StatusToast";
+import {
+  archiveConfigPatch,
+  isArchived,
+  isDraftLikeId,
+  matchesArchiveFilter,
+  type ArchiveFilter,
+} from "@/lib/archive";
+import { chapter, iconNames, recognitionStandards, recognitions } from "@/lib/data";
+import { getJourneyMoments } from "@/lib/demo-moments";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
 import type { RecognitionCategory, RecognitionType, RecognitionTypeKind } from "@/lib/types";
 
@@ -39,9 +50,16 @@ export function RecognitionLibraryManager() {
   const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
   const [filter, setFilter] = useState<"all" | "excellence" | "recognition" | "card">("all");
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>("active");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const [toast, setToast] = useState<StatusToastState | null>(null);
   const types = state.recognitionTypes;
   const visibleTypes = types.filter((type) => {
+    if (!matchesArchiveFilter(type, archiveFilter)) {
+      return false;
+    }
+
     if (filter === "excellence") {
       return type.type === "excellence_check";
     }
@@ -69,6 +87,7 @@ export function RecognitionLibraryManager() {
 
   function addRecognitionType(kind: RecognitionTypeKind) {
     setSaved(false);
+    setToast(null);
     updateState((current) => {
       const nextOrder =
         Math.max(0, ...current.recognitionTypes.map((type) => type.sortOrder)) + 10;
@@ -108,11 +127,81 @@ export function RecognitionLibraryManager() {
   }
 
   function removeRecognitionType(id: string) {
-    setSaved(false);
-    updateState((current) => ({
-      ...current,
-      recognitionTypes: current.recognitionTypes.filter((type) => type.id !== id),
-    }));
+    const type = state.recognitionTypes.find((item) => item.id === id);
+    if (!type) {
+      setToast({ tone: "error", message: "That recognition type could not be found." });
+      return;
+    }
+
+    const hasHistory =
+      recognitions.some((recognition) => recognition.recognitionTypeId === id) ||
+      getJourneyMoments().some((moment) => moment.recognitionTypeId === id) ||
+      state.excellenceLogs.some((log) => log.recognitionTypeId === id);
+    const canDeletePermanently = isDraftLikeId(id) && !hasHistory;
+
+    setConfirmDialog({
+      title: canDeletePermanently ? `Delete ${type.name}?` : `Archive ${type.name}?`,
+      destructive: true,
+      confirmLabel: canDeletePermanently ? "Delete Permanently" : "Archive",
+      body: canDeletePermanently ? (
+        <p>
+          This draft/test recognition type has no Experience Moments tied to it, so it
+          will be permanently removed from the builder.
+        </p>
+      ) : (
+        <div className="grid gap-2">
+          <p>
+            This recognition type will be archived, disabled, and removed from active
+            manager workflows immediately.
+          </p>
+          <p>
+            Historical Experience Moments and XP remain intact for reporting and
+            employee history.
+          </p>
+        </div>
+      ),
+      onConfirm: () => {
+        try {
+          setSaved(false);
+          updateState((current) => {
+            const exists = current.recognitionTypes.some((item) => item.id === id);
+            if (!exists) {
+              throw new Error("Recognition type no longer exists.");
+            }
+
+            return {
+              ...current,
+              recognitionTypes: canDeletePermanently
+                ? current.recognitionTypes.filter((item) => item.id !== id)
+                : current.recognitionTypes.map((item) =>
+                    item.id === id
+                      ? {
+                          ...item,
+                          ...archiveConfigPatch(),
+                          journeyCardEligible: false,
+                          journeyCardAreaIds: [],
+                        }
+                      : item,
+                  ),
+            };
+          });
+          setToast({
+            tone: "success",
+            message: canDeletePermanently
+              ? `${type.name} deleted.`
+              : `${type.name} archived and removed from active workflows.`,
+          });
+        } catch (error) {
+          setToast({
+            tone: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Unable to update that recognition type.",
+          });
+        }
+      },
+    });
   }
 
   return (
@@ -130,6 +219,7 @@ export function RecognitionLibraryManager() {
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
+          <ArchiveFilterControls value={archiveFilter} onChange={setArchiveFilter} />
           <Button
             type="button"
             variant={filter === "all" ? "dark" : "secondary"}
@@ -201,6 +291,8 @@ export function RecognitionLibraryManager() {
         </div>
       </div>
 
+      <StatusToast toast={toast} />
+
       <div className="grid gap-4 lg:grid-cols-2">
         {visibleTypes
           .slice()
@@ -213,7 +305,7 @@ export function RecognitionLibraryManager() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase text-journey-red">
-                    {type.category}
+                    {isArchived(type) ? "Archived" : type.category}
                   </p>
                   <input
                     value={type.name}
@@ -228,6 +320,7 @@ export function RecognitionLibraryManager() {
                   icon={type.enabled ? ToggleRight : ToggleLeft}
                   variant={type.enabled ? "dark" : "secondary"}
                   onClick={() => updateRecognitionType(type.id, { enabled: !type.enabled })}
+                  disabled={isArchived(type)}
                 >
                   {type.enabled ? "On" : "Off"}
                 </Button>
@@ -363,8 +456,9 @@ export function RecognitionLibraryManager() {
                         icon={type.enabled ? ToggleRight : ToggleLeft}
                         variant={type.enabled ? "dark" : "secondary"}
                         onClick={() => updateRecognitionType(type.id, { enabled: !type.enabled })}
+                        disabled={isArchived(type)}
                       >
-                        {type.enabled ? "Enabled" : "Disabled"}
+                        {isArchived(type) ? "Archived" : type.enabled ? "Enabled" : "Disabled"}
                       </Button>
                     </td>
                     <td className="py-3 pr-4">
@@ -551,6 +645,7 @@ export function RecognitionLibraryManager() {
         </table>
       </div>
       ) : null}
+      <ConfirmDialog dialog={confirmDialog} onClose={() => setConfirmDialog(null)} />
     </div>
   );
 }

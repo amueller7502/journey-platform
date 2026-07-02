@@ -125,6 +125,9 @@ export type RecognitionType = {
   creditScope?: RecognitionCreditScope;
   journeyCardEligible?: boolean;
   journeyCardAreaIds?: string[];
+  status?: ConfigLifecycle;
+  lifecycle?: ConfigLifecycle;
+  archivedAt?: string;
 };
 
 export type RecognitionStandard = {
@@ -181,6 +184,7 @@ export type Employee = {
   pendingProfilePhotoUrl?: string;
   profilePhotoStatus?: "none" | "pending" | "approved" | "rejected";
   active?: boolean;
+  archivedAt?: string;
   miles: number;
   weeklyMiles: number;
   reliabilityStreak: number;
@@ -202,6 +206,9 @@ export type JourneyCardArea = {
   departmentIds: DepartmentId[];
   enabled: boolean;
   sortOrder: number;
+  status?: ConfigLifecycle;
+  lifecycle?: ConfigLifecycle;
+  archivedAt?: string;
 };
 
 export type JourneyCardShiftAssignment = {
@@ -254,6 +261,9 @@ export type Reward = {
   collector?: boolean;
   comingSoon?: boolean;
   almostGoneThreshold?: number;
+  status?: ConfigLifecycle;
+  lifecycle?: ConfigLifecycle;
+  archivedAt?: string;
 };
 
 export type SkinId = "standard" | "odyssey" | "dune_3";

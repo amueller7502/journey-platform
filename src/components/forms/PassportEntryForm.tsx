@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle2, ListChecks, RotateCcw, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { isArchived } from "@/lib/archive";
 import { saveJourneyMoment, type JourneyMoment } from "@/lib/demo-moments";
 import { recognitionStandards } from "@/lib/data";
 import {
@@ -29,7 +30,7 @@ export function PassportEntryForm({
     state.journeyCardAreas,
   );
   const activeAreas = state.journeyCardAreas
-    .filter((area) => area.enabled)
+    .filter((area) => area.enabled && !isArchived(area))
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const [cardAreaId, setCardAreaId] = useState(
@@ -39,7 +40,7 @@ export function PassportEntryForm({
     activeAreas.find((area) => area.id === cardAreaId) ?? defaultCardArea ?? activeAreas[0];
   const enabledRecognitionTypes = state.recognitionTypes
     .filter((type) => {
-      if (!type.enabled || !type.journeyCardEligible) {
+      if (!type.enabled || isArchived(type) || !type.journeyCardEligible) {
         return false;
       }
 

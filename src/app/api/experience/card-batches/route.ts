@@ -5,6 +5,7 @@ import {
   recordExperienceMoments,
   writeExperienceState,
 } from "@/lib/server/experience-state";
+import { isArchived } from "@/lib/archive";
 
 type CardBatchBody = {
   employeeId?: string;
@@ -29,11 +30,14 @@ export async function POST(request: Request) {
   const manager =
     state.employees.find((item) => item.id === body.managerId) ??
     state.employees.find((item) => item.role === "manager" && item.active !== false);
-  const cardArea = state.journeyCardAreas.find((area) => area.id === body.areaId && area.enabled);
+  const cardArea = state.journeyCardAreas.find(
+    (area) => area.id === body.areaId && area.enabled && !isArchived(area),
+  );
   const selectedTypes = state.recognitionTypes.filter(
     (type) =>
       selectedIds.includes(type.id) &&
       type.enabled &&
+      !isArchived(type) &&
       type.journeyCardEligible &&
       (!type.journeyCardAreaIds?.length || type.journeyCardAreaIds.includes(body.areaId!)),
   );

@@ -1,5 +1,17 @@
 # Experience Release Notes
 
+## V1.6 Builder Delete / Archive Safety
+
+Delete buttons now perform real actions in Lite-visible builders.
+
+- Recognition Builder archives recognition types with existing Experience Moments and permanently deletes safe draft/test types.
+- Rewards Builder archives rewards with redemption history and permanently deletes safe draft/test rewards.
+- Employees archives/deactivates people with XP, moments, or reward history and permanently deletes safe draft/test accounts.
+- Experience Card areas and tasks now archive when related records exist and disappear from active card workflows immediately.
+- Daily Experience Card print-run removals now require confirmation and show success/error feedback.
+- Added Active, Archived, and All filters to the Lite builders that manage archivable records.
+- Active manager and employee workflows now ignore archived recognition types, card tasks, card areas, rewards, and employees.
+
 ## V1.5 Experience Lite First
 
 Experience is now focused on the Lite launch: help managers consistently capture Experience Moments during real shifts.

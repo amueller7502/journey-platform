@@ -4,7 +4,17 @@ import { ImagePlus, Plus, Save, SlidersHorizontal, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { RewardCard } from "@/components/dashboard/RewardCard";
+import { ArchiveFilterControls } from "@/components/ui/ArchiveFilterControls";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog, type ConfirmDialogState } from "@/components/ui/ConfirmDialog";
+import { StatusToast, type StatusToastState } from "@/components/ui/StatusToast";
+import {
+  archiveConfigPatch,
+  isArchived,
+  isDraftLikeId,
+  matchesArchiveFilter,
+  type ArchiveFilter,
+} from "@/lib/archive";
 import { useJourneyState } from "@/lib/journey-state";
 import type { Reward } from "@/lib/types";
 
@@ -33,15 +43,19 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
   const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>("active");
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const [toast, setToast] = useState<StatusToastState | null>(null);
   const catalog = state.rewards.length ? state.rewards : initialRewards;
   const visibleCatalog = useMemo(
     () =>
-      showAdvanced
+      (showAdvanced
         ? catalog
         : catalog.filter((reward) =>
             liteRewardCollections.has(reward.collection ?? "Everyday Rewards"),
-          ),
-    [catalog, showAdvanced],
+          )
+      ).filter((reward) => matchesArchiveFilter(reward, archiveFilter)),
+    [archiveFilter, catalog, showAdvanced],
   );
 
   const activeRewards = useMemo(
@@ -64,6 +78,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
 
   function addReward() {
     setSaved(false);
+    setToast(null);
     updateState((current) => ({
       ...current,
       rewards: [
@@ -89,11 +104,69 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
   }
 
   function removeReward(id: string) {
-    setSaved(false);
-    updateState((current) => ({
-      ...current,
-      rewards: current.rewards.filter((reward) => reward.id !== id),
-    }));
+    const reward = state.rewards.find((item) => item.id === id);
+    if (!reward) {
+      setToast({ tone: "error", message: "That reward could not be found." });
+      return;
+    }
+
+    const hasRedemptions = state.redemptions.some((redemption) => redemption.rewardId === id);
+    const canDeletePermanently = isDraftLikeId(id) && !hasRedemptions;
+
+    setConfirmDialog({
+      title: canDeletePermanently ? `Delete ${reward.name}?` : `Archive ${reward.name}?`,
+      destructive: true,
+      confirmLabel: canDeletePermanently ? "Delete Permanently" : "Archive",
+      body: canDeletePermanently ? (
+        <p>
+          This draft/test reward has no redemption history, so it will be permanently
+          removed from the catalog.
+        </p>
+      ) : (
+        <div className="grid gap-2">
+          <p>
+            This reward will be archived, disabled, and removed from active employee
+            reward browsing immediately.
+          </p>
+          <p>
+            Existing reward redemption history remains intact for approvals and
+            reporting.
+          </p>
+        </div>
+      ),
+      onConfirm: () => {
+        try {
+          setSaved(false);
+          updateState((current) => {
+            const exists = current.rewards.some((item) => item.id === id);
+            if (!exists) {
+              throw new Error("Reward no longer exists.");
+            }
+
+            return {
+              ...current,
+              rewards: canDeletePermanently
+                ? current.rewards.filter((item) => item.id !== id)
+                : current.rewards.map((item) =>
+                    item.id === id ? { ...item, ...archiveConfigPatch() } : item,
+                  ),
+            };
+          });
+          setToast({
+            tone: "success",
+            message: canDeletePermanently
+              ? `${reward.name} deleted.`
+              : `${reward.name} archived and removed from Rewards.`,
+          });
+        } catch (error) {
+          setToast({
+            tone: "error",
+            message:
+              error instanceof Error ? error.message : "Unable to update that reward.",
+          });
+        }
+      },
+    });
   }
 
   return (
@@ -111,6 +184,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
+          <ArchiveFilterControls value={archiveFilter} onChange={setArchiveFilter} />
           <Button type="button" variant="secondary" icon={Plus} onClick={addReward}>
             Add Reward
           </Button>
@@ -127,6 +201,8 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
           </Button>
         </div>
       </div>
+
+      <StatusToast toast={toast} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         {visibleCatalog.map((reward) => (
@@ -147,7 +223,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-journey-black to-transparent p-3">
                   <p className="text-xs font-black uppercase text-journey-white">
-                    {reward.collection ?? reward.category}
+                    {isArchived(reward) ? "Archived" : reward.collection ?? reward.category}
                   </p>
                 </div>
               </div>
@@ -231,9 +307,10 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
                   onChange={(event) =>
                     updateReward(reward.id, { enabled: event.currentTarget.checked })
                   }
+                  disabled={isArchived(reward)}
                   className="h-5 w-5 accent-journey-red"
                 />
-                Available
+                {isArchived(reward) ? "Archived" : "Available"}
               </label>
               <label className="focus-ring inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-journey-line bg-journey-white px-4 py-2 text-sm font-bold text-journey-black hover:bg-journey-mist">
                 <ImagePlus className="h-4 w-4 text-journey-red" aria-hidden="true" />
@@ -288,7 +365,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
             </tr>
           </thead>
           <tbody>
-            {catalog.map((reward) => (
+            {visibleCatalog.map((reward) => (
               <tr key={reward.id} className="border-b border-journey-line align-top">
                 <td className="py-3 pr-3">
                   <input
@@ -298,6 +375,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
                     onChange={(event) =>
                       updateReward(reward.id, { enabled: event.currentTarget.checked })
                     }
+                    disabled={isArchived(reward)}
                     className="h-5 w-5 accent-journey-red"
                   />
                 </td>
@@ -468,6 +546,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
           ))}
         </div>
       </div>
+      <ConfirmDialog dialog={confirmDialog} onClose={() => setConfirmDialog(null)} />
     </div>
   );
 }

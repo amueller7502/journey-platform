@@ -6,6 +6,7 @@ import { RewardCard } from "@/components/dashboard/RewardCard";
 import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
+import { isArchived } from "@/lib/archive";
 import {
   replaceJourneyStateFromServer,
   useJourneyState,
@@ -127,7 +128,7 @@ export function TradingPostClient() {
   }
 
   const enabledRewards = state.rewards
-    .filter((reward) => reward.enabled && liteRewardIds.has(reward.id))
+    .filter((reward) => reward.enabled && !isArchived(reward) && liteRewardIds.has(reward.id))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const collections = [
     "Featured Rewards",

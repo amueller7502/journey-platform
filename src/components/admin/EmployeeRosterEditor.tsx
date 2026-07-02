@@ -13,8 +13,19 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { ArchiveFilterControls } from "@/components/ui/ArchiveFilterControls";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog, type ConfirmDialogState } from "@/components/ui/ConfirmDialog";
+import { StatusToast, type StatusToastState } from "@/components/ui/StatusToast";
 import { EmployeeImportTool } from "@/components/admin/EmployeeImportTool";
+import {
+  isArchived,
+  isDraftLikeId,
+  matchesArchiveFilter,
+  type ArchiveFilter,
+} from "@/lib/archive";
+import { recognitions } from "@/lib/data";
+import { getJourneyMoments } from "@/lib/demo-moments";
 import {
   buildJourneyCardUrl,
   getJourneyCardAreaForEmployee,
@@ -39,6 +50,9 @@ export function EmployeeRosterEditor() {
   const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
   const [search, setSearch] = useState("");
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>("active");
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const [toast, setToast] = useState<StatusToastState | null>(null);
   const firstArea = state.journeyCardAreas.find((area) => area.enabled);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
@@ -59,12 +73,20 @@ export function EmployeeRosterEditor() {
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const filteredEmployees = useMemo(
     () =>
-      employees.filter((employee) =>
-        `${employee.name} ${employee.title} ${employee.passportId} ${employee.role} ${employee.email ?? ""} ${employee.accessCode ?? ""}`
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-      ),
-    [employees, search],
+      employees.filter((employee) => {
+        const matchesStatus = matchesArchiveFilter(
+          employee,
+          archiveFilter,
+          employee.active !== false,
+        );
+        const matchesSearch =
+          `${employee.name} ${employee.title} ${employee.passportId} ${employee.role} ${employee.email ?? ""} ${employee.accessCode ?? ""}`
+            .toLowerCase()
+            .includes(search.toLowerCase());
+
+        return matchesStatus && matchesSearch;
+      }),
+    [archiveFilter, employees, search],
   );
 
   const activeCrewCount = employees.filter(
@@ -95,6 +117,7 @@ export function EmployeeRosterEditor() {
 
   function addEmployee() {
     setSaved(false);
+    setToast(null);
     setSearch("");
     updateState((current) => {
       const passportId = nextJourneyCardId(current.employees);
@@ -142,11 +165,88 @@ export function EmployeeRosterEditor() {
   }
 
   function deleteEmployee(id: string) {
-    setSaved(false);
-    updateState((current) => ({
-      ...current,
-      employees: current.employees.filter((employee) => employee.id !== id),
-    }));
+    const employee = state.employees.find((item) => item.id === id);
+    if (!employee) {
+      setToast({ tone: "error", message: "That employee could not be found." });
+      return;
+    }
+
+    const localMoments = getJourneyMoments();
+    const hasMoments =
+      recognitions.some((recognition) => recognition.employeeId === id) ||
+      localMoments.some((moment) => moment.employeeId === id);
+    const hasHistory =
+      hasMoments ||
+      employee.miles > 0 ||
+      employee.weeklyMiles > 0 ||
+      state.redemptions.some((redemption) => redemption.employeeId === id);
+    const canDeletePermanently = isDraftLikeId(id) && !hasHistory;
+
+    setConfirmDialog({
+      title: canDeletePermanently ? `Delete ${employee.name}?` : `Archive ${employee.name}?`,
+      destructive: true,
+      confirmLabel: canDeletePermanently ? "Delete Permanently" : "Archive Employee",
+      body: canDeletePermanently ? (
+        <p>
+          This draft/test employee has no XP, moments, or reward history, so the
+          account will be permanently removed.
+        </p>
+      ) : (
+        <div className="grid gap-2">
+          <p>
+            This employee will be deactivated and archived. They will disappear from
+            manager search, Capture Moment, print runs, and employee login options.
+          </p>
+          <p>
+            Their XP, Experience Moments, and reward history remain intact.
+          </p>
+        </div>
+      ),
+      onConfirm: () => {
+        try {
+          setSaved(false);
+          updateState((current) => {
+            const exists = current.employees.some((item) => item.id === id);
+            if (!exists) {
+              throw new Error("Employee no longer exists.");
+            }
+
+            return {
+              ...current,
+              employees: canDeletePermanently
+                ? current.employees.filter((item) => item.id !== id)
+                : current.employees.map((item) =>
+                    item.id === id
+                      ? {
+                          ...item,
+                          active: false,
+                          accountStatus: "disabled",
+                          archivedAt: new Date().toISOString(),
+                        }
+                      : item,
+                  ),
+              journeyCardAssignments: canDeletePermanently
+                ? current.journeyCardAssignments.filter(
+                    (assignment) => assignment.employeeId !== id,
+                  )
+                : current.journeyCardAssignments,
+            };
+          });
+          setToast({
+            tone: "success",
+            message: canDeletePermanently
+              ? `${employee.name} deleted.`
+              : `${employee.name} archived and removed from active workflows.`,
+          });
+        } catch (error) {
+          setToast({
+            tone: "error",
+            message:
+              error instanceof Error ? error.message : "Unable to update that employee.",
+          });
+        }
+      },
+    });
   }
 
   function approveProfilePhoto(id: string) {
@@ -200,11 +300,14 @@ export function EmployeeRosterEditor() {
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ArchiveFilterControls value={archiveFilter} onChange={setArchiveFilter} />
           <Button type="button" icon={Save} onClick={() => setSaved(true)}>
             Save Roster
           </Button>
         </div>
       </div>
+
+      <StatusToast toast={toast} />
 
       <EmployeeImportTool />
 
@@ -441,6 +544,7 @@ export function EmployeeRosterEditor() {
           <tbody>
             {filteredEmployees.map((employee) => {
               const active = employee.active !== false;
+              const archived = isArchived(employee);
               const area = getJourneyCardAreaForEmployee(employee, cardAreas);
               return (
                 <tr key={employee.id} className="border-b border-journey-line align-top">
@@ -453,10 +557,12 @@ export function EmployeeRosterEditor() {
                         updateEmployee(employee.id, {
                           active: !active,
                           accountStatus: active ? "disabled" : "active",
+                          archivedAt: undefined,
                         })
                       }
+                      disabled={archived}
                     >
-                      {active ? "Active" : "Disabled"}
+                      {archived ? "Archived" : active ? "Active" : "Disabled"}
                     </Button>
                   </td>
                   <td className="py-3 pr-3">
@@ -467,8 +573,10 @@ export function EmployeeRosterEditor() {
                         updateEmployee(employee.id, {
                           accountStatus: status,
                           active: status !== "disabled",
+                          archivedAt: status === "active" ? undefined : employee.archivedAt,
                         });
                       }}
+                      disabled={archived}
                       className="focus-ring min-h-10 rounded-md border border-journey-line px-3 font-bold"
                     >
                       {accountStatusOptions.map((status) => (
@@ -658,6 +766,7 @@ export function EmployeeRosterEditor() {
           </tbody>
         </table>
       </div>
+      <ConfirmDialog dialog={confirmDialog} onClose={() => setConfirmDialog(null)} />
     </div>
   );
 }

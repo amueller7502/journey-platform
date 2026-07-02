@@ -2,9 +2,20 @@
 
 import { ClipboardList, Plus, Save, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { ArchiveFilterControls } from "@/components/ui/ArchiveFilterControls";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog, type ConfirmDialogState } from "@/components/ui/ConfirmDialog";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
-import { chapter, recognitionStandards } from "@/lib/data";
+import { StatusToast, type StatusToastState } from "@/components/ui/StatusToast";
+import {
+  archiveConfigPatch,
+  isArchived,
+  isDraftLikeId,
+  matchesArchiveFilter,
+  type ArchiveFilter,
+} from "@/lib/archive";
+import { chapter, recognitionStandards, recognitions } from "@/lib/data";
+import { getJourneyMoments } from "@/lib/demo-moments";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
 import type { DepartmentId, JourneyCardArea, RecognitionType } from "@/lib/types";
 
@@ -18,16 +29,24 @@ function sortTasks(a: RecognitionType, b: RecognitionType) {
 
 export function JourneyCardDesigner() {
   const { state, updateState } = useJourneyState();
-  const areas = useMemo(
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>("active");
+  const allAreas = useMemo(
     () => state.journeyCardAreas.slice().sort(sortAreas),
     [state.journeyCardAreas],
   );
-  const [selectedAreaId, setSelectedAreaId] = useState(areas[0]?.id ?? "");
+  const areas = useMemo(
+    () => allAreas.filter((area) => matchesArchiveFilter(area, archiveFilter)),
+    [allAreas, archiveFilter],
+  );
+  const [selectedAreaId, setSelectedAreaId] = useState(allAreas[0]?.id ?? "");
   const [saved, setSaved] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const [toast, setToast] = useState<StatusToastState | null>(null);
   const selectedArea =
     areas.find((area) => area.id === selectedAreaId) ?? areas[0];
   const cardTasks = state.recognitionTypes
     .filter((type) => type.journeyCardEligible || type.type === "journey_card_task")
+    .filter((type) => matchesArchiveFilter(type, archiveFilter))
     .slice()
     .sort(sortTasks);
   const assignedEmployees = state.employees.filter(
@@ -49,6 +68,7 @@ export function JourneyCardDesigner() {
 
   function addArea() {
     setSaved(false);
+    setToast(null);
     updateState((current) => {
       const nextOrder =
         Math.max(0, ...current.journeyCardAreas.map((area) => area.sortOrder)) + 10;
@@ -71,25 +91,81 @@ export function JourneyCardDesigner() {
   }
 
   function removeArea(id: string) {
-    setSaved(false);
-    const nextArea = areas.find((area) => area.id !== id);
-    setSelectedAreaId(nextArea?.id ?? "");
-    updateState((current) => ({
-      ...current,
-      journeyCardAreas: current.journeyCardAreas.filter((area) => area.id !== id),
-      employees: current.employees.map((employee) =>
-        employee.journeyCardAreaId === id
-          ? {
-              ...employee,
-              journeyCardAreaId: nextArea?.id,
-            }
-          : employee,
+    const area = state.journeyCardAreas.find((item) => item.id === id);
+    if (!area) {
+      setToast({ tone: "error", message: "That Experience Card area could not be found." });
+      return;
+    }
+
+    const hasRelatedRecords =
+      state.employees.some((employee) => employee.journeyCardAreaId === id) ||
+      state.journeyCardAssignments.some((assignment) => assignment.journeyCardAreaId === id) ||
+      state.recognitionTypes.some((type) => type.journeyCardAreaIds?.includes(id));
+    const canDeletePermanently = isDraftLikeId(id) && !hasRelatedRecords;
+    const nextArea = allAreas.find((item) => item.id !== id && !isArchived(item));
+
+    setConfirmDialog({
+      title: canDeletePermanently ? `Delete ${area.name}?` : `Archive ${area.name}?`,
+      destructive: true,
+      confirmLabel: canDeletePermanently ? "Delete Permanently" : "Archive Area",
+      body: canDeletePermanently ? (
+        <p>
+          This draft/test card area has no employees, print runs, or tasks tied to it,
+          so it will be permanently removed.
+        </p>
+      ) : (
+        <div className="grid gap-2">
+          <p>
+            This card area will be archived and disabled. It will no longer appear in
+            daily print runs or card entry.
+          </p>
+          <p>
+            Existing employees and historical card batches remain intact.
+          </p>
+        </div>
       ),
-      recognitionTypes: current.recognitionTypes.map((type) => ({
-        ...type,
-        journeyCardAreaIds: type.journeyCardAreaIds?.filter((areaId) => areaId !== id),
-      })),
-    }));
+      onConfirm: () => {
+        try {
+          setSaved(false);
+          setSelectedAreaId(nextArea?.id ?? "");
+          updateState((current) => ({
+            ...current,
+            journeyCardAreas: canDeletePermanently
+              ? current.journeyCardAreas.filter((item) => item.id !== id)
+              : current.journeyCardAreas.map((item) =>
+                  item.id === id ? { ...item, ...archiveConfigPatch() } : item,
+                ),
+            employees: canDeletePermanently
+              ? current.employees.map((employee) =>
+                  employee.journeyCardAreaId === id
+                    ? { ...employee, journeyCardAreaId: nextArea?.id }
+                    : employee,
+                )
+              : current.employees,
+            recognitionTypes: canDeletePermanently
+              ? current.recognitionTypes.map((type) => ({
+                  ...type,
+                  journeyCardAreaIds: type.journeyCardAreaIds?.filter(
+                    (areaId) => areaId !== id,
+                  ),
+                }))
+              : current.recognitionTypes,
+          }));
+          setToast({
+            tone: "success",
+            message: canDeletePermanently
+              ? `${area.name} deleted.`
+              : `${area.name} archived and removed from active card workflows.`,
+          });
+        } catch (error) {
+          setToast({
+            tone: "error",
+            message:
+              error instanceof Error ? error.message : "Unable to update that card area.",
+          });
+        }
+      },
+    });
   }
 
   function updateTask(id: string, patch: Partial<RecognitionType>) {
@@ -120,6 +196,7 @@ export function JourneyCardDesigner() {
     }
 
     setSaved(false);
+    setToast(null);
     updateState((current) => {
       const nextOrder =
         Math.max(0, ...current.recognitionTypes.map((type) => type.sortOrder)) + 10;
@@ -149,11 +226,69 @@ export function JourneyCardDesigner() {
   }
 
   function removeTask(id: string) {
-    setSaved(false);
-    updateState((current) => ({
-      ...current,
-      recognitionTypes: current.recognitionTypes.filter((type) => type.id !== id),
-    }));
+    const task = state.recognitionTypes.find((item) => item.id === id);
+    if (!task) {
+      setToast({ tone: "error", message: "That card task could not be found." });
+      return;
+    }
+
+    const hasHistory =
+      recognitions.some((recognition) => recognition.recognitionTypeId === id) ||
+      getJourneyMoments().some((moment) => moment.recognitionTypeId === id) ||
+      state.excellenceLogs.some((log) => log.recognitionTypeId === id);
+    const canDeletePermanently = isDraftLikeId(id) && !hasHistory;
+
+    setConfirmDialog({
+      title: canDeletePermanently ? `Delete ${task.name}?` : `Archive ${task.name}?`,
+      destructive: true,
+      confirmLabel: canDeletePermanently ? "Delete Permanently" : "Archive Task",
+      body: canDeletePermanently ? (
+        <p>
+          This draft/test card task has no Experience Moments tied to it, so it will
+          be permanently removed.
+        </p>
+      ) : (
+        <div className="grid gap-2">
+          <p>
+            This task will be archived, disabled, and removed from active Experience
+            Cards immediately.
+          </p>
+          <p>Historical Experience Moments and XP remain intact.</p>
+        </div>
+      ),
+      onConfirm: () => {
+        try {
+          setSaved(false);
+          updateState((current) => ({
+            ...current,
+            recognitionTypes: canDeletePermanently
+              ? current.recognitionTypes.filter((type) => type.id !== id)
+              : current.recognitionTypes.map((type) =>
+                  type.id === id
+                    ? {
+                        ...type,
+                        ...archiveConfigPatch(),
+                        journeyCardEligible: false,
+                        journeyCardAreaIds: [],
+                      }
+                    : type,
+                ),
+          }));
+          setToast({
+            tone: "success",
+            message: canDeletePermanently
+              ? `${task.name} deleted.`
+              : `${task.name} archived and removed from active cards.`,
+          });
+        } catch (error) {
+          setToast({
+            tone: "error",
+            message:
+              error instanceof Error ? error.message : "Unable to update that card task.",
+          });
+        }
+      },
+    });
   }
 
   if (!selectedArea) {
@@ -182,6 +317,7 @@ export function JourneyCardDesigner() {
           that shift.
         </p>
         <div className="flex flex-wrap gap-2">
+          <ArchiveFilterControls value={archiveFilter} onChange={setArchiveFilter} />
           <Button type="button" variant="secondary" icon={Plus} onClick={addArea}>
             Add Area
           </Button>
@@ -200,6 +336,8 @@ export function JourneyCardDesigner() {
         </div>
       ) : null}
 
+      <StatusToast toast={toast} />
+
       <div className="grid gap-5 xl:grid-cols-[300px_1fr]">
         <div className="grid gap-3">
           {areas.map((area) => (
@@ -214,7 +352,7 @@ export function JourneyCardDesigner() {
               }`}
             >
               <p className="text-xs font-black uppercase text-journey-red">
-                {area.enabled ? "Enabled" : "Disabled"}
+                {isArchived(area) ? "Archived" : area.enabled ? "Enabled" : "Disabled"}
               </p>
               <h3 className="mt-1 text-lg font-black">{area.name}</h3>
               <p className="mt-2 text-xs font-bold opacity-80">
@@ -246,8 +384,13 @@ export function JourneyCardDesigner() {
                 onClick={() =>
                   updateArea(selectedArea.id, { enabled: !selectedArea.enabled })
                 }
+                disabled={isArchived(selectedArea)}
               >
-                {selectedArea.enabled ? "Enabled" : "Disabled"}
+                {isArchived(selectedArea)
+                  ? "Archived"
+                  : selectedArea.enabled
+                    ? "Enabled"
+                    : "Disabled"}
               </Button>
               <Button
                 type="button"
@@ -400,8 +543,9 @@ export function JourneyCardDesigner() {
                           variant={task.enabled ? "dark" : "secondary"}
                           icon={task.enabled ? ToggleRight : ToggleLeft}
                           onClick={() => updateTask(task.id, { enabled: !task.enabled })}
+                          disabled={isArchived(task)}
                         >
-                          {task.enabled ? "Enabled" : "Disabled"}
+                          {isArchived(task) ? "Archived" : task.enabled ? "Enabled" : "Disabled"}
                         </Button>
                       </td>
                       <td className="p-3">
@@ -422,6 +566,7 @@ export function JourneyCardDesigner() {
           </div>
         </div>
       </div>
+      <ConfirmDialog dialog={confirmDialog} onClose={() => setConfirmDialog(null)} />
     </Panel>
   );
 }

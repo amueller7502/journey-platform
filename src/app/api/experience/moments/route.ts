@@ -4,6 +4,7 @@ import {
   recordExperienceMoments,
   writeExperienceState,
 } from "@/lib/server/experience-state";
+import { isArchived } from "@/lib/archive";
 
 type CaptureMomentBody = {
   employeeId?: string;
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
   const { state } = await readExperienceState();
   const employee = state.employees.find((item) => item.id === body.employeeId);
   const recognitionType = state.recognitionTypes.find(
-    (item) => item.id === body.recognitionTypeId && item.enabled,
+    (item) => item.id === body.recognitionTypeId && item.enabled && !isArchived(item),
   );
   const manager =
     state.employees.find((item) => item.id === body.managerId) ??
