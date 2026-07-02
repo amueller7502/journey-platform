@@ -9,7 +9,7 @@ import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { type JourneyMoment, getJourneyMoments, subscribeToJourneyMoments } from "@/lib/demo-moments";
 import { recognitions } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
-import { formatMiles } from "@/lib/utils";
+import { formatXp } from "@/lib/utils";
 
 export function CommunitySnapshot() {
   const { state } = useJourneyState();
@@ -70,7 +70,7 @@ export function CommunitySnapshot() {
       <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Community Goal"
-          value={formatMiles(state.chapter.communityGoalMiles)}
+          value={formatXp(state.chapter.communityGoalMiles)}
           detail={state.chapter.phrase}
           icon={Sparkles}
         />
@@ -81,13 +81,13 @@ export function CommunitySnapshot() {
           icon={Users}
         />
         <MetricCard
-          label="Weekly Miles"
-          value={formatMiles(weeklyMiles)}
+          label="Weekly XP"
+          value={formatXp(weeklyMiles)}
           detail="earned by recognition"
           icon={Trophy}
         />
         <MetricCard
-          label="Activation"
+          label="Season"
           value={state.chapter.chapterNumber}
           detail={state.chapter.chapterTitle}
           icon={ArrowRight}
@@ -113,7 +113,7 @@ export function CommunitySnapshot() {
                     {moment.title}
                   </p>
                 </div>
-                <p className="font-black text-journey-red">+{moment.miles}</p>
+                <p className="font-black text-journey-red">+{moment.miles} XP</p>
               </div>
               <p className="mt-3 text-sm leading-6 text-journey-steel">{moment.note}</p>
             </article>

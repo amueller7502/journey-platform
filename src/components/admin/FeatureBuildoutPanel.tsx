@@ -10,11 +10,11 @@ const featureRows = [
   {
     area: "Recognition library",
     status: "Configurable",
-    detail: "Edit Moments, Excellence Checks, Miles, standards, and enabled state.",
+    detail: "Edit Moments, Excellence Checks, XP, standards, and enabled state.",
     icon: CheckCircle2,
   },
   {
-    area: "Trading Post",
+    area: "Rewards",
     status: "Configurable",
     detail: "Edit reward catalog, costs, inventory, spotlight, and visibility.",
     icon: CheckCircle2,

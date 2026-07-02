@@ -75,7 +75,7 @@ export function PendingRewardQueue() {
                   {employee?.name ?? "Crew Member"} - {reward?.name ?? "Reward"}
                 </h3>
                 <p className="mt-1 text-sm font-bold text-journey-steel">
-                  {reward?.milesCost ?? 0} miles / requested{" "}
+                  {reward?.milesCost ?? 0} XP / requested{" "}
                   {formatShortDateTime(redemption.requestedAt)}
                 </p>
               </div>

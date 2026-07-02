@@ -29,7 +29,7 @@ import {
   recognitions,
 } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
-import { daysRemaining, formatMiles } from "@/lib/utils";
+import { daysRemaining, formatXp } from "@/lib/utils";
 
 export function TvDashboard() {
   const { state } = useJourneyState();
@@ -82,6 +82,10 @@ export function TvDashboard() {
   ).length;
   const activeSkin =
     state.skins.find((skin) => skin.id === state.activeSkinId) ?? state.skins[0];
+  const primaryFocus =
+    state.experienceEvents.find(
+      (event) => event.enabled && event.type === "Today's Focus",
+    ) ?? state.experienceEvents.find((event) => event.enabled);
 
   function enterFullscreen() {
     document.documentElement.requestFullscreen?.();
@@ -131,7 +135,7 @@ export function TvDashboard() {
                 15/70
               </p>
               <p className="mt-4 text-2xl font-black text-journey-red">
-                {formatMiles(state.chapter.communityGoalMiles)} Miles
+                {formatXp(state.chapter.communityGoalMiles)} XP
               </p>
               <p className="mt-5 text-lg font-bold leading-8 text-journey-line">
                 {activeSkin?.texture ?? "Film grain, frame marks, and projection light."}
@@ -142,19 +146,19 @@ export function TvDashboard() {
       );
     }
 
-    if (activePanel === "Community Progress") {
+    if (activePanel === "Community XP" || activePanel === "Community Progress") {
       return (
         <TvPanel
           icon={Route}
-          eyebrow={activeSkin?.headline ?? "Community Progress"}
+          eyebrow={activeSkin?.headline ?? "Community XP"}
           title={state.chapter.phrase}
         >
           <ChapterProgress inverse />
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            <TvStat label="Miles Today" value={`+${formatMiles(chapterStats.todayMiles)}`} />
+            <TvStat label="XP Today" value={`+${formatXp(chapterStats.todayMiles)}`} />
             <TvStat
               label="Remaining"
-              value={formatMiles(state.chapter.communityGoalMiles - communityMiles)}
+              value={formatXp(state.chapter.communityGoalMiles - communityMiles)}
             />
             <TvStat label="Active Crew" value={`${activeEmployees}`} />
           </div>
@@ -162,7 +166,30 @@ export function TvDashboard() {
       );
     }
 
-    if (activePanel === "Today's Spotlight") {
+    if (activePanel === "Today's Focus") {
+      return (
+        <TvPanel
+          icon={Sparkles}
+          eyebrow="Today's Focus"
+          title={primaryFocus?.title ?? "Recognize the Moment"}
+        >
+          <div className="max-w-5xl">
+            <p className="text-3xl font-black text-journey-white sm:text-5xl">
+              {primaryFocus?.banner ?? "More Than A Movie Starts With Us."}
+            </p>
+            <p className="mt-6 text-2xl font-bold leading-9 text-journey-line">
+              {primaryFocus?.tvAnnouncement ??
+                "Managers are watching for the Moments that protect the guest experience."}
+            </p>
+            <p className="mt-6 text-5xl font-black text-journey-red">
+              {primaryFocus?.xpModifier ?? 1}x XP
+            </p>
+          </div>
+        </TvPanel>
+      );
+    }
+
+    if (activePanel === "Recognition Spotlight" || activePanel === "Today's Spotlight") {
       const employee = state.employees.find((item) => item.id === spotlight.employeeId);
       const action = state.recognitionTypes.find(
         (item) => item.id === spotlight.recognitionTypeId,
@@ -181,7 +208,7 @@ export function TvDashboard() {
               {journeySpotlight?.recognitionTypeName ?? action?.name}
             </p>
             <p className="mt-4 text-5xl font-black text-journey-red">
-              +{journeySpotlight?.miles ?? spotlight.miles} Miles Earned
+              +{journeySpotlight?.miles ?? spotlight.miles} XP Earned
             </p>
           </div>
         </TvPanel>
@@ -190,11 +217,11 @@ export function TvDashboard() {
 
     if (activePanel === "15,700 / IMAX 1570") {
       return (
-        <TvPanel icon={Film} eyebrow="Activation Signal" title="15,700 Miles">
+        <TvPanel icon={Film} eyebrow="Season Signal" title="15,700 XP">
           <div className="grid max-w-5xl gap-5 lg:grid-cols-[1fr_0.7fr]">
             <div>
               <p className="text-3xl font-black text-journey-white sm:text-5xl">
-                15,700 Miles - a nod to IMAX 1570 film.
+                15,700 XP - a nod to IMAX 1570 film.
               </p>
               <p className="mt-6 text-2xl font-bold text-journey-line">
                 Every verified guest moment, clean space, reliable shift, and crew
@@ -213,9 +240,9 @@ export function TvDashboard() {
       );
     }
 
-    if (activePanel === "Recognition Leaderboard") {
+    if (activePanel === "Experience Leaderboard" || activePanel === "Recognition Leaderboard") {
       return (
-        <TvPanel icon={Route} eyebrow="Recognition Leaderboard" title="Who's Moving North">
+        <TvPanel icon={Route} eyebrow="Experience Leaderboard" title="Recognition in Motion">
           <LeaderboardBoard mode="tv" />
         </TvPanel>
       );
@@ -231,7 +258,7 @@ export function TvDashboard() {
                 className="rounded-lg border border-journey-red bg-journey-coal p-5"
               >
                 <p className="text-xs font-black uppercase text-journey-red">
-                  +{moment.miles} Miles Earned
+                    +{moment.miles} XP Earned
                 </p>
                 <h3 className="mt-2 text-2xl font-black text-journey-white">
                   {moment.employeeName}
@@ -257,7 +284,7 @@ export function TvDashboard() {
                   className="rounded-lg border border-journey-steel bg-journey-coal p-5"
                 >
                   <p className="text-xs font-black uppercase text-journey-red">
-                    +{recognition.miles} Miles Earned
+                    +{recognition.miles} XP Earned
                   </p>
                   <h3 className="mt-2 text-2xl font-black text-journey-white">
                     {employee?.name}
@@ -294,7 +321,7 @@ export function TvDashboard() {
         : [rewardSpotlight];
 
       return (
-        <TvPanel icon={Gift} eyebrow="Reward Spotlight" title="Trading Post Prizes">
+        <TvPanel icon={Gift} eyebrow="Reward Spotlight" title="Rewards Worth Earning">
           <div className="grid max-w-6xl gap-4 lg:grid-cols-3">
             {rewardsToShow.map((reward, rewardIndex) => (
               <article
@@ -325,7 +352,7 @@ export function TvDashboard() {
                     {reward.description}
                   </p>
                   <div className="mt-5 grid grid-cols-2 gap-3">
-                    <TvStat label="Miles" value={`${reward.milesCost}`} compact />
+                    <TvStat label="XP" value={`${reward.milesCost}`} compact />
                     <TvStat label="In Stock" value={`${reward.inventoryCount}`} compact />
                   </div>
                 </div>
@@ -344,7 +371,7 @@ export function TvDashboard() {
           </p>
           <p className="mt-4 text-3xl font-black text-journey-red">Days Remaining</p>
           <p className="mt-6 text-2xl font-bold text-journey-line">
-            {state.chapter.subtitle} - {formatMiles(state.chapter.communityGoalMiles)} Miles
+            {state.chapter.subtitle} - {formatXp(state.chapter.communityGoalMiles)} XP
           </p>
         </div>
       </TvPanel>
@@ -365,6 +392,7 @@ export function TvDashboard() {
     state.chapter,
     state.employees,
     state.recognitionTypes,
+    primaryFocus,
   ]);
 
   return (

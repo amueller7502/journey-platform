@@ -62,6 +62,7 @@ export function PassportEntryForm({
     availableSelected.includes(type.id),
   );
   const totalMiles = selectedTypes.reduce((total, type) => total + type.milesValue, 0);
+  const submittedBatchId = `card-${currentEmployee.passportId.toLowerCase()}-today`;
 
   const grouped = recognitionStandards.map((standard) => ({
     standard,
@@ -76,11 +77,11 @@ export function PassportEntryForm({
           Experience Card Batch Submitted
         </h2>
         <p className="mt-3 text-lg font-bold text-journey-steel">
-          {currentEmployee.name} earned {totalMiles} Miles from {selectedTypes.length} verified{" "}
+          {currentEmployee.name} earned {totalMiles} XP from {selectedTypes.length} verified{" "}
           {cardArea?.name ?? "Experience Card"} items.
         </p>
         <p className="mt-4 text-sm font-bold text-journey-steel">
-          Batch: card-{currentEmployee.passportId.toLowerCase()}-today
+          Batch: {submittedBatchId}
         </p>
       </div>
     );
@@ -95,12 +96,14 @@ export function PassportEntryForm({
           return;
         }
         const createdAt = new Date().toISOString();
+        const batchStamp = createdAt.replace(/[^0-9]/g, "");
+        const batchId = `card-${currentEmployee.passportId}-${batchStamp}`;
         selectedTypes
           .slice()
           .reverse()
           .forEach((type, index) => {
             saveJourneyMoment({
-              id: `card-${currentEmployee.passportId}-${Date.now()}-${index}`,
+              id: `card-${currentEmployee.passportId}-${batchStamp}-${index}`,
               employeeId: currentEmployee.id,
               employeeName: currentEmployee.name,
               employeeInitials: currentEmployee.initials,
@@ -110,9 +113,10 @@ export function PassportEntryForm({
               miles: type.milesValue,
               note:
                 note.trim() ||
-                `${currentEmployee.name} had ${type.name.toLowerCase()} verified from a Experience Card.`,
+                `${currentEmployee.name} had ${type.name.toLowerCase()} verified from an Experience Card.`,
               createdAt,
               managerName: "Jordan Ellis",
+              batchId,
             });
           });
         addMilesToEmployee(currentEmployee.id, totalMiles);
@@ -199,7 +203,7 @@ export function PassportEntryForm({
                         {item.description}
                       </span>
                       <span className="mt-2 block text-sm font-black text-journey-red">
-                        +{item.milesValue} Miles
+                        +{item.milesValue} XP
                       </span>
                     </span>
                   </label>
@@ -227,7 +231,7 @@ export function PassportEntryForm({
           <div>
             <p className="text-xs font-black uppercase text-journey-red">Batch total</p>
             <p className="text-2xl font-black text-journey-black">
-              {totalMiles} Miles from {selectedTypes.length} items
+              {totalMiles} XP from {selectedTypes.length} items
             </p>
           </div>
           <Button type="submit" icon={Send} disabled={!selectedTypes.length}>

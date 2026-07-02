@@ -28,7 +28,7 @@ export function DailySpotlightTool() {
           >
             <p className="font-black text-journey-black">{recognition.note}</p>
             <p className="mt-2 text-sm font-bold text-journey-steel">
-              +{recognition.miles} miles
+              +{recognition.miles} XP
             </p>
           </button>
         ))}

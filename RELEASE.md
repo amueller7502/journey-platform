@@ -1,25 +1,47 @@
-# Release Notes
+# Experience Release Notes
 
-## Experience Platform Language And Leadership Experience
+## V1.0 Management Preview Sprint
 
-Renamed the platform to **Experience** across user-facing product language.
+Prepared Experience to operate as an Employee Experience Platform rather than a fixed recognition prototype.
 
-## Highlights
+### Product Language
 
-- Reframed the product as an **Employee Experience Platform** rather than a recognition campaign.
-- Added frozen product language in README and product docs.
-- Preserved the Employee Experience while updating labels to Experience.
-- Added a new Leadership Experience for managers.
-- Added Leadership Dashboard, Leadership Health, Leadership Journal, Leadership Achievements, Leadership Recognition, Leadership Rewards, Recognition Coverage, Coaching Insights, and Employees Awaiting Recognition.
-- Clarified that managers do not earn employee XP or spendable employee Miles.
-- Added Leadership Recognition seed data for coaching, communication, coverage, and operational impact.
-- Renamed visible card language to Experience Card.
-- Renamed visible moment language to Experience Moment.
-- Updated welcome, brand lockup, role routing, navigation, docs, package metadata, and seeded copy.
+- Renamed the product surface to **Experience**.
+- Froze product terms around XP, Experience Moments, Experience Journal, Experience Cards, Rewards, Experience Studio, Seasons, Community XP, Experience Score, and Leadership Health.
+- Reframed Season One as **The Odyssey**.
+- Updated the campaign phrase to **More Than A Movie Starts With Us.**
 
-## Known Issues
+### Employee Experience
 
-- Some internal code, storage keys, table names, and CSS tokens still use `journey` for migration stability.
-- Experience Moments still use browser event storage for the live TV feed; normalized per-action Supabase writes remain a hardening step.
-- Supabase operating-state persistence stores configurable state as JSON when service-role environment variables are configured.
-- Login is role selection, not production authentication.
+- Reworked Today around mission, Season One, Community XP, Today's Focus, Recognition Spotlight, countdown, current XP, level, Rewards, and Experience Journal.
+- Replaced the old reward store with Rewards while preserving the legacy `/trading-post` redirect.
+- Added curated reward collections, tiers, and flags.
+
+### Manager / Leadership Experience
+
+- Updated manager navigation around operational shift workflows.
+- Improved Capture Moment for fast manager entry.
+- Added Experience Cards as a manager print-run workflow.
+- Clarified Excellence Checks as Community XP, not spendable employee XP.
+- Expanded Leadership Dashboard signals, Leadership Achievements, and Leadership Rewards.
+
+### Admin/GM
+
+- Reframed Dashboard as Command Center.
+- Reframed Recognition Library as Recognition Studio.
+- Reframed Settings as Experience Studio.
+- Reframed the old season-management page as Season Builder.
+- Added Experience Events configuration.
+- Expanded Rewards editor metadata.
+
+### TV Signage
+
+- Updated the TV loop for Community XP, Today's Focus, Recognition Spotlight, Experience Leaderboard, Recognition Wall, Department Progress, Reward Spotlight, and Countdown.
+- Preserved compatibility with old saved TV slide labels.
+
+### Known Issues
+
+- Supabase Auth is not yet wired.
+- Some internal names still use legacy `journey`, `chapter`, and `miles` terms for compatibility.
+- Uploaded images are preview/local-state based until storage is added.
+- Fully normalized Supabase mutations remain a V1.1 hardening task.

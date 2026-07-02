@@ -22,8 +22,8 @@ export default function RecognizeEmployeePage() {
           />
           <MetricCard
             label="Today"
-            value={`+${chapterStats.todayMiles}`}
-            detail="Miles recognized"
+            value={`+${chapterStats.todayMiles} XP`}
+            detail="XP recognized"
             icon={ShieldCheck}
           />
         </div>

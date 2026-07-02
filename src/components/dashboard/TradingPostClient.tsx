@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { useJourneyState } from "@/lib/journey-state";
-import { formatShortDateTime } from "@/lib/utils";
+import { formatShortDateTime, formatXp } from "@/lib/utils";
 
 export function TradingPostClient() {
   const { state, updateState } = useJourneyState();
@@ -45,7 +45,12 @@ export function TradingPostClient() {
     }
 
     if (currentEmployee.miles < reward.milesCost) {
-      setMessage("Not enough Miles for that reward yet.");
+      setMessage("Not enough XP for that reward yet.");
+      return;
+    }
+
+    if (reward.comingSoon) {
+      setMessage("That reward is coming soon.");
       return;
     }
 
@@ -67,16 +72,28 @@ export function TradingPostClient() {
         ...current.redemptions,
       ],
     }));
-    setMessage(`${reward.name} requested. A manager can approve it from Pending Rewards.`);
+    setMessage(`${reward.name} requested. A manager can approve it from Rewards Approvals.`);
   }
+
+  const enabledRewards = state.rewards
+    .filter((reward) => reward.enabled)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const collections = [
+    "Featured Rewards",
+    "Everyday Rewards",
+    "Season Exclusives",
+    "Experience Rewards",
+    "Collector's Vault",
+    "Coming Soon",
+  ];
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
       <div className="grid gap-5">
         <MetricCard
-          label="Available Miles"
-          value={`${currentEmployee?.miles ?? 0}`}
-          detail="Redeemable Experience balance"
+          label="Available XP"
+          value={`${formatXp(currentEmployee?.miles ?? 0)}`}
+          detail="Redeemable Employee Experience balance"
           icon={Gift}
         />
         <Panel>
@@ -111,7 +128,7 @@ export function TradingPostClient() {
               })
             ) : (
               <p className="text-sm font-bold text-journey-steel">
-                No redemptions for this employee yet.
+                No reward requests for this employee yet.
               </p>
             )}
           </div>
@@ -120,47 +137,75 @@ export function TradingPostClient() {
 
       <Panel>
         <PanelHeader
-          title="Reward Catalog"
-          eyebrow="First seasonal activation"
+          title="Rewards"
+          eyebrow="Curated Employee Experience"
           action={<PackageCheck className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
-        <div className="grid gap-4 md:grid-cols-2">
-          {state.rewards
-            .filter((reward) => reward.enabled)
-            .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map((reward) => {
-              const alreadyOpen = openRedemptions.some(
-                (redemption) => redemption.rewardId === reward.id,
-              );
-              const canAfford = (currentEmployee?.miles ?? 0) >= reward.milesCost;
-              const inStock = reward.inventoryCount > 0;
+        <div className="grid gap-6">
+          {collections.map((collection) => {
+            const collectionRewards = enabledRewards.filter(
+              (reward) => (reward.collection ?? "Everyday Rewards") === collection,
+            );
 
-              return (
-                <RewardCard
-                  key={reward.id}
-                  reward={reward}
-                  footerNote={
-                    alreadyOpen
-                      ? "Request pending"
-                      : !inStock
-                        ? "Out of stock"
-                        : !canAfford
-                          ? "Keep earning"
-                          : undefined
-                  }
-                  action={
-                    <Button
-                      type="button"
-                      className="w-full"
-                      disabled={alreadyOpen || !canAfford || !inStock}
-                      onClick={() => requestReward(reward.id)}
-                    >
-                      {alreadyOpen ? "Requested" : "Request Reward"}
-                    </Button>
-                  }
-                />
-              );
-            })}
+            if (!collectionRewards.length) {
+              return null;
+            }
+
+            return (
+              <section key={collection}>
+                <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-black uppercase text-journey-red">
+                      {collection}
+                    </p>
+                    <h3 className="text-xl font-black text-journey-black">
+                      {collection === "Coming Soon"
+                        ? "Preview what is next"
+                        : "Choose a reward"}
+                    </h3>
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {collectionRewards.map((reward) => {
+                    const alreadyOpen = openRedemptions.some(
+                      (redemption) => redemption.rewardId === reward.id,
+                    );
+                    const canAfford = (currentEmployee?.miles ?? 0) >= reward.milesCost;
+                    const inStock = reward.inventoryCount > 0;
+                    const comingSoon = Boolean(reward.comingSoon);
+
+                    return (
+                      <RewardCard
+                        key={reward.id}
+                        reward={reward}
+                        footerNote={
+                          alreadyOpen
+                            ? "Request pending"
+                            : comingSoon
+                              ? "Coming soon"
+                              : !inStock
+                                ? "Out of stock"
+                                : !canAfford
+                                  ? "Keep earning XP"
+                                  : undefined
+                        }
+                        action={
+                          <Button
+                            type="button"
+                            className="w-full"
+                            disabled={alreadyOpen || !canAfford || !inStock || comingSoon}
+                            onClick={() => requestReward(reward.id)}
+                          >
+                            {alreadyOpen ? "Requested" : "Request Reward"}
+                          </Button>
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
         </div>
       </Panel>
     </div>

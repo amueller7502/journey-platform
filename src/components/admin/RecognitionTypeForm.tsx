@@ -156,7 +156,7 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
           </select>
         </label>
         <label className="grid gap-2 text-sm font-bold text-journey-black">
-          Miles
+          XP
           <input
             type="number"
             value={form.milesValue}
@@ -224,7 +224,7 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
             }
             className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
           >
-            <option value="employee">Employee Miles</option>
+            <option value="employee">Employee XP</option>
             <option value="department">Department / building progress</option>
             <option value="community">Community progress only</option>
           </select>

@@ -10,7 +10,7 @@ import {
   getJourneyMoments,
   subscribeToJourneyMoments,
 } from "@/lib/demo-moments";
-import { formatMiles, formatShortDateTime } from "@/lib/utils";
+import { formatShortDateTime, formatXp } from "@/lib/utils";
 import { useJourneyState } from "@/lib/journey-state";
 
 export function ManagerShiftDashboard() {
@@ -42,7 +42,7 @@ export function ManagerShiftDashboard() {
         .slice(0, 8),
     [state.employees],
   );
-  const weeklyMiles = state.employees.reduce(
+  const weeklyXp = state.employees.reduce(
     (total, employee) => total + (employee.role === "employee" ? employee.weeklyMiles : 0),
     0,
   );
@@ -51,8 +51,8 @@ export function ManagerShiftDashboard() {
     <>
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="Weekly Miles"
-          value={formatMiles(weeklyMiles)}
+          label="Weekly XP"
+          value={formatXp(weeklyXp)}
           detail="recognized this week"
           icon={HandHeart}
         />
@@ -65,7 +65,7 @@ export function ManagerShiftDashboard() {
         <MetricCard
           label="Need Recognition"
           value={`${employeesNeedingRecognition.length}`}
-          detail="no Miles this week"
+          detail="no XP this week"
           icon={Users}
         />
         <MetricCard
@@ -140,7 +140,7 @@ export function ManagerShiftDashboard() {
                       {moment.recognitionTypeName}
                     </p>
                   </div>
-                  <p className="font-black text-journey-red">+{moment.miles}</p>
+                  <p className="font-black text-journey-red">+{moment.miles} XP</p>
                 </div>
                 <p className="mt-2 text-xs font-bold uppercase text-journey-steel">
                   {formatShortDateTime(moment.createdAt)}

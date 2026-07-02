@@ -7,19 +7,23 @@ import { Panel, PanelHeader } from "@/components/ui/Panel";
 import {
   COMMUNITY_GOAL_MILES,
   chapterStats,
-  employees,
   employeesNotRecognizedThisWeek,
-  enabledRecognitionTypes,
   recognitionOfTheDay,
   getEmployee,
   getRecognitionType,
   launchReadinessChecklist,
 } from "@/lib/data";
-import { daysRemaining, formatMiles } from "@/lib/utils";
+import { productLanguage } from "@/lib/product-language";
+import { daysRemaining, formatXp } from "@/lib/utils";
 
 export default function AdminDashboardPage() {
+  const experienceScore = 86;
+  const presentationScore = 91;
+  const managerLeadershipHealth = 83;
+  const inventoryWarnings = 3;
+
   return (
-    <AppShell role="admin" title="Dashboard" eyebrow="Admin/GM">
+    <AppShell role="admin" title="Command Center" eyebrow="Admin/GM">
       <div className="grid gap-5 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <Panel className="odyssey-frame h-full bg-journey-black text-journey-white">
@@ -27,9 +31,9 @@ export default function AdminDashboardPage() {
           </Panel>
         </div>
         <MetricCard
-          label="Remaining"
-          value={formatMiles(COMMUNITY_GOAL_MILES - chapterStats.communityMiles)}
-          detail="Miles to community goal"
+          label={productLanguage.experienceScore}
+          value={`${experienceScore}`}
+          detail="Composite recognition, coverage, presentation"
           icon={Goal}
         />
         <MetricCard
@@ -42,15 +46,15 @@ export default function AdminDashboardPage() {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-4">
         <MetricCard
-          label="Active Employees"
-          value={`${chapterStats.activeEmployees}`}
-          detail="Crew profiles"
+          label={productLanguage.communityGoal}
+          value={formatXp(chapterStats.communityMiles)}
+          detail={`${formatXp(COMMUNITY_GOAL_MILES - chapterStats.communityMiles)} XP remaining`}
           icon={Users}
         />
-          <MetricCard
-          label="Recognition Types"
-          value={`${enabledRecognitionTypes.length}`}
-          detail="Enabled library items"
+        <MetricCard
+          label="Presentation Score"
+          value={`${presentationScore}`}
+          detail="Readiness checks and space standards"
           icon={BarChart3}
         />
         <MetricCard
@@ -60,26 +64,27 @@ export default function AdminDashboardPage() {
           icon={Gift}
         />
         <MetricCard
-          label="Average Daily"
-          value={formatMiles(chapterStats.averageDailyMiles)}
-          detail="Community pace"
+          label={productLanguage.leadershipHealth}
+          value={`${managerLeadershipHealth}%`}
+          detail="Coverage, coaching, handoffs"
           icon={Goal}
         />
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <Panel>
-          <PanelHeader title="Department Progress" eyebrow="Experience Miles" />
+          <PanelHeader title="Department Progress" eyebrow="Community XP" />
           <DepartmentProgress />
         </Panel>
         <Panel>
           <PanelHeader title="Pace Snapshot" eyebrow="GM View" />
           <div className="grid gap-3">
             {[
-              ["Goal pace", "560 miles per day"],
-              ["Current pace", `${formatMiles(chapterStats.averageDailyMiles)} miles per day`],
+              ["Goal pace", "560 XP per day"],
+              ["Current pace", `${formatXp(chapterStats.averageDailyMiles)} XP per day`],
               ["Recognition density", "4.6 entries per active crew member"],
-              ["Reward liability", "2,190 miles in pending and ready rewards"],
+              ["Reward liability", "2,190 XP in pending and ready rewards"],
+              ["Inventory warnings", `${inventoryWarnings} rewards near threshold`],
             ].map(([label, value]) => (
               <div
                 key={label}
@@ -100,7 +105,7 @@ export default function AdminDashboardPage() {
             {getEmployee(recognitionOfTheDay.employeeId)?.name}
           </p>
           <p className="mt-2 text-sm font-bold text-journey-red">
-            {getRecognitionType(recognitionOfTheDay.recognitionTypeId)?.name} +{recognitionOfTheDay.miles} Miles
+            {getRecognitionType(recognitionOfTheDay.recognitionTypeId)?.name} +{recognitionOfTheDay.miles} XP
           </p>
           <p className="mt-3 border-l-4 border-journey-red pl-3 text-sm leading-6 text-journey-steel">
             {recognitionOfTheDay.note}

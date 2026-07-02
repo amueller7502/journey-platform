@@ -28,7 +28,7 @@ export function RecognitionCard({ recognition }: { recognition: Recognition }) {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-bold uppercase text-journey-steel">
             <span>{formatShortDateTime(recognition.createdAt)}</span>
             <span className="text-journey-red">
-              +{recognition.miles} Miles Earned
+              +{recognition.miles} XP Earned
             </span>
           </div>
         </div>

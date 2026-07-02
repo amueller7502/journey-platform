@@ -116,7 +116,7 @@ export function RecognitionLibraryManager() {
           </p>
           {saved ? (
             <p className="mt-2 text-sm font-black text-journey-red">
-              Recognition library saved.
+              Recognition Studio saved.
             </p>
           ) : null}
         </div>
@@ -174,7 +174,7 @@ export function RecognitionLibraryManager() {
             Add Moment
           </Button>
           <Button type="button" icon={Save} onClick={() => setSaved(true)}>
-            Save Library
+            Save Studio
           </Button>
           <LinkButton href="/admin/recognition-library/new" icon={Plus}>
             Full Form
@@ -191,7 +191,7 @@ export function RecognitionLibraryManager() {
               <th className="py-3 pr-4">Type</th>
               <th className="py-3 pr-4">Category</th>
               <th className="py-3 pr-4">Standard</th>
-              <th className="py-3 pr-4">Miles</th>
+              <th className="py-3 pr-4">XP</th>
               <th className="py-3 pr-4">Scope</th>
               <th className="py-3 pr-4">Experience Card</th>
               <th className="py-3 pr-4">Icon</th>
@@ -331,7 +331,7 @@ export function RecognitionLibraryManager() {
                         Card task
                       </label>
                       <p className="mt-2 text-xs font-bold text-journey-steel">
-                        Assign areas in Admin / Experience Cards.
+                        Assign areas in Experience Card Builder.
                       </p>
                     </td>
                     <td className="py-3 pr-4">

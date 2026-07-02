@@ -86,6 +86,7 @@ export function RecognitionForm() {
     const nextType = recognitionOptions.find((item) => item.id === id);
 
     setRecognitionTypeId(id);
+    setSubmitted(false);
     if (nextType) {
       setMiles(nextType.milesValue);
     }
@@ -113,7 +114,7 @@ export function RecognitionForm() {
           miles: effectiveMiles,
           note:
             note.trim() ||
-            `${employee.name} created a Experience Moment through ${recognitionType.name.toLowerCase()}.`,
+            `${employee.name} created an Experience Moment through ${recognitionType.name.toLowerCase()}.`,
           createdAt: new Date().toISOString(),
           managerName: "Jordan Ellis",
         });
@@ -132,7 +133,7 @@ export function RecognitionForm() {
             </h3>
           </div>
           <p className="text-sm font-bold text-journey-steel">
-            Standard and Miles are automatic.
+            Standard and XP are automatic.
           </p>
         </div>
       </div>
@@ -154,7 +155,10 @@ export function RecognitionForm() {
           </div>
           <select
             value={selectedEmployeeId}
-            onChange={(event) => setEmployeeId(event.target.value)}
+            onChange={(event) => {
+              setEmployeeId(event.target.value);
+              setSubmitted(false);
+            }}
             className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3"
           >
             {filteredCrew.map((item) => (
@@ -174,7 +178,7 @@ export function RecognitionForm() {
           >
             {recognitionOptions.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name} ({item.milesValue} Miles)
+                {item.name} ({item.milesValue} XP)
               </option>
             ))}
           </select>
@@ -209,7 +213,10 @@ export function RecognitionForm() {
           Optional Moment Note
           <textarea
             value={note}
-            onChange={(event) => setNote(event.target.value)}
+            onChange={(event) => {
+              setNote(event.target.value);
+              setSubmitted(false);
+            }}
             rows={3}
             className="focus-ring resize-none rounded-md border border-journey-line bg-journey-white px-3 py-3"
             placeholder="What Moment mattered? Optional."
@@ -217,7 +224,7 @@ export function RecognitionForm() {
         </label>
 
         <div className="grid gap-2 rounded-lg border border-journey-line bg-journey-white p-4">
-          <p className="text-xs font-black uppercase text-journey-red">Miles Earned</p>
+          <p className="text-xs font-black uppercase text-journey-red">XP Earned</p>
           <p className="text-4xl font-black text-journey-black">{effectiveMiles}</p>
           <p className="text-sm font-bold text-journey-steel">
             {recognitionType?.name}
@@ -241,7 +248,7 @@ export function RecognitionForm() {
             </div>
           ) : null}
           <p className="text-xs font-bold text-journey-steel">
-            Admins change Miles values in Recognition Library.
+            Admins change XP values in Recognition Studio.
           </p>
         </div>
       </div>
@@ -249,15 +256,15 @@ export function RecognitionForm() {
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-journey-line bg-journey-mist p-4">
         <div>
           <p className="text-sm font-black text-journey-black">
-            {employee?.name ?? "Employee"} receives {effectiveMiles} Miles Earned
+            {employee?.name ?? "Employee"} receives {effectiveMiles} XP
           </p>
           <p className="mt-1 text-sm font-bold text-journey-steel">
-            {recognitionType?.name} becomes a Experience Moment.
+            {recognitionType?.name} becomes an Experience Moment.
           </p>
         </div>
-        <Button icon={Send} type="submit">
-          Capture Moment
-        </Button>
+          <Button icon={Send} type="submit" disabled={submitted || !recognitionOptions.length}>
+            {submitted ? "Moment Captured" : "Capture Moment"}
+          </Button>
       </div>
 
       {submitted ? (

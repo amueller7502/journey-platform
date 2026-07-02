@@ -1,32 +1,39 @@
 # Experience Roadmap
 
-## Now: Platform Language And Leadership Experience
+## V1.0 Management Preview
 
-- Freeze product language around Experience.
-- Preserve the existing Employee Experience.
-- Add Leadership Experience for managers.
-- Keep managers out of employee XP/Miles earning.
-- Add leadership recognition, health, journal, achievements, rewards, coverage, coaching insights, and employees awaiting recognition.
+- Finish Experience language across core screens.
+- Make managers able to capture Experience Moments in under 10 seconds.
+- Move Experience Card print runs to the manager workflow.
+- Keep admin card template configuration in Experience Studio.
+- Redesign the old reward store into Rewards.
+- Add configurable Experience Events.
+- Add Leadership Dashboard, Leadership Health, Leadership Journal, Leadership Achievements, Leadership Recognition, Leadership Rewards, Recognition Coverage, Coaching Insights, and Employees Awaiting Recognition.
+- Keep TV signage focused on Community XP, Today's Focus, Recognition Spotlight, Department Progress, Rewards, Countdown, and Experience Leaderboard.
 
-## Launch: First Seasonal Activation
+## V1.1 Operational Hardening
 
-Employee launch is **July 16, 2026**.
+- Replace preview access codes with Supabase Auth and role-based permissions.
+- Normalize writes for Experience Moments, rewards, redemptions, Experience Events, seasons, card batches, and leadership recognition.
+- Add audit history for admin changes.
+- Add image storage for reward photos and profile photo approvals.
+- Add manager handoff notes and shift summaries.
+- Add budget tracking for Rewards.
+- Add downloadable CSV exports for reports and reward liability.
 
-- Seed employees.
-- Seed rewards.
-- Seed recognition types and excellence checks.
-- Print Experience Cards.
-- Test TV dashboard.
-- Test employee moment capture.
-- Test reward redemption.
-- Test Experience Card batch entry.
-- Test Leadership Dashboard and recognition coverage.
+## V1.2 Season System
 
-## Next
+- Support unlimited seasons.
+- Add season cloning.
+- Add season-specific reward availability.
+- Add badge/badge-art management.
+- Add per-season TV slide packages.
+- Add skin versioning and preview before activation.
 
-- Wire normalized Supabase mutations for Experience Moments, Experience Card batches, leadership recognition, reward edits, and settings.
-- Add production authentication and role mapping.
-- Add CSV import/export for employees and Experience Cards.
-- Add reward fulfillment audit trail.
-- Add seasonal activation cloning for future skins.
-- Expand Skin Developer for future activations, including a Dune 3 skin.
+## Future Ideas
+
+- Dune 3 skin.
+- Staff nomination prompts that notify managers but do not self-award XP.
+- Mobile-first manager quick actions.
+- Scheduled TV slide playlists.
+- Deeper coaching recommendations based on recognition coverage.

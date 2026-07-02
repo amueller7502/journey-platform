@@ -7,7 +7,7 @@ import {
   recognitions,
   recognitionStandards,
 } from "@/lib/data";
-import { formatMiles, percent } from "@/lib/utils";
+import { formatXp, percent } from "@/lib/utils";
 
 const actionTotals = recognitionTypes
   .map((recognitionType) => ({
@@ -24,10 +24,10 @@ const standardTotals = recognitionStandards.map((standard) => ({
   count: recognitions.filter((recognition) => recognition.standardId === standard.id).length,
 }));
 
-const maxActionMiles = Math.max(...actionTotals.map((item) => item.miles), 1);
+const maxActionXp = Math.max(...actionTotals.map((item) => item.miles), 1);
 
 export default function RecognitionAnalyticsPage() {
-  const totalMiles = recognitions.reduce((total, recognition) => total + recognition.miles, 0);
+  const totalXp = recognitions.reduce((total, recognition) => total + recognition.miles, 0);
 
   return (
     <AppShell role="admin" title="Recognition Analytics" eyebrow="Insights">
@@ -39,8 +39,8 @@ export default function RecognitionAnalyticsPage() {
           icon={BarChart3}
         />
         <MetricCard
-          label="Tracked Miles"
-          value={formatMiles(totalMiles)}
+          label="Tracked XP"
+          value={formatXp(totalXp)}
           detail="Recognition feed sample"
           icon={PieChart}
         />
@@ -54,20 +54,20 @@ export default function RecognitionAnalyticsPage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
         <Panel>
-          <PanelHeader title="Action Mix" eyebrow="Miles by rule" />
+          <PanelHeader title="Action Mix" eyebrow="XP by rule" />
           <div className="grid gap-4">
             {actionTotals.map(({ recognitionType, miles }) => (
               <div key={recognitionType.id}>
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <span className="font-black text-journey-black">{recognitionType.name}</span>
                   <span className="text-sm font-bold text-journey-steel">
-                    {formatMiles(miles)} miles
+                    {formatXp(miles)} XP
                   </span>
                 </div>
                 <div className="h-3 overflow-hidden rounded-sm bg-journey-mist">
                   <div
                     className="h-full bg-journey-red"
-                    style={{ width: `${percent(miles, maxActionMiles)}%` }}
+                    style={{ width: `${percent(miles, maxActionXp)}%` }}
                   />
                 </div>
               </div>

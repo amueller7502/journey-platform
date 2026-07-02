@@ -1,32 +1,34 @@
 # Experience Manifesto
 
-Experience exists to recognize the people who create extraordinary movie experiences.
+Experience exists to recognize the people who create extraordinary movie experiences while helping leaders build exceptional teams.
 
-At Celebration Cinema North, the guest experience is built moment by moment: a cleaner auditorium, a warmer greeting, a teammate stepping across departments, a shift covered when the building needs it, and a small detail caught before a guest ever notices.
+The product promise is simple: Experience makes recognizing great work easier than overlooking it.
 
-Experience is not a one-time recognition campaign. It is an Employee Experience Platform with two connected sides:
+## What This Is
 
-- The **Employee Experience** helps employees see their Miles, moments, rewards, community progress, and profile.
-- The **Leadership Experience** helps managers notice recognition gaps, coach intentionally, and receive leadership recognition without earning employee XP.
+Experience is an Employee Experience Platform for Celebration Cinema North. It is not a one-off recognition campaign, even though each season can have its own theme, skin, rewards, events, and printed Experience Cards.
 
-The first seasonal activation is **The Odyssey**.
+Season One is **The Odyssey**, running July 16-August 12, 2026.
 
-It begins with the management preview on **July 9, 2026** and launches to employees on **July 16, 2026**. The community goal is **15,700 Miles**.
+The campaign phrase is **More Than A Movie Starts With Us.**
 
-## Product Promise
+The community goal is **15,700 XP**.
 
-Recognition should be easier to capture than to overlook.
+## Product Rules
 
-## Core Beliefs
-
-- Every Mile represents a Moment That Mattered.
+- Employees do not self-submit XP.
+- Managers capture and verify Experience Moments.
+- Managers do not earn employee XP.
+- Managers receive Leadership Recognition for coaching, communication, coverage, and operational impact.
 - Recognition matters more than competition.
-- Managers verify and recognize employee moments.
-- Employees do not self-submit Miles.
-- Managers do not earn employee XP or employee Miles.
-- Leaders deserve recognition for coaching, communication, coverage, and operational impact.
-- The best version of Experience helps leaders notice what is already happening.
+- Every XP entry represents a Moment That Mattered.
 
-## The Odyssey
+## What Success Looks Like
 
-**The Odyssey** is about forward motion, shared effort, and a premium cinema experience. Every Experience Moment should connect to guest experience, building presentation, teamwork, reliability, or attention to detail.
+Employees feel seen.
+
+Managers notice great work while it is happening.
+
+Admin/GM leaders can configure seasons, rewards, recognition types, Experience Cards, and TV signage without code.
+
+The building becomes more intentional about guest experience, presentation, teamwork, reliability, and attention to detail.

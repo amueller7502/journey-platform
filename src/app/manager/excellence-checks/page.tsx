@@ -10,7 +10,7 @@ export default function ExcellenceChecksPage() {
         <Panel>
           <PanelHeader
             title="Readiness Checks"
-            eyebrow="Community progress, not spendable employee Miles"
+            eyebrow="Community XP, not spendable employee XP"
           />
           <ExcellenceCheckBoard />
         </Panel>

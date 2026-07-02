@@ -10,7 +10,7 @@ export default function RecognitionFeedPage() {
       <Panel>
         <PanelHeader
           title="Recent Experience Moments"
-          eyebrow="First seasonal activation"
+          eyebrow="This season"
           action={<Megaphone className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
         <div className="mb-5 grid gap-4">
@@ -23,7 +23,7 @@ export default function RecognitionFeedPage() {
                 Experience Card Batch
               </p>
               <h3 className="mt-2 text-xl font-black text-journey-black">
-                {getEmployee(batch.employeeId)?.name} earned {batch.totalMiles} Miles
+                {getEmployee(batch.employeeId)?.name} earned {batch.totalMiles} XP
                 from {batch.itemCount} verified Experience Card items.
               </h3>
               <p className="mt-2 text-sm font-bold text-journey-steel">{batch.note}</p>

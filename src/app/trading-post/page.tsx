@@ -1,10 +1,5 @@
-import { AppShell } from "@/components/AppShell";
-import { TradingPostClient } from "@/components/dashboard/TradingPostClient";
+import { redirect } from "next/navigation";
 
-export default function TradingPostPage() {
-  return (
-    <AppShell role="employee" title="Trading Post" eyebrow="Rewards">
-      <TradingPostClient />
-    </AppShell>
-  );
+export default function TradingPostRedirectPage() {
+  redirect("/rewards");
 }

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { useJourneyState } from "@/lib/journey-state";
 import type { JourneyCardArea, JourneyCardShiftAssignment, RecognitionType } from "@/lib/types";
-import { formatMiles } from "@/lib/utils";
+import { formatXp } from "@/lib/utils";
 
 function todayString() {
   return new Date().toISOString().slice(0, 10);
@@ -280,7 +280,7 @@ export function JourneyCardPrintList() {
                       </p>
                       <p className="mt-1 text-sm font-bold text-journey-steel">
                         {tasks.length} checklist items /{" "}
-                        {formatMiles(tasks.reduce((total, task) => total + task.milesValue, 0))}
+                        {formatXp(tasks.reduce((total, task) => total + task.milesValue, 0))} XP
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -331,7 +331,7 @@ export function JourneyCardPrintList() {
                   <p className="text-xs font-black uppercase text-journey-red">
                     Experience / Shift Card
                   </p>
-                  <h3 className="mt-1 text-2xl font-black">Every Mile Matters</h3>
+                  <h3 className="mt-1 text-2xl font-black">More Than A Movie Starts With Us.</h3>
                   <p className="mt-1 text-sm font-bold text-journey-line">
                     Turn this card in to a manager at the end of the shift.
                   </p>
@@ -357,7 +357,7 @@ export function JourneyCardPrintList() {
                         {area?.name ?? "Experience Card"}
                       </h4>
                       <p className="mt-1 text-sm font-bold text-journey-steel">
-                        {assignment.shiftDate} / {formatMiles(totalMiles)} possible
+                        {assignment.shiftDate} / {formatXp(totalMiles)} XP possible
                       </p>
                     </div>
                   </div>
@@ -378,7 +378,7 @@ export function JourneyCardPrintList() {
                           </p>
                         </div>
                         <p className="text-right text-xs font-black text-journey-red">
-                          +{task.milesValue}
+                          +{task.milesValue} XP
                         </p>
                       </div>
                     ))}
@@ -399,7 +399,7 @@ export function JourneyCardPrintList() {
       <Panel className="mt-5">
         <PanelHeader title="Export Preview" eyebrow="Copy-ready rows" />
         <pre className="overflow-x-auto rounded-lg bg-journey-black p-4 text-xs font-bold text-journey-white">
-{`shift_date,employee,journey_card_id,card_type,possible_miles
+{`shift_date,employee,experience_card_id,card_type,possible_xp
 ${assignments
   .map((assignment) => {
     const employee = state.employees.find((item) => item.id === assignment.employeeId);

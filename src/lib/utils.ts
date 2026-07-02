@@ -8,6 +8,8 @@ export function formatMiles(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
+export const formatXp = formatMiles;
+
 export function percent(value: number, total: number) {
   if (total <= 0) {
     return 0;

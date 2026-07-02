@@ -12,6 +12,7 @@ export type JourneyMoment = {
   note: string;
   createdAt: string;
   managerName: string;
+  batchId?: string;
 };
 
 export type DemoMoment = JourneyMoment;

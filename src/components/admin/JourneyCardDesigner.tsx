@@ -326,7 +326,7 @@ export function JourneyCardDesigner() {
                   <th className="p-3">Task</th>
                   <th className="p-3">Description</th>
                   <th className="p-3">Standard</th>
-                  <th className="p-3">Miles</th>
+                  <th className="p-3">XP</th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Delete</th>
                 </tr>

@@ -6,7 +6,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { type JourneyMoment, getJourneyMoments, subscribeToJourneyMoments } from "@/lib/demo-moments";
 import { recognitions } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
-import { formatMiles, percent } from "@/lib/utils";
+import { formatXp, percent } from "@/lib/utils";
 import type { DepartmentId } from "@/lib/types";
 
 type LeaderboardMode = "app" | "tv";
@@ -89,7 +89,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
     return [...localMomentRows, ...seededRows].slice(0, mode === "tv" ? 5 : 8);
   }, [mode, moments, state.employees, state.recognitionTypes]);
 
-  const totalWeekMiles = crew.reduce((total, employee) => total + employee.weeklyMiles, 0);
+  const totalWeekXp = crew.reduce((total, employee) => total + employee.weeklyMiles, 0);
   const topCrew = crew.slice(0, mode === "tv" ? 5 : 8);
   const topDepartment = departmentStandings[0];
   const topArea = areaStandings[0];
@@ -105,8 +105,8 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
         <LeaderboardStat
           inverse={inverse}
           icon={Trophy}
-          label="Weekly Miles"
-          value={formatMiles(totalWeekMiles)}
+          label="Weekly XP"
+          value={formatXp(totalWeekXp)}
           detail="recognized this week"
         />
         <LeaderboardStat
@@ -114,7 +114,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
           icon={Award}
           label="Top Crew"
           value={topCrew[0]?.name ?? "None yet"}
-          detail={`${topCrew[0]?.weeklyMiles ?? 0} weekly Miles`}
+          detail={`${topCrew[0]?.weeklyMiles ?? 0} weekly XP`}
         />
         <LeaderboardStat
           inverse={inverse}
@@ -149,7 +149,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase text-journey-red">
-                Recognition Leaderboard
+                Experience Leaderboard
               </p>
               <h3
                 className={cx(
@@ -195,7 +195,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
                     mode === "tv" ? "text-3xl" : "text-xl",
                   )}
                 >
-                  {employee.weeklyMiles}
+                  {employee.weeklyMiles} XP
                 </p>
               </div>
             ))}
@@ -248,7 +248,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
               >
                 <span className="font-black">{area.name}</span>
                 <span className="text-sm font-black text-journey-red">
-                  {area.miles} weekly Miles
+                  {area.miles} weekly XP
                 </span>
               </div>
             ))}
@@ -281,7 +281,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
                       {recognition.title}
                     </p>
                   </div>
-                  <p className="font-black text-journey-red">+{recognition.miles}</p>
+                  <p className="font-black text-journey-red">+{recognition.miles} XP</p>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-journey-steel">
                   {recognition.note}

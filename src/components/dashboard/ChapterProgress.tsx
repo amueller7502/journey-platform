@@ -2,7 +2,7 @@
 
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useJourneyState } from "@/lib/journey-state";
-import { formatMiles, percent } from "@/lib/utils";
+import { formatXp, percent } from "@/lib/utils";
 
 export function ChapterProgress({ inverse = false }: { inverse?: boolean }) {
   const { state } = useJourneyState();
@@ -42,7 +42,7 @@ export function ChapterProgress({ inverse = false }: { inverse?: boolean }) {
                 : "pb-2 text-lg font-bold text-journey-steel"
             }
           >
-            {formatMiles(communityMiles)} of {formatMiles(communityGoal)} miles
+            {formatXp(communityMiles)} of {formatXp(communityGoal)} XP
           </p>
         </div>
       </div>

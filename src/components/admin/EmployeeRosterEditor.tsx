@@ -23,7 +23,7 @@ import {
   useJourneyState,
 } from "@/lib/journey-state";
 import type { DepartmentId, Employee, Role } from "@/lib/types";
-import { formatMiles } from "@/lib/utils";
+import { formatXp } from "@/lib/utils";
 
 const roleOptions: Role[] = ["employee", "manager", "admin"];
 const accountStatusOptions = ["invited", "active", "disabled"] as const;
@@ -432,8 +432,8 @@ export function EmployeeRosterEditor() {
               <th className="py-3 pr-3">Title</th>
               <th className="py-3 pr-3">Experience Card ID</th>
               <th className="py-3 pr-3">Shift</th>
-              <th className="py-3 pr-3">Miles</th>
-              <th className="py-3 pr-3">Weekly</th>
+              <th className="py-3 pr-3">XP</th>
+              <th className="py-3 pr-3">Weekly XP</th>
               <th className="py-3 pr-3">Streak</th>
               <th className="py-3 pr-3">Delete</th>
             </tr>
@@ -613,7 +613,7 @@ export function EmployeeRosterEditor() {
                       className="focus-ring min-h-10 w-24 rounded-md border border-journey-line px-3 font-black"
                     />
                     <p className="mt-2 text-xs font-bold text-journey-steel">
-                      {formatMiles(employee.miles)}
+                      {formatXp(employee.miles)} XP
                     </p>
                   </td>
                   <td className="py-3 pr-3">

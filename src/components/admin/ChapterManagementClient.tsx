@@ -8,7 +8,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { chapterSettings } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
-import { daysRemaining, formatDate, formatMiles } from "@/lib/utils";
+import { daysRemaining, formatDate, formatXp } from "@/lib/utils";
 
 export function ChapterManagementClient() {
   const { state, updateState } = useJourneyState();
@@ -42,9 +42,9 @@ export function ChapterManagementClient() {
         </Panel>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
           <MetricCard
-            label="Community Goal"
-            value={formatMiles(state.chapter.communityGoalMiles)}
-            detail={`${formatMiles(communityMiles)} earned`}
+            label="Community XP Goal"
+            value={formatXp(state.chapter.communityGoalMiles)}
+            detail={`${formatXp(communityMiles)} XP earned`}
             icon={Goal}
           />
           <MetricCard
@@ -58,7 +58,7 @@ export function ChapterManagementClient() {
 
       <Panel className="mt-5">
         <PanelHeader
-          title="Manage Current Activation"
+          title="Manage Current Season"
           eyebrow={state.chapter.chapterNumber}
           action={<Save className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
@@ -66,7 +66,7 @@ export function ChapterManagementClient() {
       </Panel>
 
       <Panel className="mt-5">
-        <PanelHeader title="Activation Operations" eyebrow="Preview controls" />
+        <PanelHeader title="Season Operations" eyebrow="Preview controls" />
         <div className="grid gap-4 md:grid-cols-3">
           <label className="grid gap-2 rounded-lg border border-journey-line p-4 text-sm font-bold text-journey-black">
             Active Status
@@ -90,11 +90,11 @@ export function ChapterManagementClient() {
           <div className="rounded-lg border border-journey-line p-4">
             <p className="text-xs font-black uppercase text-journey-red">Current Progress</p>
             <p className="mt-2 text-2xl font-black text-journey-black">
-              {formatMiles(communityMiles)}
+              {formatXp(communityMiles)}
             </p>
           </div>
           <div className="rounded-lg border border-journey-line p-4">
-            <p className="text-xs font-black uppercase text-journey-red">Fresh Activation</p>
+            <p className="text-xs font-black uppercase text-journey-red">Fresh Season</p>
             <Button
               type="button"
               variant="secondary"
@@ -102,7 +102,7 @@ export function ChapterManagementClient() {
               className="mt-2"
               onClick={resetProgress}
             >
-              Reset Progress
+              Reset XP Progress
             </Button>
           </div>
         </div>

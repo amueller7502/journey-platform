@@ -6,6 +6,7 @@ import {
   chapter as defaultChapter,
   departments as defaultDepartments,
   employees as defaultEmployees,
+  experienceEvents as defaultExperienceEvents,
   excellenceLogs as defaultExcellenceLogs,
   journeyCardAreas as defaultJourneyCardAreas,
   journeySkins as defaultSkins,
@@ -17,6 +18,7 @@ import {
 import type {
   Department,
   Employee,
+  ExperienceEvent,
   ExcellenceLog,
   JourneyCardArea,
   JourneyCardShiftAssignment,
@@ -39,6 +41,7 @@ export type JourneyOperatingState = {
   rewards: Reward[];
   redemptions: Redemption[];
   excellenceLogs: ExcellenceLog[];
+  experienceEvents: ExperienceEvent[];
   tvPanelSettings: TvPanelSetting[];
   skins: JourneySkin[];
   activeSkinId: string;
@@ -59,6 +62,7 @@ const defaultState: JourneyOperatingState = {
   rewards: defaultRewards,
   redemptions: defaultRedemptions,
   excellenceLogs: defaultExcellenceLogs,
+  experienceEvents: defaultExperienceEvents,
   tvPanelSettings: defaultTvPanelSettings,
   skins: defaultSkins,
   activeSkinId: activeSkin.id,
@@ -107,6 +111,7 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
     rewards: mergeById(defaultState.rewards, value?.rewards),
     redemptions: mergeById(defaultState.redemptions, value?.redemptions),
     excellenceLogs: mergeById(defaultState.excellenceLogs, value?.excellenceLogs),
+    experienceEvents: mergeById(defaultState.experienceEvents, value?.experienceEvents),
     tvPanelSettings: mergeById(defaultState.tvPanelSettings, value?.tvPanelSettings),
     skins: mergeById(defaultState.skins, value?.skins),
   };

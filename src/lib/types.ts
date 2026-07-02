@@ -133,11 +133,24 @@ export type Reward = {
   inventoryCount: number;
   imageUrl: string;
   category: "Food" | "Cinema" | "Gear" | "Experience";
+  collection?:
+    | "Everyday Rewards"
+    | "Featured Rewards"
+    | "Collector's Vault"
+    | "Experience Rewards"
+    | "Season Exclusives"
+    | "Coming Soon";
+  tier?: "Tier 1" | "Tier 2" | "Tier 3";
   enabled: boolean;
   sortOrder: number;
   redemptionLimitPerEmployee?: number;
   fulfillmentNotes?: string;
   spotlight?: boolean;
+  featured?: boolean;
+  seasonExclusive?: boolean;
+  collector?: boolean;
+  comingSoon?: boolean;
+  almostGoneThreshold?: number;
 };
 
 export type SkinId = "standard" | "odyssey" | "dune_3";
@@ -181,6 +194,32 @@ export type TvPanelSetting = {
   enabled: boolean;
   sortOrder: number;
   seconds: number;
+};
+
+export type ExperienceEventType =
+  | "Today's Focus"
+  | "Community Challenge"
+  | "Bonus XP Event"
+  | "Flash Event"
+  | "Surprise Drop"
+  | "Mystery Mission"
+  | "Premiere Event"
+  | "Season Finale Event";
+
+export type ExperienceEvent = {
+  id: string;
+  type: ExperienceEventType;
+  title: string;
+  description: string;
+  startAt: string;
+  endAt: string;
+  xpModifier: number;
+  eligibleRecognitionTypeIds: string[];
+  departmentIds: DepartmentId[];
+  tvAnnouncement: string;
+  banner: string;
+  enabled: boolean;
+  sortOrder: number;
 };
 
 export type MenuConfiguration = {

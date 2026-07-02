@@ -111,7 +111,7 @@ export function ProfileClient() {
         </Panel>
         <div className="grid gap-5 sm:grid-cols-3">
           <MetricCard
-            label="Miles"
+            label="XP"
             value={`${currentEmployee.miles}`}
             detail="Experience total"
             icon={BadgeCheck}

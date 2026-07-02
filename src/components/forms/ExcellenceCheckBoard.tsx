@@ -47,7 +47,7 @@ export function ExcellenceCheckBoard() {
               Building Readiness
             </p>
             <h3 className="mt-1 text-xl font-black text-journey-black">
-              Excellence Checks add community progress, not spendable employee Miles.
+              Excellence Checks add Community XP, not spendable employee XP.
             </h3>
             <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-journey-steel">
               Use this screen for verified spaces and operational standards. To reward
@@ -95,7 +95,7 @@ export function ExcellenceCheckBoard() {
       {!excellenceCheckTypes.length ? (
         <div className="rounded-lg border border-journey-line bg-journey-white p-4 text-sm font-bold text-journey-steel md:col-span-2">
           No enabled excellence checks are available. Add or enable checks in Admin /
-          Recognition Library.
+          Recognition Studio.
         </div>
       ) : null}
       {excellenceCheckTypes.map((check) => {
@@ -109,7 +109,7 @@ export function ExcellenceCheckBoard() {
               <div>
                 <h3 className="font-black text-journey-black">{check.name}</h3>
                 <p className="mt-2 text-sm font-bold text-journey-steel">
-                  +{check.milesValue} community Miles per confirmed check
+                  +{check.milesValue} Community XP per confirmed check
                 </p>
                 <p className="mt-2 text-sm leading-6 text-journey-steel">
                   {check.description}
@@ -162,7 +162,7 @@ export function ExcellenceCheckBoard() {
                   </p>
                 </div>
                 <p className="text-sm font-black text-journey-red">
-                  +{log.communityMiles} community Miles
+                  +{log.communityMiles} Community XP
                 </p>
               </div>
             );

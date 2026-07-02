@@ -90,6 +90,10 @@ export function LeadershipExperienceView({ view }: { view: LeadershipView }) {
   const pendingRewards = state.redemptions.filter((redemption) =>
     ["Requested", "Pending", "Approved", "Ready"].includes(redemption.status),
   );
+  const activeFocus =
+    state.experienceEvents.find(
+      (event) => event.enabled && event.type === "Today's Focus",
+    ) ?? state.experienceEvents.find((event) => event.enabled);
   const recognitionCoverage = employees.length
     ? Math.round(((employees.length - awaitingRecognition.length) / employees.length) * 100)
     : 0;
@@ -123,6 +127,29 @@ export function LeadershipExperienceView({ view }: { view: LeadershipView }) {
           pendingRewards={pendingRewards.length}
           recognitions={visibleRecognitions.length}
         />
+        <Panel>
+          <PanelHeader title="Leadership Health Signals" eyebrow="Shift operations" />
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              [
+                "Experience Moments Captured",
+                `${employees.reduce((total, employee) => total + employee.weeklyMiles, 0)} weekly XP`,
+              ],
+              ["Recognition Notes", `${visibleRecognitions.length} leadership notes`],
+              ["Experience Card Batches", `${state.journeyCardAssignments.length} planned cards`],
+              ["Excellence Checks Verified", `${state.excellenceLogs.length} readiness logs`],
+              ["Today's Focus", activeFocus?.title ?? "No active focus"],
+              ["Pending Reward Requests", `${pendingRewards.length} open handoffs`],
+              ["Employees Awaiting Recognition", `${awaitingRecognition.length} people`],
+              ["Suggested Coaching Actions", `${visibleInsights.length} available`],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-journey-line p-4">
+                <p className="text-xs font-black uppercase text-journey-red">{label}</p>
+                <p className="mt-2 text-lg font-black text-journey-black">{value}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
         <Panel className="bg-journey-black text-journey-white">
           <PanelHeader title="Leadership Actions" eyebrow="Shift-ready shortcuts" />
           <div className="grid gap-3 md:grid-cols-3">
@@ -137,7 +164,7 @@ export function LeadershipExperienceView({ view }: { view: LeadershipView }) {
             </LinkButton>
           </div>
           <p className="mt-4 text-sm font-bold text-journey-line">
-            Managers do not earn employee XP or Miles. Leadership recognition is
+            Managers do not earn employee XP. Leadership recognition is
             tracked as coaching, coverage, communication, and operational impact.
           </p>
         </Panel>
@@ -244,7 +271,7 @@ export function LeadershipExperienceView({ view }: { view: LeadershipView }) {
           <div className="grid gap-3 text-sm font-bold leading-6 text-journey-steel">
             <p>{productLanguage.leadershipRecognition} is not employee XP.</p>
             <p>Leadership recognition names manager impact, coaching, coverage, and communication.</p>
-            <p>Employee Miles remain inside the Employee Experience only.</p>
+            <p>Employee XP remains inside the Employee Experience only.</p>
           </div>
         </Panel>
       </div>
@@ -254,7 +281,7 @@ export function LeadershipExperienceView({ view }: { view: LeadershipView }) {
   if (view === "rewards") {
     return (
       <Panel>
-        <PanelHeader title="Leadership Rewards" eyebrow="Recognition without Miles" />
+        <PanelHeader title="Leadership Rewards" eyebrow="Recognition without employee XP" />
         <div className="grid gap-4 md:grid-cols-3">
           {leadershipRewards.map((reward) => (
             <article key={reward.id} className="rounded-lg border border-journey-line p-4">
@@ -352,7 +379,7 @@ function HeroPanel({ activeLeader }: { activeLeader: string }) {
       <h2 className="mt-2 text-3xl font-black">Lead the experience, recognize the people.</h2>
       <p className="mt-3 max-w-3xl text-sm font-bold leading-6 text-journey-line">
         {activeLeader} sees employee recognition coverage, coaching priorities,
-        leadership recognition, and reward handoffs without earning employee Miles.
+        leadership recognition, and reward handoffs without earning employee XP.
       </p>
     </Panel>
   );
@@ -504,7 +531,7 @@ function LeadershipRecognitionForm({
         </label>
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-journey-line bg-journey-mist p-4">
           <p className="text-sm font-bold text-journey-steel">
-            Leadership recognition is separate from employee Miles and the Trading Post.
+            Leadership recognition is separate from employee XP and Rewards.
           </p>
           <Button type="button" icon={Sparkles} onClick={submitRecognition}>
             Record Recognition

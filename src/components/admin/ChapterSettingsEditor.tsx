@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/Button";
 import { useJourneyState } from "@/lib/journey-state";
 
 const editableFields = [
-  ["Activation name", "name"],
-  ["Activation subtitle", "subtitle"],
+  ["Season name", "name"],
+  ["Season subtitle", "subtitle"],
   ["Start date", "startDate"],
   ["End date", "endDate"],
-  ["Community goal", "communityGoalMiles"],
+  ["Community XP goal", "communityGoalMiles"],
   ["Theme label", "themeLabel"],
   ["Active", "active"],
-  ["Visual tagline", "visualTagline"],
+  ["Season tagline", "visualTagline"],
   ["Theme note", "themeNote"],
 ] as const;
 
@@ -71,7 +71,7 @@ export function ChapterSettingsEditor({
               active: String(values.active).toLowerCase().startsWith("y"),
               visualTagline: values.visualTagline || current.chapter.visualTagline,
               themeNote: values.themeNote || current.chapter.themeNote,
-              imaxReference: `${values.communityGoalMiles || current.chapter.communityGoalMiles} Miles - a nod to IMAX 1570 film.`,
+              imaxReference: `${values.communityGoalMiles || current.chapter.communityGoalMiles} XP - a nod to IMAX 1570 film.`,
             },
           };
         });
@@ -98,11 +98,11 @@ export function ChapterSettingsEditor({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" icon={Save}>
-          Save Activation Settings
+          Save Season Settings
         </Button>
         {saved ? (
           <p className="text-sm font-black text-journey-red">
-            Activation settings saved.
+            Season settings saved.
           </p>
         ) : null}
       </div>

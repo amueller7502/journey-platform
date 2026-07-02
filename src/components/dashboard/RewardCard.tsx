@@ -12,12 +12,23 @@ export function RewardCard({
   action?: ReactNode;
   footerNote?: string;
 }) {
+  const almostGone =
+    reward.inventoryCount > 0 &&
+    reward.inventoryCount <= (reward.almostGoneThreshold ?? 2);
+  const badges = [
+    reward.featured ? "Featured" : "",
+    reward.seasonExclusive ? "Season Exclusive" : "",
+    reward.collector ? "Collector" : "",
+    reward.comingSoon ? "Coming Soon" : "",
+    almostGone ? "Almost Gone" : "",
+  ].filter(Boolean);
+
   return (
     <article className="overflow-hidden rounded-lg border border-journey-line bg-journey-white shadow-line transition hover:-translate-y-0.5 hover:shadow-premium">
       <div className="relative aspect-square border-b border-journey-line bg-journey-black">
         <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,transparent_0_12px,#fff_12px_16px,transparent_16px_30px)] [background-size:30px_100%]" />
         <div className="absolute left-4 top-4 z-10 rounded-sm bg-journey-red px-2 py-1 text-xs font-black uppercase text-journey-white">
-          Trading Post
+          {reward.tier ?? "Reward"}
         </div>
         <Image
           src={reward.imageUrl}
@@ -29,14 +40,16 @@ export function RewardCard({
         />
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-journey-black via-journey-black/70 to-transparent p-4">
           <p className="text-xs font-black uppercase text-journey-white">
-            {reward.category}
+            {reward.collection ?? reward.category}
           </p>
         </div>
       </div>
       <div className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase text-journey-red">{reward.category}</p>
+            <p className="text-xs font-black uppercase text-journey-red">
+              {reward.collection ?? reward.category}
+            </p>
             <h3 className="mt-1 text-lg font-black text-journey-black">{reward.name}</h3>
             <p className="mt-2 text-sm leading-6 text-journey-steel">{reward.description}</p>
           </div>
@@ -44,15 +57,27 @@ export function RewardCard({
             <Gift className="h-5 w-5" aria-hidden="true" />
           </div>
         </div>
+        {badges.length ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {badges.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-sm border border-journey-line bg-journey-mist px-2 py-1 text-[11px] font-black uppercase text-journey-black"
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-5 flex items-center justify-between border-t border-journey-line pt-4">
           <div>
             <span className="text-2xl font-black text-journey-black">
               {reward.milesCost}
             </span>
-            <p className="text-xs font-black uppercase text-journey-red">Miles</p>
+            <p className="text-xs font-black uppercase text-journey-red">XP</p>
           </div>
           <span className="text-sm font-bold text-journey-steel">
-            {reward.inventoryCount} in stock
+            {reward.comingSoon ? "Coming soon" : `${reward.inventoryCount} in stock`}
           </span>
         </div>
         {footerNote ? (

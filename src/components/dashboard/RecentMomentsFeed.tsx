@@ -51,7 +51,7 @@ export function RecentMomentsFeed({
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-bold uppercase text-journey-steel">
                 <span>{formatShortDateTime(moment.createdAt)}</span>
                 <span className="text-journey-red">
-                  +{moment.miles} Miles Earned
+                  +{moment.miles} XP Earned
                 </span>
               </div>
             </div>

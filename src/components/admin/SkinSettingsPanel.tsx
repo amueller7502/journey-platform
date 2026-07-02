@@ -83,15 +83,15 @@ export function SkinSettingsPanel({
   function addSkin() {
     setSaved(false);
     updateState((current) => {
-      const id = `${makeSlugId("New Activation Skin", "activation_skin")}-${Date.now()}`;
+      const id = `${makeSlugId("New Season Skin", "season_skin")}-${Date.now()}`;
       const nextSkin: JourneySkin = {
         id,
-        name: "New Activation Skin",
+        name: "New Season Skin",
         status: "draft",
-        description: "Reusable activation visual package.",
+        description: "Reusable season visual package.",
         canDisable: true,
         tvTreatment: "Draft display treatment",
-        headline: "Activation Headline",
+        headline: "Season Headline",
         visualDirection: "Describe the skin's cinematic world and UI tone.",
         motionStyle: "Describe motion cues for TV and hero surfaces.",
         texture: "Describe grain, frames, light, or environmental texture.",
@@ -160,8 +160,8 @@ export function SkinSettingsPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-journey-steel">
-            Skin Developer controls activation visual packages. Turn skins off for
-            the clean Cinema Standard experience, or draft future activations like Dune 3.
+            Skin Developer controls season visual packages. Turn skins off for
+            the clean Cinema Standard experience, or draft future seasons like Dune 3.
           </p>
           {saved ? (
             <p className="mt-2 text-sm font-black text-journey-red">

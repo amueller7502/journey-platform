@@ -1,7 +1,6 @@
 import { ClipboardCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { JourneyCardDesigner } from "@/components/admin/JourneyCardDesigner";
-import { JourneyCardPrintList } from "@/components/admin/JourneyCardPrintList";
 import { LinkButton } from "@/components/ui/Button";
 
 export default function AdminPassportsPage() {
@@ -17,7 +16,6 @@ export default function AdminPassportsPage() {
       }
     >
       <JourneyCardDesigner />
-      <JourneyCardPrintList />
     </AppShell>
   );
 }
