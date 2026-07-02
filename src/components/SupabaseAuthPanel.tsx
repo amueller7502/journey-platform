@@ -277,6 +277,20 @@ export function SupabaseAuthPanel() {
           >
             Create
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("reset_password");
+              setMessage("");
+            }}
+            className={`rounded-sm px-3 py-2 text-xs font-black uppercase ${
+              mode === "reset_password"
+                ? "bg-journey-black text-journey-white"
+                : "text-journey-steel"
+            }`}
+          >
+            Reset
+          </button>
         </div>
       </div>
 
@@ -380,9 +394,10 @@ export function SupabaseAuthPanel() {
             setMode("reset_password");
             setMessage("");
           }}
-          className="focus-ring justify-self-start rounded-md text-sm font-black text-journey-red"
+          className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-journey-line bg-journey-white px-4 py-2 text-sm font-black text-journey-black transition hover:bg-journey-mist"
         >
-          Forgot password?
+          <Mail className="h-4 w-4 text-journey-red" aria-hidden="true" />
+          Reset Password
         </button>
       ) : null}
       <Button
