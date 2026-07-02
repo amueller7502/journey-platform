@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { Gift, PackageCheck } from "lucide-react";
 import { RewardCard } from "@/components/dashboard/RewardCard";
+import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
-import { redemptions } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
 import { formatShortDateTime } from "@/lib/utils";
 
 export function TradingPostClient() {
-  const { state } = useJourneyState();
+  const { state, updateState } = useJourneyState();
   const [accountId, setAccountId] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const load = () =>
@@ -26,9 +27,48 @@ export function TradingPostClient() {
     state.employees.find(
       (employee) => employee.role === "employee" && employee.active !== false,
     ) ?? state.employees[0];
-  const currentRedemptions = redemptions.filter(
+  const currentRedemptions = state.redemptions.filter(
     (redemption) => redemption.employeeId === currentEmployee?.id,
   );
+  const openRedemptions = currentRedemptions.filter(
+    (redemption) =>
+      redemption.status === "Requested" ||
+      redemption.status === "Approved" ||
+      redemption.status === "Pending" ||
+      redemption.status === "Ready",
+  );
+
+  function requestReward(rewardId: string) {
+    const reward = state.rewards.find((item) => item.id === rewardId);
+    if (!currentEmployee || !reward) {
+      return;
+    }
+
+    if (currentEmployee.miles < reward.milesCost) {
+      setMessage("Not enough Miles for that reward yet.");
+      return;
+    }
+
+    if (reward.inventoryCount <= 0) {
+      setMessage("That reward is currently out of stock.");
+      return;
+    }
+
+    updateState((current) => ({
+      ...current,
+      redemptions: [
+        {
+          id: `redemption-${currentEmployee.id}-${reward.id}-${Date.now()}`,
+          employeeId: currentEmployee.id,
+          rewardId: reward.id,
+          status: "Requested",
+          requestedAt: new Date().toISOString(),
+        },
+        ...current.redemptions,
+      ],
+    }));
+    setMessage(`${reward.name} requested. A manager can approve it from Pending Rewards.`);
+  }
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
@@ -41,6 +81,11 @@ export function TradingPostClient() {
         />
         <Panel>
           <PanelHeader title="My Redemptions" eyebrow="Status" />
+          {message ? (
+            <p className="mb-3 rounded-md border border-journey-line bg-journey-mist p-3 text-sm font-black text-journey-red">
+              {message}
+            </p>
+          ) : null}
           <div className="grid gap-3">
             {currentRedemptions.length ? (
               currentRedemptions.map((redemption) => {
@@ -83,9 +128,39 @@ export function TradingPostClient() {
           {state.rewards
             .filter((reward) => reward.enabled)
             .sort((a, b) => a.sortOrder - b.sortOrder)
-            .map((reward) => (
-              <RewardCard key={reward.id} reward={reward} />
-            ))}
+            .map((reward) => {
+              const alreadyOpen = openRedemptions.some(
+                (redemption) => redemption.rewardId === reward.id,
+              );
+              const canAfford = (currentEmployee?.miles ?? 0) >= reward.milesCost;
+              const inStock = reward.inventoryCount > 0;
+
+              return (
+                <RewardCard
+                  key={reward.id}
+                  reward={reward}
+                  footerNote={
+                    alreadyOpen
+                      ? "Request pending"
+                      : !inStock
+                        ? "Out of stock"
+                        : !canAfford
+                          ? "Keep earning"
+                          : undefined
+                  }
+                  action={
+                    <Button
+                      type="button"
+                      className="w-full"
+                      disabled={alreadyOpen || !canAfford || !inStock}
+                      onClick={() => requestReward(reward.id)}
+                    >
+                      {alreadyOpen ? "Requested" : "Request Reward"}
+                    </Button>
+                  }
+                />
+              );
+            })}
         </div>
       </Panel>
     </div>

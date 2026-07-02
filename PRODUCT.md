@@ -26,10 +26,11 @@ Journey makes recognizing great work easier than overlooking it.
 ## Primary Workflows
 
 - Manager captures a Journey Moment in under 10 seconds.
-- Manager verifies Journey Card items from a QR link.
+- Manager enters turned-in Journey Card checklist items at the end of the shift.
+- Admin/manager bulk assigns and prints daily Journey Cards by employee and scheduled area.
 - Employee views miles, recent moments, rewards, and community progress.
 - Admin manages recognition types, excellence checks, reward inventory, chapter settings, skins, and launch readiness.
-- TV mode celebrates community progress, spotlight moments, recognition leaderboard, department progress, rewards, and countdown.
+- TV mode celebrates community progress, spotlight moments, recognition leaderboard, department progress, rotating rewards, and countdown.
 
 ## Launch Scope
 

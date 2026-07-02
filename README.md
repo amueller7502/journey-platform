@@ -21,11 +21,13 @@ Chapter One is **The Odyssey**, running **July 16-August 12, 2026**. The managem
 - Supabase schema, RLS policies, and seed data
 - Employee, Manager, and Admin/GM page groups
 - Manager Capture Moment flow designed for under 10 seconds
-- Journey Card paper-to-digital batch entry workflow
-- Area-specific Journey Card builder for Floor/Lobby, Concessions, Kitchen/Oscar's, Box Office/Guest Services, and Facilities/Exterior
+- Journey Card printable shift checklist workflow with end-of-shift manager entry
+- Area-specific Journey Card template builder for Floor/Lobby, Concessions, Kitchen/Oscar's, Box Office/Guest Services, and Facilities/Exterior
+- Bulk daily Journey Card assignment and print runs by employee and card type
 - Preview account creation with role, department, access code, account status, and Journey Card assignment
 - Admin-managed recognition type and excellence check library
-- Admin-managed rewards, costs, inventory, and Trading Post cards
+- Admin-managed rewards, costs, inventory, Trading Post cards, and redemption queue
+- Dedicated profile photo approval page
 - Admin skin controls with Cinema Standard, Odyssey / North Stars, and a future Dune 3 slot
 - Visible launch readiness checklist on the Admin/GM Dashboard
 - TV mode focused on community progress, spotlight moments, recognition leaderboard, department progress, rewards, and countdown
@@ -63,7 +65,7 @@ The build script uses the stable webpack builder for predictable local and CI pa
 
 ## Environment Variables
 
-For the management preview, environment variables are optional because the app can run from browser-saved configurable state and does not require Supabase authentication.
+Environment variables are optional for local preview because the app can fall back to browser-saved configurable state and does not require Supabase authentication.
 
 When connecting Supabase later, create `.env.local` from `.env.example`:
 
@@ -83,7 +85,7 @@ Only the two `NEXT_PUBLIC_*` variables should be exposed to the browser. Keep `S
 4. Add the Supabase environment variables to `.env.local`.
 5. For Vercel, add the same environment variables in Project Settings before deploying the live data version.
 
-The UI starts from seeded data in `src/lib/data.ts`, then admin edits persist to browser localStorage through `src/lib/journey-state.ts`. Supabase clients, schema, RLS policies, and seed data are ready for the live multi-device data layer. Supabase authentication is not required for the preview deployment.
+The UI starts from seeded data in `src/lib/data.ts`. When `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are present, operating state is saved through `/api/journey-state` into `journey_operating_state`; browser localStorage remains the offline fallback.
 
 ## Seed Data
 
@@ -123,7 +125,7 @@ No password is required in Sprint Alpha. Production authentication is a known fo
 - Journey Moments and Journey Card tasks award spendable employee Miles.
 - Excellence Checks log building readiness and add department/community progress.
 - If a manager wants to reward the person behind an Excellence Check, they should capture a separate Journey Moment.
-- Journey Cards are assigned by area, so kitchen, lobby, concessions, box office, guest services, and facilities can have different task lists.
+- Journey Card templates are built by area. Each day, managers/admins can bulk assign any active employee to the card type they are scheduled for and print those shift checklists.
 
 ## Management Preview Flow
 
@@ -135,11 +137,12 @@ No password is required in Sprint Alpha. Production authentication is a known fo
 
 For Journey Card entry:
 
-1. Open `/manager/passport` or scan a Journey Card QR code.
-2. Select a Journey Card ID.
-3. Batch-select verified items.
-4. Submit the batch.
-5. Confirm the total Miles awarded.
+1. Open `/admin/passports`.
+2. Choose the shift date, Journey Card type, and employees scheduled for that area.
+3. Print the half-sheet checklist cards.
+4. At the end of shift, open `/manager/passport`.
+5. Select the employee/card type, batch-select verified items, and submit.
+6. Confirm the total Miles awarded.
 
 ## Admin Flexibility
 
@@ -155,12 +158,13 @@ Admin/GM users can preview or manage:
 - Disable the Odyssey skin and return to the Cinema Standard look
 - Prepare future skins, including the seeded Dune 3 draft slot
 
-Admin configuration currently saves to browser localStorage. Supabase mutations are modeled in the schema and are the next step for shared, multi-device production data.
+Admin configuration saves to browser storage locally and to Supabase operating state when the Supabase service role environment variable is configured.
 
 Admin editors that work in the configurable build:
 
 - Employee roster add/edit/disable controls
 - Journey Card ID editing
+- Daily Journey Card bulk assignment and printable checklist cards
 - Recognition Library add/edit/enable/disable controls
 - Excellence Check add/edit/enable/disable controls
 - Add/Edit Recognition Type forms
@@ -169,6 +173,7 @@ Admin editors that work in the configurable build:
 - TV Display Settings
 - Menu Configuration
 - Chapter Settings
+- Profile Photo Approvals
 
 ## Launch Readiness Checklist
 
@@ -203,6 +208,7 @@ The schema in `supabase/schema.sql` includes:
 - `reward_redemptions`
 - `daily_spotlights`
 - `tv_display_settings`
+- `journey_operating_state`
 
 ## Routes
 
@@ -213,16 +219,18 @@ The schema in `supabase/schema.sql` includes:
 - `/community` Community
 - `/leaderboard` Leaderboard
 - `/profile` Profile
+- `/manager/dashboard` Shift Dashboard
 - `/manager/recognize` Capture Moment
 - `/manager/excellence-checks` Excellence Checks
 - `/manager/leaderboard` Manager Leaderboard
-- `/manager/passport` Journey Card lookup
+- `/manager/passport` Journey Card lookup / turned-in checklist entry
 - `/manager/passport/[passport_id]` Journey Card batch entry
 - `/manager/pending-rewards` Pending Rewards
 - `/manager/daily-spotlight` Daily Spotlight
 - `/manager/recognition-feed` Moment Feed
 - `/admin/dashboard` Admin/GM Dashboard
 - `/admin/employees` Employees
+- `/admin/photo-approvals` Profile Photo Approvals
 - `/admin/leaderboard` Admin Leaderboard
 - `/admin/rewards` Rewards / Inventory
 - `/admin/recognition-library` Recognition Library
@@ -249,7 +257,7 @@ The TV dashboard rotates through:
 - Reward Spotlight
 - Countdown
 
-The leaderboard is now available to employees, managers, Admin/GM users, and the TV loop. It focuses on weekly recognition and keeps community progress visible alongside standings.
+The leaderboard is available to employees, managers, Admin/GM users, and the TV loop. Reward Spotlight shows multiple rotating prizes to keep the Trading Post visible.
 
 For fullscreen during the preview, open `/tv` and click the fullscreen icon in the TV header, or use the browser fullscreen command.
 
@@ -268,7 +276,7 @@ Additional preview screenshots may include `welcome.png`, `journey-card-entry.pn
 
 ## Deploying To Vercel
 
-The management-preview build deploys cleanly without Supabase environment variables because it uses seeded data plus browser-saved configuration.
+The build deploys cleanly without Supabase environment variables because it uses seeded data plus browser-saved configuration. Add Supabase variables when you want shared saved state across devices.
 
 Exact steps:
 
@@ -280,7 +288,7 @@ Exact steps:
 6. Use **Install Command**: `npm install`.
 7. Use **Build Command**: `npm run build`.
 8. Leave **Output Directory** blank so Vercel uses the Next.js default.
-9. Do not add Supabase environment variables for the management preview unless you are testing live data wiring.
+9. Add Supabase environment variables if you want shared operating-state persistence across devices; otherwise leave them blank for local/browser fallback.
 10. Click **Deploy**.
 11. After deployment, open `/`, `/manager/recognize`, `/admin/dashboard`, and `/tv` to verify role entry and the TV loop.
 
@@ -312,11 +320,9 @@ The archive excludes dependency folders, local build output, local environment f
 ## Known Issues
 
 - Login is role selection, not production authentication.
-- Configurable admin state is browser-local until Supabase mutations are connected.
-- Journey Moments are stored in browser localStorage and are not shared across devices yet.
-- Recognition Library, Excellence Checks, Employee Roster, Rewards, Skin Developer, Menu Configuration, and Chapter Settings are configurable in-browser.
-- Journey Card batch entry persists Miles and TV feed updates in the current browser; shared production persistence needs Supabase writes.
-- Journey Card QR links use local preview URLs in seed data until deployment URLs are assigned.
+- Supabase persistence currently stores the configurable operating state as JSON in `journey_operating_state`; fully normalized per-action writes are still a future hardening step.
+- Journey Moments still use browser event storage for the live TV feed, while employee Miles and core operating state sync through the Journey state bridge when Supabase is configured.
+- Recognition Library, Excellence Checks, Employee Roster, Rewards, Skin Developer, Menu Configuration, Chapter Settings, redemptions, and Journey Card print runs are configurable in-app.
 - The C-frame is cropped from the provided raster logo, not a vector source file.
 - TV mode rotates panels client-side and includes the configurable Recognition Leaderboard slide.
 - If screenshots are recaptured after a rebuild, restart the local Next.js preview first so the browser does not hold stale chunk references.

@@ -171,15 +171,15 @@ export function JourneyCardDesigner() {
     <Panel className="mt-5">
       <PanelHeader
         title="Journey Card Builder"
-        eyebrow="Area-specific task design"
+        eyebrow="Card template design"
         action={<ClipboardList className="h-5 w-5 text-journey-red" aria-hidden="true" />}
       />
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-3xl text-sm font-bold leading-6 text-journey-steel">
-          Journey Cards can be assigned by work area. Managers only see tasks that
-          match each employee card area, so kitchen, lobby, concessions, and
-          facilities can each have a fair checklist.
+          Build reusable card templates by work area. Daily print runs can assign
+          any active employee to any card type based on where they are scheduled
+          that shift.
         </p>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="secondary" icon={Plus} onClick={addArea}>
@@ -218,7 +218,7 @@ export function JourneyCardDesigner() {
               </p>
               <h3 className="mt-1 text-lg font-black">{area.name}</h3>
               <p className="mt-2 text-xs font-bold opacity-80">
-                {state.employees.filter((employee) => employee.journeyCardAreaId === area.id).length} assigned
+                {state.employees.filter((employee) => employee.journeyCardAreaId === area.id).length} default
               </p>
             </button>
           ))}
@@ -311,7 +311,7 @@ export function JourneyCardDesigner() {
             </div>
 
             <p className="mt-4 text-sm font-bold text-journey-steel">
-              Assigned active crew:{" "}
+              Default active crew:{" "}
               <span className="font-black text-journey-black">
                 {assignedEmployees.map((employee) => employee.name).join(", ") || "None yet"}
               </span>

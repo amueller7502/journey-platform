@@ -1,4 +1,4 @@
-import { QrCode } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { JourneyCardDesigner } from "@/components/admin/JourneyCardDesigner";
 import { JourneyCardPrintList } from "@/components/admin/JourneyCardPrintList";
@@ -9,8 +9,12 @@ export default function AdminPassportsPage() {
     <AppShell
       role="admin"
       title="Journey Cards"
-      eyebrow="Paper to digital workflow"
-      actions={<LinkButton href="/manager/passport" icon={QrCode}>Manager Entry</LinkButton>}
+      eyebrow="Printable shift checklists"
+      actions={
+        <LinkButton href="/manager/passport" icon={ClipboardCheck}>
+          Manager Entry
+        </LinkButton>
+      }
     >
       <JourneyCardDesigner />
       <JourneyCardPrintList />

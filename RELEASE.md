@@ -20,13 +20,13 @@ Prepared for the **July 9, 2026** management preview.
 - Replaced demo labeling with a configurable-build indicator.
 - Added configurable employee roster management, Journey Card ID editing, live recognition/excellence check editing, reward editing, and Skin Developer controls.
 - Added browser-saved configurable state for Chapter One settings.
-- Added CSV account import, employee delete, richer Skin Developer controls, TV slide controls, printable Journey Cards, reward photo uploads, and profile photo approval.
+- Added CSV/XLSX account import, employee delete, richer Skin Developer controls, TV slide controls, daily printable Journey Card checklists, reward photo uploads, and dedicated profile photo approvals.
+- Added Manager Shift Dashboard, multi-prize TV Reward Spotlight, reward request/approve/fulfill workflow, and Supabase operating-state persistence.
 
 ## Known Issues
 
-- Configurable actions currently use browser-local state unless Supabase mutations are connected.
+- Configurable actions use browser-local fallback and can sync operating state to Supabase when service-role environment variables are configured.
 - Login is role selection, not production authentication.
-- Journey Card QR links use local preview URLs in seed data until deployment URLs are assigned.
-- Journey Moments and configurable admin edits are browser-local and are not shared across devices yet.
+- Journey Moments still use browser event storage for the live TV feed; normalized per-action Supabase writes remain a hardening step.
 - TV mode remains community-first while including the configurable Recognition Leaderboard slide.
 - Restart local preview after rebuilding before recapturing screenshots, or the browser may hold stale chunk references.

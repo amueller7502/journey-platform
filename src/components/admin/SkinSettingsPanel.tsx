@@ -101,6 +101,10 @@ export function SkinSettingsPanel({
         animationIntensity: 50,
         funLevel: 70,
         doodleDensity: 60,
+        marqueeSpeed: 65,
+        projectorSweep: 55,
+        floatAmplitude: 45,
+        confettiLevel: 55,
         titleTreatment: "handbill",
         cardTreatment: "ticket",
         frameStyle: "filmstrip",
@@ -369,6 +373,26 @@ export function SkinSettingsPanel({
               value={selected.doodleDensity ?? 20}
               onChange={(value) => updateSkin(selected.id, { doodleDensity: value })}
             />
+            <SkinSlider
+              label="Marquee Speed"
+              value={selected.marqueeSpeed ?? 40}
+              onChange={(value) => updateSkin(selected.id, { marqueeSpeed: value })}
+            />
+            <SkinSlider
+              label="Projector Sweep"
+              value={selected.projectorSweep ?? 50}
+              onChange={(value) => updateSkin(selected.id, { projectorSweep: value })}
+            />
+            <SkinSlider
+              label="Float Motion"
+              value={selected.floatAmplitude ?? 30}
+              onChange={(value) => updateSkin(selected.id, { floatAmplitude: value })}
+            />
+            <SkinSlider
+              label="Celebration Texture"
+              value={selected.confettiLevel ?? 10}
+              onChange={(value) => updateSkin(selected.id, { confettiLevel: value })}
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -457,10 +481,13 @@ export function SkinSettingsPanel({
             style={{
               background: `linear-gradient(135deg, ${selected.palette.deep ?? selected.palette.primary}, ${selected.palette.primary})`,
               "--skin-preview-density": `${(selected.doodleDensity ?? 20) / 100}`,
-              "--skin-preview-speed": `${Math.max(5, 16 - (selected.animationIntensity ?? 50) / 8)}s`,
+              "--skin-preview-speed": `${Math.max(4, 18 - (selected.marqueeSpeed ?? selected.animationIntensity ?? 50) / 7)}s`,
+              "--skin-preview-sweep": `${(selected.projectorSweep ?? 50) / 100}`,
+              "--skin-preview-float": `${(selected.floatAmplitude ?? 30) / 100}`,
+              "--skin-preview-confetti": `${(selected.confettiLevel ?? 0) / 100}`,
             } as CSSProperties}
           >
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="skin-preview-float flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p
                   className="text-xs font-black uppercase"
@@ -481,6 +508,8 @@ export function SkinSettingsPanel({
                     selected.titleTreatment,
                     selected.cardTreatment,
                     selected.frameStyle,
+                    `motion ${selected.animationIntensity ?? 60}`,
+                    `fun ${selected.funLevel ?? 50}`,
                   ].map((value) =>
                     value ? (
                       <span

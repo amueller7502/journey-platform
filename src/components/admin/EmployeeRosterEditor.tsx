@@ -355,7 +355,7 @@ export function EmployeeRosterEditor() {
             />
           </label>
           <label className="grid gap-2 text-sm font-bold text-journey-black">
-            Journey Card Area
+            Default Journey Card Area
             <select
               value={newEmployee.journeyCardAreaId}
               onChange={(event) =>
@@ -428,7 +428,7 @@ export function EmployeeRosterEditor() {
               <th className="py-3 pr-3">Name</th>
               <th className="py-3 pr-3">Role</th>
               <th className="py-3 pr-3">Department</th>
-              <th className="py-3 pr-3">Card Area</th>
+              <th className="py-3 pr-3">Default Card</th>
               <th className="py-3 pr-3">Title</th>
               <th className="py-3 pr-3">Journey Card ID</th>
               <th className="py-3 pr-3">Shift</th>
@@ -564,7 +564,7 @@ export function EmployeeRosterEditor() {
                       ))}
                     </select>
                     <p className="mt-2 text-xs font-bold text-journey-steel">
-                      Controls available Journey Card tasks.
+                      Day-of print runs can assign any card type.
                     </p>
                   </td>
                   <td className="py-3 pr-3">
@@ -588,7 +588,7 @@ export function EmployeeRosterEditor() {
                       className="focus-ring min-h-10 w-full min-w-44 rounded-md border border-journey-line px-3 font-black"
                     />
                     <p className="mt-2 text-xs font-bold text-journey-steel">
-                      QR opens manager Journey Card entry.
+                      Used to look up turned-in Journey Cards.
                     </p>
                   </td>
                   <td className="py-3 pr-3">

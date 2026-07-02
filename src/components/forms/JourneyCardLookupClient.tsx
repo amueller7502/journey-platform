@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { QrCode, Search } from "lucide-react";
+import { ClipboardCheck, Search } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { useJourneyState } from "@/lib/journey-state";
@@ -11,6 +11,11 @@ export function JourneyCardLookupClient() {
   const router = useRouter();
   const { state } = useJourneyState();
   const [passportId, setPassportId] = useState("ODY-1570-001");
+  const areas = state.journeyCardAreas
+    .filter((area) => area.enabled)
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
   const crew = state.employees.filter(
     (employee) => employee.role === "employee" && employee.active !== false,
   );
@@ -18,14 +23,15 @@ export function JourneyCardLookupClient() {
   return (
     <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
       <Panel>
-        <PanelHeader title="Scan or Type Journey Card ID" eyebrow="Paper to digital" />
+        <PanelHeader title="Enter Turned-In Journey Card" eyebrow="End-of-shift entry" />
         <div className="rounded-lg border border-journey-line bg-journey-mist p-4">
           <div className="flex items-center gap-3">
-            <QrCode className="h-8 w-8 text-journey-red" aria-hidden="true" />
+            <ClipboardCheck className="h-8 w-8 text-journey-red" aria-hidden="true" />
             <div>
-              <p className="font-black text-journey-black">QR URL format</p>
+              <p className="font-black text-journey-black">Paper checklist workflow</p>
               <p className="mt-1 text-sm font-bold text-journey-steel">
-                /manager/passport/[journey_card_id]
+                Select the employee and the card type they worked today, then enter
+                completed checklist items.
               </p>
             </div>
           </div>
@@ -34,7 +40,9 @@ export function JourneyCardLookupClient() {
           className="mt-5 grid gap-3"
           onSubmit={(event) => {
             event.preventDefault();
-            router.push(`/manager/passport/${encodeURIComponent(passportId.trim())}`);
+            router.push(
+              `/manager/passport/${encodeURIComponent(passportId.trim())}?area=${encodeURIComponent(areaId)}`,
+            );
           }}
         >
           <label className="grid gap-2 text-sm font-bold text-journey-black">
@@ -46,18 +54,32 @@ export function JourneyCardLookupClient() {
               placeholder="ODY-1570-001"
             />
           </label>
+          <label className="grid gap-2 text-sm font-bold text-journey-black">
+            Journey Card Type Worked
+            <select
+              value={areaId}
+              onChange={(event) => setAreaId(event.target.value)}
+              className="focus-ring min-h-12 rounded-md border border-journey-line px-3 text-base font-bold"
+            >
+              {areas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="submit"
             className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-journey-red px-4 py-2 text-sm font-black text-journey-white transition hover:bg-journey-black"
           >
             <Search className="h-4 w-4" aria-hidden="true" />
-            Open Journey Card
+            Enter Checklist
           </button>
         </form>
       </Panel>
 
       <Panel>
-        <PanelHeader title="Crew Journey Cards" eyebrow="Current roster" />
+        <PanelHeader title="Crew Lookup" eyebrow="Current roster" />
         <div className="grid gap-3">
           {crew.map((employee) => (
             <div
@@ -71,8 +93,8 @@ export function JourneyCardLookupClient() {
                 </p>
               </div>
               <LinkButton
-                href={`/manager/passport/${employee.passportId}`}
-                icon={QrCode}
+                href={`/manager/passport/${employee.passportId}?area=${areaId}`}
+                icon={ClipboardCheck}
                 variant="secondary"
               >
                 Enter

@@ -1,8 +1,17 @@
 import { Gift } from "lucide-react";
 import Image from "next/image";
+import type { ReactNode } from "react";
 import type { Reward } from "@/lib/types";
 
-export function RewardCard({ reward }: { reward: Reward }) {
+export function RewardCard({
+  reward,
+  action,
+  footerNote,
+}: {
+  reward: Reward;
+  action?: ReactNode;
+  footerNote?: string;
+}) {
   return (
     <article className="overflow-hidden rounded-lg border border-journey-line bg-journey-white shadow-line transition hover:-translate-y-0.5 hover:shadow-premium">
       <div className="relative aspect-square border-b border-journey-line bg-journey-black">
@@ -46,6 +55,12 @@ export function RewardCard({ reward }: { reward: Reward }) {
             {reward.inventoryCount} in stock
           </span>
         </div>
+        {footerNote ? (
+          <p className="mt-3 rounded-sm bg-journey-mist px-2 py-1 text-xs font-black uppercase text-journey-steel">
+            {footerNote}
+          </p>
+        ) : null}
+        {action ? <div className="mt-4">{action}</div> : null}
         {!reward.enabled ? (
           <p className="mt-3 rounded-sm bg-journey-mist px-2 py-1 text-xs font-black uppercase text-journey-steel">
             Disabled

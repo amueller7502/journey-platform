@@ -1,6 +1,7 @@
 create extension if not exists pgcrypto;
 
 drop table if exists public.daily_spotlights cascade;
+drop table if exists public.journey_operating_state cascade;
 drop table if exists public.tv_display_settings cascade;
 drop table if exists public.reward_redemptions cascade;
 drop table if exists public.rewards cascade;
@@ -23,6 +24,7 @@ drop type if exists public.recognition_type_kind cascade;
 
 create type public.journey_role as enum ('employee', 'manager', 'admin');
 create type public.reward_redemption_status as enum (
+  'requested',
   'pending',
   'approved',
   'ready',
@@ -57,6 +59,10 @@ create table public.skins (
   animation_intensity integer not null default 30 check (animation_intensity between 0 and 100),
   fun_level integer not null default 20 check (fun_level between 0 and 100),
   doodle_density integer not null default 10 check (doodle_density between 0 and 100),
+  marquee_speed integer not null default 35 check (marquee_speed between 0 and 100),
+  projector_sweep integer not null default 45 check (projector_sweep between 0 and 100),
+  float_amplitude integer not null default 20 check (float_amplitude between 0 and 100),
+  confetti_level integer not null default 0 check (confetti_level between 0 and 100),
   title_treatment text not null default 'clean' check (title_treatment in ('clean', 'marquee', 'blockbuster', 'handbill')),
   card_treatment text not null default 'flat' check (card_treatment in ('flat', 'poster', 'ticket', 'lobby')),
   frame_style text not null default 'standard' check (frame_style in ('standard', 'filmstrip', 'ticket-stub', 'lightbox')),
@@ -265,6 +271,12 @@ create table public.tv_display_settings (
   updated_at timestamptz not null default now()
 );
 
+create table public.journey_operating_state (
+  id text primary key,
+  state jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 create index recognition_types_chapter_idx on public.recognition_types (chapter_id, enabled, sort_order);
 create index recognition_types_card_idx on public.recognition_types (chapter_id, journey_card_eligible, enabled);
 create index excellence_check_logs_chapter_created_idx
@@ -325,6 +337,7 @@ alter table public.rewards enable row level security;
 alter table public.reward_redemptions enable row level security;
 alter table public.daily_spotlights enable row level security;
 alter table public.tv_display_settings enable row level security;
+alter table public.journey_operating_state enable row level security;
 
 create policy "authenticated users read active chapters"
   on public.chapters for select to authenticated
@@ -451,5 +464,10 @@ create policy "authenticated users read tv settings"
 
 create policy "admins manage tv settings"
   on public.tv_display_settings for all to authenticated
+  using (public.current_journey_role() = 'admin')
+  with check (public.current_journey_role() = 'admin');
+
+create policy "admins manage operating state"
+  on public.journey_operating_state for all to authenticated
   using (public.current_journey_role() = 'admin')
   with check (public.current_journey_role() = 'admin');

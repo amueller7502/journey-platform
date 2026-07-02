@@ -102,6 +102,15 @@ export type JourneyCardArea = {
   sortOrder: number;
 };
 
+export type JourneyCardShiftAssignment = {
+  id: string;
+  employeeId: string;
+  journeyCardAreaId: string;
+  shiftDate: string;
+  createdAt: string;
+  printedAt?: string;
+};
+
 export type Recognition = {
   id: string;
   employeeId: string;
@@ -150,6 +159,10 @@ export type JourneySkin = {
   animationIntensity?: number;
   funLevel?: number;
   doodleDensity?: number;
+  marqueeSpeed?: number;
+  projectorSweep?: number;
+  floatAmplitude?: number;
+  confettiLevel?: number;
   titleTreatment?: "clean" | "marquee" | "blockbuster" | "handbill";
   cardTreatment?: "flat" | "poster" | "ticket" | "lobby";
   frameStyle?: "standard" | "filmstrip" | "ticket-stub" | "lightbox";
@@ -184,8 +197,10 @@ export type Redemption = {
   id: string;
   employeeId: string;
   rewardId: string;
-  status: "Pending" | "Approved" | "Ready" | "Fulfilled";
+  status: "Requested" | "Approved" | "Fulfilled" | "Cancelled" | "Pending" | "Ready";
   requestedAt: string;
+  reviewedAt?: string;
+  fulfilledAt?: string;
 };
 
 export type RecognitionBatch = {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -57,6 +58,19 @@ export function TvDashboard() {
     state.rewards.find((reward) => reward.spotlight && reward.enabled) ??
     state.rewards.find((reward) => reward.enabled) ??
     state.rewards[0];
+  const rewardSpotlights = useMemo(
+    () =>
+      state.rewards
+        .filter((reward) => reward.enabled)
+        .slice()
+        .sort(
+          (a, b) =>
+            Number(Boolean(b.spotlight)) -
+              Number(Boolean(a.spotlight)) ||
+            a.sortOrder - b.sortOrder,
+        ),
+    [state.rewards],
+  );
   const activeIndex = panels.length ? index % panels.length : 0;
   const activePanel = panels[activeIndex] ?? panels[0];
   const communityMiles = state.departments.reduce(
@@ -273,16 +287,50 @@ export function TvDashboard() {
     }
 
     if (activePanel === "Reward Spotlight") {
+      const rewardsToShow = rewardSpotlights.length
+        ? [0, 1, 2].map(
+            (offset) => rewardSpotlights[(index + offset) % rewardSpotlights.length],
+          )
+        : [rewardSpotlight];
+
       return (
-        <TvPanel icon={Gift} eyebrow="Reward Spotlight" title={rewardSpotlight.name}>
-          <div className="max-w-4xl">
-            <p className="text-3xl font-black text-journey-white sm:text-5xl">
-              {rewardSpotlight.description}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-5">
-              <TvStat label="Miles" value={`${rewardSpotlight.milesCost}`} />
-              <TvStat label="In Stock" value={`${rewardSpotlight.inventoryCount}`} />
-            </div>
+        <TvPanel icon={Gift} eyebrow="Reward Spotlight" title="Trading Post Prizes">
+          <div className="grid max-w-6xl gap-4 lg:grid-cols-3">
+            {rewardsToShow.map((reward, rewardIndex) => (
+              <article
+                key={`${reward.id}-${rewardIndex}`}
+                className="overflow-hidden rounded-lg border border-journey-steel bg-journey-coal"
+              >
+                <div className="relative aspect-square bg-journey-black">
+                  {reward.imageUrl ? (
+                    <Image
+                      src={reward.imageUrl}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 30vw, 80vw"
+                      className="object-cover opacity-90"
+                      unoptimized
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 bg-gradient-to-t from-journey-black via-transparent to-transparent" />
+                  <p className="absolute left-4 top-4 rounded-sm bg-journey-red px-2 py-1 text-xs font-black uppercase text-journey-white">
+                    {reward.category}
+                  </p>
+                </div>
+                <div className="p-5">
+                  <h3 className="text-3xl font-black text-journey-white">
+                    {reward.name}
+                  </h3>
+                  <p className="mt-3 text-base font-bold leading-7 text-journey-line">
+                    {reward.description}
+                  </p>
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    <TvStat label="Miles" value={`${reward.milesCost}`} compact />
+                    <TvStat label="In Stock" value={`${reward.inventoryCount}`} compact />
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         </TvPanel>
       );
@@ -308,9 +356,11 @@ export function TvDashboard() {
     activeSkin?.texture,
     activeSkin?.visualDirection,
     communityMiles,
+    index,
     journeyMoments,
     journeySpotlight,
     rewardSpotlight,
+    rewardSpotlights,
     spotlight,
     state.chapter,
     state.employees,
@@ -318,12 +368,12 @@ export function TvDashboard() {
   ]);
 
   return (
-    <main className="cinema-surface film-grain relative min-h-screen overflow-hidden text-journey-white">
+    <main className="cinema-surface film-grain relative min-h-screen overflow-y-auto text-journey-white xl:h-screen xl:overflow-hidden">
       <SkinRuntimeClass />
       <div className="tv-signal-beam pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-y-0 left-0 w-8 film-perf opacity-40" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-8 film-perf opacity-40" />
-      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-4 border-b border-journey-steel bg-journey-black/95 px-8 py-5">
+      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-4 border-b border-journey-steel bg-journey-black/95 px-5 py-4 sm:px-8">
         <BrandLockup size="sm" />
         <div className="flex items-center gap-4">
           <PreviewModeBadge />
@@ -354,7 +404,7 @@ export function TvDashboard() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
-          className="min-h-screen px-8 pb-10 pt-32"
+          className="min-h-screen px-5 pb-10 pt-28 sm:px-8 xl:h-screen xl:pb-8"
         >
           {panel}
         </motion.div>
@@ -386,14 +436,14 @@ function TvPanel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex min-h-[calc(100vh-10rem)] flex-col justify-center">
-      <div className="mb-10 flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center rounded-md bg-journey-red text-journey-white">
-          <Icon className="h-8 w-8" aria-hidden="true" />
+    <section className="mx-auto flex min-h-[calc(100dvh-8rem)] w-full max-w-[1500px] flex-col justify-center">
+      <div className="mb-6 flex items-center gap-4 xl:mb-8">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-journey-red text-journey-white sm:h-14 sm:w-14">
+          <Icon className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden="true" />
         </div>
         <div>
           <p className="text-sm font-black uppercase text-journey-red">{eyebrow}</p>
-          <h1 className="mt-2 text-5xl font-black leading-none text-journey-white sm:text-7xl">
+          <h1 className="mt-1 text-[clamp(2.3rem,5vw,5.8rem)] font-black leading-none text-journey-white">
             {title}
           </h1>
         </div>
@@ -403,11 +453,21 @@ function TvPanel({
   );
 }
 
-function TvStat({ label, value }: { label: string; value: string }) {
+function TvStat({
+  label,
+  value,
+  compact = false,
+}: {
+  label: string;
+  value: string;
+  compact?: boolean;
+}) {
   return (
-    <div className="rounded-lg border border-journey-steel bg-journey-coal p-5">
+    <div className={`rounded-lg border border-journey-steel bg-journey-coal ${compact ? "p-3" : "p-5"}`}>
       <p className="text-xs font-black uppercase text-journey-red">{label}</p>
-      <p className="mt-2 text-4xl font-black text-journey-white">{value}</p>
+      <p className={`${compact ? "mt-1 text-2xl" : "mt-2 text-4xl"} font-black text-journey-white`}>
+        {value}
+      </p>
     </div>
   );
 }

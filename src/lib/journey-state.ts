@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import {
   activeSkin,
   chapter as defaultChapter,
@@ -10,6 +10,7 @@ import {
   journeyCardAreas as defaultJourneyCardAreas,
   journeySkins as defaultSkins,
   recognitionTypes as defaultRecognitionTypes,
+  redemptions as defaultRedemptions,
   rewards as defaultRewards,
   tvPanelSettings as defaultTvPanelSettings,
 } from "@/lib/data";
@@ -18,8 +19,10 @@ import type {
   Employee,
   ExcellenceLog,
   JourneyCardArea,
+  JourneyCardShiftAssignment,
   JourneySkin,
   RecognitionType,
+  Redemption,
   Reward,
   TvPanelSetting,
 } from "@/lib/types";
@@ -31,8 +34,10 @@ export type JourneyOperatingState = {
   departments: Department[];
   employees: Employee[];
   journeyCardAreas: JourneyCardArea[];
+  journeyCardAssignments: JourneyCardShiftAssignment[];
   recognitionTypes: RecognitionType[];
   rewards: Reward[];
+  redemptions: Redemption[];
   excellenceLogs: ExcellenceLog[];
   tvPanelSettings: TvPanelSetting[];
   skins: JourneySkin[];
@@ -49,8 +54,10 @@ const defaultState: JourneyOperatingState = {
   departments: defaultDepartments,
   employees: defaultEmployees,
   journeyCardAreas: defaultJourneyCardAreas,
+  journeyCardAssignments: [],
   recognitionTypes: defaultRecognitionTypes,
   rewards: defaultRewards,
+  redemptions: defaultRedemptions,
   excellenceLogs: defaultExcellenceLogs,
   tvPanelSettings: defaultTvPanelSettings,
   skins: defaultSkins,
@@ -59,8 +66,11 @@ const defaultState: JourneyOperatingState = {
   updatedAt: "seed",
 };
 
+const serverSnapshot = cloneState(defaultState);
+
 let cachedRaw: string | null = null;
 let cachedState: JourneyOperatingState | null = null;
+let remoteHydrationStarted = false;
 
 function cloneState(state: JourneyOperatingState): JourneyOperatingState {
   return JSON.parse(JSON.stringify(state)) as JourneyOperatingState;
@@ -89,8 +99,13 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
     departments: mergeById(defaultState.departments, value?.departments),
     employees: mergeById(defaultState.employees, value?.employees),
     journeyCardAreas: mergeById(defaultState.journeyCardAreas, value?.journeyCardAreas),
+    journeyCardAssignments: mergeById(
+      defaultState.journeyCardAssignments,
+      value?.journeyCardAssignments,
+    ),
     recognitionTypes: mergeById(defaultState.recognitionTypes, value?.recognitionTypes),
     rewards: mergeById(defaultState.rewards, value?.rewards),
+    redemptions: mergeById(defaultState.redemptions, value?.redemptions),
     excellenceLogs: mergeById(defaultState.excellenceLogs, value?.excellenceLogs),
     tvPanelSettings: mergeById(defaultState.tvPanelSettings, value?.tvPanelSettings),
     skins: mergeById(defaultState.skins, value?.skins),
@@ -107,6 +122,10 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
 
 export function getDefaultJourneyState() {
   return cloneState(defaultState);
+}
+
+function getServerJourneyState() {
+  return serverSnapshot;
 }
 
 export function getJourneyState(): JourneyOperatingState {
@@ -144,6 +163,55 @@ export function saveJourneyState(nextState: JourneyOperatingState) {
   cachedRaw = raw;
   window.localStorage.setItem(STORAGE_KEY, raw);
   window.dispatchEvent(new Event(EVENT_NAME));
+  void persistJourneyStateToDatabase(normalized);
+}
+
+async function persistJourneyStateToDatabase(state: JourneyOperatingState) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    await fetch("/api/journey-state", {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ state }),
+    });
+  } catch {
+    // Browser storage remains the offline fallback.
+  }
+}
+
+async function hydrateJourneyStateFromDatabase() {
+  if (typeof window === "undefined" || remoteHydrationStarted) {
+    return;
+  }
+
+  remoteHydrationStarted = true;
+  try {
+    const response = await fetch("/api/journey-state", { cache: "no-store" });
+    if (!response.ok) {
+      return;
+    }
+
+    const payload = (await response.json()) as {
+      state?: Partial<JourneyOperatingState> | null;
+    };
+    if (!payload.state) {
+      return;
+    }
+
+    const normalized = normalizeState(payload.state);
+    const raw = JSON.stringify(normalized);
+    cachedState = normalized;
+    cachedRaw = raw;
+    window.localStorage.setItem(STORAGE_KEY, raw);
+    window.dispatchEvent(new Event(EVENT_NAME));
+  } catch {
+    // Browser storage remains the offline fallback.
+  }
 }
 
 export function updateJourneyState(
@@ -175,8 +243,12 @@ export function useJourneyState() {
   const state = useSyncExternalStore(
     subscribeToJourneyState,
     getJourneyState,
-    getDefaultJourneyState,
+    getServerJourneyState,
   );
+
+  useEffect(() => {
+    void hydrateJourneyStateFromDatabase();
+  }, []);
 
   return useMemo(
     () => ({

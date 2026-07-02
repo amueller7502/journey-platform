@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { saveJourneyMoment } from "@/lib/demo-moments";
@@ -12,34 +12,46 @@ import {
 } from "@/lib/journey-state";
 import type { Employee } from "@/lib/types";
 
-export function PassportEntryForm({ employee }: { employee: Employee }) {
+export function PassportEntryForm({
+  employee,
+  initialAreaId,
+}: {
+  employee: Employee;
+  initialAreaId?: string;
+}) {
   const { state } = useJourneyState();
   const currentEmployee =
     state.employees.find((item) => item.passportId === employee.passportId) ?? employee;
-  const cardArea = getJourneyCardAreaForEmployee(
+  const defaultCardArea = getJourneyCardAreaForEmployee(
     currentEmployee,
     state.journeyCardAreas,
   );
-  const enabledRecognitionTypes = useMemo(
-    () =>
-      state.recognitionTypes
-        .filter((type) => {
-          if (!type.enabled || !type.journeyCardEligible) {
-            return false;
-          }
-
-          if (!cardArea) {
-            return true;
-          }
-
-          return (
-            !type.journeyCardAreaIds?.length ||
-            type.journeyCardAreaIds.includes(cardArea.id)
-          );
-        })
-        .sort((a, b) => a.sortOrder - b.sortOrder),
-    [cardArea, state.recognitionTypes],
+  const activeAreas = state.journeyCardAreas
+    .filter((area) => area.enabled)
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const [cardAreaId, setCardAreaId] = useState(
+    initialAreaId ?? defaultCardArea?.id ?? activeAreas[0]?.id ?? "",
   );
+  const cardArea =
+    activeAreas.find((area) => area.id === cardAreaId) ?? defaultCardArea ?? activeAreas[0];
+  const enabledRecognitionTypes = state.recognitionTypes
+    .filter((type) => {
+      if (!type.enabled || !type.journeyCardEligible) {
+        return false;
+      }
+
+      if (!cardArea) {
+        return true;
+      }
+
+      return (
+        !type.journeyCardAreaIds?.length ||
+        type.journeyCardAreaIds.includes(cardArea.id)
+      );
+    })
+    .slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder);
   const [selected, setSelected] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -51,14 +63,10 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
   );
   const totalMiles = selectedTypes.reduce((total, type) => total + type.milesValue, 0);
 
-  const grouped = useMemo(
-    () =>
-      recognitionStandards.map((standard) => ({
-        standard,
-        items: enabledRecognitionTypes.filter((type) => type.standardId === standard.id),
-      })),
-    [enabledRecognitionTypes],
-  );
+  const grouped = recognitionStandards.map((standard) => ({
+    standard,
+    items: enabledRecognitionTypes.filter((type) => type.standardId === standard.id),
+  }));
 
   if (submitted) {
     return (
@@ -117,13 +125,30 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
             {cardArea?.name ?? "Unassigned Journey Card"}
           </p>
           <h3 className="mt-1 text-xl font-black text-journey-black">
-            Area-specific verified tasks
+            Enter turned-in shift checklist
           </h3>
           <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-journey-steel">
-            These are employee-earning card tasks for this area. Excellence Checks
-            are logged separately as building readiness and do not become spendable
-            employee Miles unless a manager also captures a Journey Moment.
+            Choose the Journey Card type the employee worked today, then select
+            the items that were verified from the paper card they turned in.
           </p>
+          <label className="mt-4 grid max-w-xl gap-2 text-sm font-bold text-journey-black">
+            Journey Card Type Worked Today
+            <select
+              value={cardArea?.id ?? ""}
+              onChange={(event) => {
+                setCardAreaId(event.target.value);
+                setSelected([]);
+                setSubmitted(false);
+              }}
+              className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3"
+            >
+              {activeAreas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {area.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </section>
 
         {!enabledRecognitionTypes.length ? (

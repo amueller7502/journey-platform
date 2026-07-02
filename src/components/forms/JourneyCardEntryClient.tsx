@@ -1,12 +1,18 @@
 "use client";
 
-import { QrCode } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 import { PassportEntryForm } from "@/components/forms/PassportEntryForm";
 import { LinkButton } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Panel";
 import { getJourneyCardAreaForEmployee, useJourneyState } from "@/lib/journey-state";
 
-export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
+export function JourneyCardEntryClient({
+  passportId,
+  areaId,
+}: {
+  passportId: string;
+  areaId?: string;
+}) {
   const { state } = useJourneyState();
   const employee = state.employees.find(
     (item) => item.passportId.toLowerCase() === passportId.toLowerCase(),
@@ -23,7 +29,7 @@ export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
       <Panel>
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-journey-black text-journey-white">
-            <QrCode className="h-6 w-6" aria-hidden="true" />
+            <ClipboardCheck className="h-6 w-6" aria-hidden="true" />
           </div>
           <div>
             <p className="text-xs font-black uppercase text-journey-red">
@@ -34,9 +40,9 @@ export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
             </h2>
             <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-journey-steel">
               Add or re-enable this employee in Admin / Employees, then return to this
-              Journey Card URL.
+              Journey Card entry screen.
             </p>
-            <LinkButton href="/admin/employees" icon={QrCode} className="mt-4">
+            <LinkButton href="/admin/employees" icon={ClipboardCheck} className="mt-4">
               Manage Employees
             </LinkButton>
           </div>
@@ -69,7 +75,7 @@ export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
           </div>
         </div>
       </Panel>
-      <PassportEntryForm employee={employee} />
+      <PassportEntryForm employee={employee} initialAreaId={areaId} />
     </>
   );
 }

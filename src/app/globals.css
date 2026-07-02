@@ -169,6 +169,25 @@ textarea {
   animation: skinPatternDrift var(--skin-preview-speed, 10s) linear infinite;
 }
 
+.skin-preview-pattern::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: calc(var(--skin-preview-confetti, 0) * 0.42);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.95) 0 3px, transparent 4px),
+    radial-gradient(circle at 78% 26%, rgba(215, 25, 32, 0.95) 0 4px, transparent 5px),
+    radial-gradient(circle at 48% 80%, rgba(255, 255, 255, 0.78) 0 2px, transparent 4px),
+    linear-gradient(105deg, transparent 0 46%, rgba(255, 255, 255, calc(var(--skin-preview-sweep, 0.5) * 0.28)) 48% 52%, transparent 54%);
+  background-size: 90px 90px, 140px 120px, 110px 130px, 100% 100%;
+  animation: skinConfettiFloat var(--skin-preview-speed, 10s) ease-in-out infinite alternate;
+}
+
+.skin-preview-float {
+  animation: skinPreviewFloat 5s ease-in-out infinite;
+}
+
 .skin-pattern-doodles::before {
   background-image:
     radial-gradient(circle at 10% 20%, transparent 0 11px, rgba(255, 255, 255, 0.95) 12px 13px, transparent 14px),
@@ -228,6 +247,25 @@ textarea {
   }
   to {
     transform: translate3d(90px, 40px, 0);
+  }
+}
+
+@keyframes skinConfettiFloat {
+  from {
+    transform: translate3d(-18px, -8px, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(26px, 18px, 0) rotate(1.5deg);
+  }
+}
+
+@keyframes skinPreviewFloat {
+  0%,
+  100% {
+    transform: translateY(calc(var(--skin-preview-float, 0.3) * -4px));
+  }
+  50% {
+    transform: translateY(calc(var(--skin-preview-float, 0.3) * 8px));
   }
 }
 

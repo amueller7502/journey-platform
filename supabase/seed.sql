@@ -10,15 +10,19 @@ insert into public.skins (
   animation_intensity,
   fun_level,
   doodle_density,
+  marquee_speed,
+  projector_sweep,
+  float_amplitude,
+  confetti_level,
   title_treatment,
   card_treatment,
   frame_style,
   palette,
   sort_order
 ) values
-  ('standard', 'Cinema Standard', 'available', 'Clean black, white, gray, and Celebration red base system.', false, 'Standard recognition loop', 'film', 'clean', 30, 20, 10, 'clean', 'flat', 'standard', '{"primary":"#050505","secondary":"#ffffff","accent":"#d71920"}', 1),
-  ('odyssey', 'Odyssey / North Stars', 'active', 'Odyssey skin with IMAX 15/70 film cues, projection texture, and recognition leaderboard energy.', true, 'Opening signal card, recognition leaderboard, film grain, projection sweep, and 15/70 chapter card', 'waves', 'immersive', 78, 64, 28, 'blockbuster', 'poster', 'filmstrip', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
-  ('dune_3', 'Dune 3', 'draft', 'Future chapter skin slot for desert and premium event theming.', true, 'Draft concept', 'doodles', 'playful', 55, 80, 70, 'handbill', 'ticket', 'ticket-stub', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
+  ('standard', 'Cinema Standard', 'available', 'Clean black, white, gray, and Celebration red base system.', false, 'Standard recognition loop', 'film', 'clean', 30, 20, 10, 35, 45, 20, 0, 'clean', 'flat', 'standard', '{"primary":"#050505","secondary":"#ffffff","accent":"#d71920"}', 1),
+  ('odyssey', 'Odyssey / North Stars', 'active', 'Odyssey skin with IMAX 15/70 film cues, projection texture, and recognition leaderboard energy.', true, 'Opening signal card, recognition leaderboard, film grain, projection sweep, and 15/70 chapter card', 'waves', 'immersive', 78, 64, 28, 58, 82, 68, 18, 'blockbuster', 'poster', 'filmstrip', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
+  ('dune_3', 'Dune 3', 'draft', 'Future chapter skin slot for desert and premium event theming.', true, 'Draft concept', 'doodles', 'playful', 55, 80, 70, 72, 40, 48, 70, 'handbill', 'ticket', 'ticket-stub', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
 
 insert into public.chapters (
   id,
@@ -229,8 +233,8 @@ insert into public.reward_redemptions (
   status,
   requested_at
 ) values
-  ('88888888-8888-4888-8888-888888888801', '11111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333301', '55555555-5555-4555-8555-555555555502', 'pending', '2026-07-24 14:15:00-04'),
-  ('88888888-8888-4888-8888-888888888802', '11111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333304', '55555555-5555-4555-8555-555555555501', 'pending', '2026-07-24 12:40:00-04');
+  ('88888888-8888-4888-8888-888888888801', '11111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333301', '55555555-5555-4555-8555-555555555502', 'requested', '2026-07-24 14:15:00-04'),
+  ('88888888-8888-4888-8888-888888888802', '11111111-1111-4111-8111-111111111111', '33333333-3333-4333-8333-333333333304', '55555555-5555-4555-8555-555555555501', 'requested', '2026-07-24 12:40:00-04');
 
 insert into public.daily_spotlights (
   chapter_id,
