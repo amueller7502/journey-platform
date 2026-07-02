@@ -1,5 +1,13 @@
 # Experience Release Notes
 
+## V1.8 Password Recovery
+
+- Added **Forgot password?** to the Welcome sign-in flow.
+- Added `/reset-password` so Supabase recovery links have a clean place to set a new password.
+- Added builder-only password administration from Employees with temporary password reset controls.
+- Added a protected server route so only signed-in Experience Builders can reset staff passwords.
+- Documented the Supabase Auth redirect URL needed for production reset links.
+
 ## V1.7 Live Account Entry
 
 - Replaced the Welcome screen preview access-code fallback with Supabase account sign-in.

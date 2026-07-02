@@ -130,6 +130,18 @@ Creating an account creates:
 
 The preview access-code fallback has been removed from the Welcome screen.
 
+## Password Resets
+
+The Welcome screen includes **Forgot password?** under Sign In. It sends a Supabase recovery email and sends the user to `/reset-password` to choose a new password.
+
+In Supabase, add your deployed URL to Auth redirect URLs, including:
+
+```text
+https://your-vercel-domain.vercel.app/reset-password
+```
+
+Experience Builders can also reset a staff member's temporary password from **Employees**. The builder must be signed in, the employee needs an email address, and the employee must already have a Supabase Auth login.
+
 ## Main Routes
 
 Visible in Experience Lite:

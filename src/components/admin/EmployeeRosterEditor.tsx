@@ -33,6 +33,7 @@ import {
   nextJourneyCardId,
   useJourneyState,
 } from "@/lib/journey-state";
+import { createClient, hasSupabaseBrowserEnv } from "@/lib/supabase/client";
 import type { DepartmentId, Employee, Role } from "@/lib/types";
 import { formatXp } from "@/lib/utils";
 
@@ -53,6 +54,8 @@ export function EmployeeRosterEditor() {
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>("active");
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const [toast, setToast] = useState<StatusToastState | null>(null);
+  const [passwordDrafts, setPasswordDrafts] = useState<Record<string, string>>({});
+  const [passwordResetting, setPasswordResetting] = useState<string | null>(null);
   const firstArea = state.journeyCardAreas.find((area) => area.enabled);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
@@ -249,6 +252,81 @@ export function EmployeeRosterEditor() {
     });
   }
 
+  async function resetEmployeePassword(employee: Employee) {
+    const password = passwordDrafts[employee.id]?.trim() ?? "";
+    setToast(null);
+
+    if (!hasSupabaseBrowserEnv()) {
+      setToast({
+        tone: "error",
+        message: "Supabase is not configured, so live passwords cannot be reset yet.",
+      });
+      return;
+    }
+
+    if (!employee.email?.trim()) {
+      setToast({
+        tone: "error",
+        message: `${employee.name} needs an email address before a password can be reset.`,
+      });
+      return;
+    }
+
+    if (password.length < 8) {
+      setToast({
+        tone: "error",
+        message: "Temporary password must be at least 8 characters.",
+      });
+      return;
+    }
+
+    setPasswordResetting(employee.id);
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+      const response = await fetch("/api/auth/admin-reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(data.session?.access_token
+            ? { Authorization: `Bearer ${data.session.access_token}` }
+            : {}),
+        },
+        body: JSON.stringify({
+          employeeId: employee.id,
+          email: employee.email,
+          password,
+        }),
+      });
+      const payload = (await response.json()) as { error?: string; message?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Unable to reset that password.");
+      }
+
+      setPasswordDrafts((current) => ({
+        ...current,
+        [employee.id]: "",
+      }));
+      updateEmployee(employee.id, {
+        active: true,
+        accountStatus: "active",
+        archivedAt: undefined,
+      });
+      setToast({
+        tone: "success",
+        message: payload.message ?? `Password reset for ${employee.name}.`,
+      });
+    } catch (error) {
+      setToast({
+        tone: "error",
+        message: error instanceof Error ? error.message : "Unable to reset password.",
+      });
+    } finally {
+      setPasswordResetting(null);
+    }
+  }
+
   function approveProfilePhoto(id: string) {
     setSaved(false);
     updateState((current) => ({
@@ -373,10 +451,10 @@ export function EmployeeRosterEditor() {
           </div>
           <div>
             <p className="text-xs font-black uppercase text-journey-red">
-              Create Account
+              Add Employee
             </p>
             <h3 className="text-lg font-black text-journey-black">
-              Add a person, assign a role, and issue a Experience Card.
+              Add a person, assign a role, and issue an Experience Card.
             </h3>
           </div>
         </div>
@@ -404,7 +482,7 @@ export function EmployeeRosterEditor() {
                 setNewEmployee((current) => ({ ...current, email: event.target.value }))
               }
               className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
-              placeholder="optional for preview"
+              placeholder="needed for login"
             />
           </label>
           <label className="grid gap-2 text-sm font-bold text-journey-black">
@@ -477,20 +555,6 @@ export function EmployeeRosterEditor() {
             </select>
           </label>
           <label className="grid gap-2 text-sm font-bold text-journey-black">
-            Access Code
-            <input
-              value={newEmployee.accessCode}
-              onChange={(event) =>
-                setNewEmployee((current) => ({
-                  ...current,
-                  accessCode: event.target.value,
-                }))
-              }
-              className="focus-ring min-h-10 rounded-md border border-journey-line px-3 font-mono font-black"
-              placeholder={makeAccessCode(newEmployee.name)}
-            />
-          </label>
-          <label className="grid gap-2 text-sm font-bold text-journey-black">
             Status
             <select
               value={newEmployee.accountStatus}
@@ -511,7 +575,7 @@ export function EmployeeRosterEditor() {
           </label>
         </div>
         <Button type="button" icon={Plus} className="mt-4" onClick={addEmployee}>
-          Create Account
+          Add Employee
         </Button>
       </div>
 
@@ -593,16 +657,39 @@ export function EmployeeRosterEditor() {
                       className="focus-ring mt-2 min-h-10 w-full min-w-56 rounded-md border border-journey-line px-3"
                       placeholder="email / login"
                     />
-                    <div className="mt-2 flex items-center gap-2">
-                      <KeyRound className="h-4 w-4 text-journey-red" aria-hidden="true" />
+                    <div className="mt-2 grid gap-2 rounded-md border border-journey-line bg-journey-mist p-2">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase text-journey-red">
+                        <KeyRound className="h-4 w-4" aria-hidden="true" />
+                        Password Admin
+                      </div>
                       <input
-                        value={employee.accessCode ?? ""}
+                        type="password"
+                        value={passwordDrafts[employee.id] ?? ""}
                         onChange={(event) =>
-                          updateEmployee(employee.id, { accessCode: event.target.value })
+                          setPasswordDrafts((current) => ({
+                            ...current,
+                            [employee.id]: event.target.value,
+                          }))
                         }
-                        className="focus-ring min-h-10 w-32 rounded-md border border-journey-line px-3 font-mono font-black"
-                        placeholder="code"
+                        disabled={archived || !employee.email}
+                        className="focus-ring min-h-10 w-full rounded-md border border-journey-line bg-journey-white px-3"
+                        placeholder="Temporary password"
                       />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        icon={KeyRound}
+                        onClick={() => void resetEmployeePassword(employee)}
+                        disabled={
+                          archived ||
+                          !employee.email ||
+                          passwordResetting === employee.id
+                        }
+                      >
+                        {passwordResetting === employee.id
+                          ? "Resetting..."
+                          : "Set Password"}
+                      </Button>
                     </div>
                   </td>
                   <td className="py-3 pr-3">

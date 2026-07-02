@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { HandHeart, LayoutDashboard, LogIn, UserPlus, UserRound } from "lucide-react";
+import {
+  ArrowLeft,
+  HandHeart,
+  LayoutDashboard,
+  LogIn,
+  Mail,
+  UserPlus,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
   appRoleForPlatformRole,
@@ -13,7 +21,7 @@ import {
 import { createClient, hasSupabaseBrowserEnv } from "@/lib/supabase/client";
 import type { PlatformRole, Role } from "@/lib/types";
 
-type AuthMode = "sign_in" | "create_account";
+type AuthMode = "sign_in" | "create_account" | "reset_password";
 
 const experienceOptions: Array<{
   role: Role;
@@ -72,6 +80,32 @@ export function SupabaseAuthPanel() {
       return;
     }
 
+    const supabase = createClient();
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (mode === "reset_password") {
+      if (!cleanEmail) {
+        setMessage("Email is required to send a reset link.");
+        return;
+      }
+
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      setLoading(false);
+
+      if (error) {
+        setMessage(error.message);
+        return;
+      }
+
+      setMessage(
+        "If an Experience account exists for that email, a reset link is on the way.",
+      );
+      return;
+    }
+
     if (mode === "create_account" && !fullName.trim()) {
       setMessage("Name is required to create an account.");
       return;
@@ -83,8 +117,6 @@ export function SupabaseAuthPanel() {
     }
 
     setLoading(true);
-    const supabase = createClient();
-    const cleanEmail = email.trim().toLowerCase();
 
     if (mode === "create_account") {
       const createResponse = await fetch("/api/auth/create-account", {
@@ -122,7 +154,7 @@ export function SupabaseAuthPanel() {
     });
 
     if (authResult.error) {
-      setMessage(authResult.error.message);
+      setMessage(`${authResult.error.message}. Use Forgot Password if you need a new one.`);
       setLoading(false);
       return;
     }
@@ -217,7 +249,9 @@ export function SupabaseAuthPanel() {
             Account Access
           </p>
           <p className="text-sm font-bold text-journey-steel">
-            Choose the experience you want to open.
+            {mode === "reset_password"
+              ? "Enter your email and we will send a password reset link."
+              : "Choose the experience you want to open."}
           </p>
         </div>
         <div className="flex rounded-md border border-journey-line bg-journey-white p-1">
@@ -246,38 +280,60 @@ export function SupabaseAuthPanel() {
         </div>
       </div>
 
-      <div className="grid gap-2">
-        {experienceOptions.map((option) => {
-          const Icon = option.icon;
-          const selected = selectedRole === option.role;
-          return (
-            <button
-              key={option.role}
-              type="button"
-              onClick={() => setSelectedRole(option.role)}
-              className={`focus-ring flex min-h-16 items-center gap-3 rounded-lg border p-3 text-left transition ${
-                selected
-                  ? "border-journey-red bg-journey-black text-journey-white"
-                  : "border-journey-line bg-journey-white text-journey-black hover:bg-journey-mist"
-              }`}
-            >
-              <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
-                  selected ? "bg-journey-red text-journey-white" : "bg-journey-mist text-journey-red"
+      {mode === "reset_password" ? (
+        <button
+          type="button"
+          onClick={() => {
+            setMode("sign_in");
+            setMessage("");
+          }}
+          className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-black text-journey-red"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to sign in
+        </button>
+      ) : null}
+
+      {mode !== "reset_password" ? (
+        <div className="grid gap-2">
+          {experienceOptions.map((option) => {
+            const Icon = option.icon;
+            const selected = selectedRole === option.role;
+            return (
+              <button
+                key={option.role}
+                type="button"
+                onClick={() => setSelectedRole(option.role)}
+                className={`focus-ring flex min-h-16 items-center gap-3 rounded-lg border p-3 text-left transition ${
+                  selected
+                    ? "border-journey-red bg-journey-black text-journey-white"
+                    : "border-journey-line bg-journey-white text-journey-black hover:bg-journey-mist"
                 }`}
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span>
-                <span className="block font-black">{option.label}</span>
-                <span className={`mt-1 block text-xs font-bold ${selected ? "text-journey-line" : "text-journey-steel"}`}>
-                  {option.description}
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
+                    selected
+                      ? "bg-journey-red text-journey-white"
+                      : "bg-journey-mist text-journey-red"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                <span>
+                  <span className="block font-black">{option.label}</span>
+                  <span
+                    className={`mt-1 block text-xs font-bold ${
+                      selected ? "text-journey-line" : "text-journey-steel"
+                    }`}
+                  >
+                    {option.description}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
 
       {mode === "create_account" ? (
         <label className="grid gap-2 text-sm font-bold text-journey-black">
@@ -301,36 +357,68 @@ export function SupabaseAuthPanel() {
           placeholder="sam.carter@north.example"
         />
       </label>
-      <label className="grid gap-2 text-sm font-bold text-journey-black">
-        Password
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              void handleSubmit();
-            }
+      {mode !== "reset_password" ? (
+        <label className="grid gap-2 text-sm font-bold text-journey-black">
+          Password
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                void handleSubmit();
+              }
+            }}
+            className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3"
+          />
+        </label>
+      ) : null}
+      {mode === "sign_in" ? (
+        <button
+          type="button"
+          onClick={() => {
+            setMode("reset_password");
+            setMessage("");
           }}
-          className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3"
-        />
-      </label>
+          className="focus-ring justify-self-start rounded-md text-sm font-black text-journey-red"
+        >
+          Forgot password?
+        </button>
+      ) : null}
       <Button
         type="button"
-        icon={mode === "sign_in" ? LogIn : UserPlus}
+        icon={
+          mode === "sign_in" ? LogIn : mode === "reset_password" ? Mail : UserPlus
+        }
         onClick={() => void handleSubmit()}
         disabled={loading}
       >
-        {loading ? "Working..." : mode === "sign_in" ? "Sign In" : "Create Account"}
+        {loading
+          ? "Working..."
+          : mode === "sign_in"
+            ? "Sign In"
+            : mode === "reset_password"
+              ? "Send Reset Link"
+              : "Create Account"}
       </Button>
       {message ? (
-        <p className="text-sm font-black text-journey-red">{message}</p>
+        <p
+          className={`text-sm font-black ${
+            message.startsWith("If an Experience account")
+              ? "text-journey-black"
+              : "text-journey-red"
+          }`}
+        >
+          {message}
+        </p>
       ) : (
         <p className="text-xs font-bold text-journey-steel">
           {hasEnv
-            ? mode === "create_account"
-              ? "Creating an account also creates the matching Experience profile and role."
-              : "Your account role controls which experiences you can open."
+            ? mode === "reset_password"
+              ? "Reset links expire for safety. If one expires, request another."
+              : mode === "create_account"
+                ? "Creating an account also creates the matching Experience profile and role."
+                : "Your account role controls which experiences you can open."
             : "Supabase env vars are not present, so live account access is unavailable."}
         </p>
       )}
