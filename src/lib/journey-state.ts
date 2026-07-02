@@ -5,27 +5,43 @@ import {
   activeSkin,
   chapter as defaultChapter,
   departments as defaultDepartments,
+  experienceAchievements as defaultExperienceAchievements,
+  experienceDisplaySlides as defaultExperienceDisplaySlides,
   employees as defaultEmployees,
   experienceEvents as defaultExperienceEvents,
   excellenceLogs as defaultExcellenceLogs,
   journeyCardAreas as defaultJourneyCardAreas,
   journeySkins as defaultSkins,
+  launchReadinessItems as defaultLaunchReadinessItems,
+  leadershipPointRules as defaultLeadershipPointRules,
+  leadershipRewards as defaultLeadershipRewards,
   recognitionTypes as defaultRecognitionTypes,
+  recognitionStandards as defaultRecognitionStandards,
   redemptions as defaultRedemptions,
   rewards as defaultRewards,
+  scoringMetrics as defaultScoringMetrics,
+  seasons as defaultSeasons,
   tvPanelSettings as defaultTvPanelSettings,
 } from "@/lib/data";
 import type {
   Department,
   Employee,
+  ExperienceAchievement,
+  ExperienceDisplaySlide,
+  ExperienceSeason,
   ExperienceEvent,
   ExcellenceLog,
   JourneyCardArea,
   JourneyCardShiftAssignment,
   JourneySkin,
+  LaunchReadinessItem,
+  LeadershipPointRule,
+  LeadershipReward,
+  RecognitionStandard,
   RecognitionType,
   Redemption,
   Reward,
+  ScoringMetric,
   TvPanelSetting,
 } from "@/lib/types";
 
@@ -33,15 +49,23 @@ export type JourneyChapter = typeof defaultChapter;
 
 export type JourneyOperatingState = {
   chapter: JourneyChapter;
+  seasons: ExperienceSeason[];
   departments: Department[];
   employees: Employee[];
   journeyCardAreas: JourneyCardArea[];
   journeyCardAssignments: JourneyCardShiftAssignment[];
+  recognitionStandards: RecognitionStandard[];
   recognitionTypes: RecognitionType[];
   rewards: Reward[];
   redemptions: Redemption[];
   excellenceLogs: ExcellenceLog[];
   experienceEvents: ExperienceEvent[];
+  experienceDisplaySlides: ExperienceDisplaySlide[];
+  scoringMetrics: ScoringMetric[];
+  launchReadinessItems: LaunchReadinessItem[];
+  experienceAchievements: ExperienceAchievement[];
+  leadershipPointRules: LeadershipPointRule[];
+  leadershipRewards: LeadershipReward[];
   tvPanelSettings: TvPanelSetting[];
   skins: JourneySkin[];
   activeSkinId: string;
@@ -54,15 +78,23 @@ const EVENT_NAME = "journey-operating-state";
 
 const defaultState: JourneyOperatingState = {
   chapter: defaultChapter,
+  seasons: defaultSeasons,
   departments: defaultDepartments,
   employees: defaultEmployees,
   journeyCardAreas: defaultJourneyCardAreas,
   journeyCardAssignments: [],
+  recognitionStandards: defaultRecognitionStandards,
   recognitionTypes: defaultRecognitionTypes,
   rewards: defaultRewards,
   redemptions: defaultRedemptions,
   excellenceLogs: defaultExcellenceLogs,
   experienceEvents: defaultExperienceEvents,
+  experienceDisplaySlides: defaultExperienceDisplaySlides,
+  scoringMetrics: defaultScoringMetrics,
+  launchReadinessItems: defaultLaunchReadinessItems,
+  experienceAchievements: defaultExperienceAchievements,
+  leadershipPointRules: defaultLeadershipPointRules,
+  leadershipRewards: defaultLeadershipRewards,
   tvPanelSettings: defaultTvPanelSettings,
   skins: defaultSkins,
   activeSkinId: activeSkin.id,
@@ -100,6 +132,7 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
       ...defaultState.chapter,
       ...(value?.chapter ?? {}),
     },
+    seasons: mergeById(defaultState.seasons, value?.seasons),
     departments: mergeById(defaultState.departments, value?.departments),
     employees: mergeById(defaultState.employees, value?.employees),
     journeyCardAreas: mergeById(defaultState.journeyCardAreas, value?.journeyCardAreas),
@@ -107,11 +140,33 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
       defaultState.journeyCardAssignments,
       value?.journeyCardAssignments,
     ),
+    recognitionStandards: mergeById(
+      defaultState.recognitionStandards,
+      value?.recognitionStandards,
+    ),
     recognitionTypes: mergeById(defaultState.recognitionTypes, value?.recognitionTypes),
     rewards: mergeById(defaultState.rewards, value?.rewards),
     redemptions: mergeById(defaultState.redemptions, value?.redemptions),
     excellenceLogs: mergeById(defaultState.excellenceLogs, value?.excellenceLogs),
     experienceEvents: mergeById(defaultState.experienceEvents, value?.experienceEvents),
+    experienceDisplaySlides: mergeById(
+      defaultState.experienceDisplaySlides,
+      value?.experienceDisplaySlides,
+    ),
+    scoringMetrics: mergeById(defaultState.scoringMetrics, value?.scoringMetrics),
+    launchReadinessItems: mergeById(
+      defaultState.launchReadinessItems,
+      value?.launchReadinessItems,
+    ),
+    experienceAchievements: mergeById(
+      defaultState.experienceAchievements,
+      value?.experienceAchievements,
+    ),
+    leadershipPointRules: mergeById(
+      defaultState.leadershipPointRules,
+      value?.leadershipPointRules,
+    ),
+    leadershipRewards: mergeById(defaultState.leadershipRewards, value?.leadershipRewards),
     tvPanelSettings: mergeById(defaultState.tvPanelSettings, value?.tvPanelSettings),
     skins: mergeById(defaultState.skins, value?.skins),
   };

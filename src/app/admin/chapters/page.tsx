@@ -5,7 +5,7 @@ import { Panel, PanelHeader } from "@/components/ui/Panel";
 
 export default function ChapterManagementPage() {
   return (
-    <AppShell role="admin" title="Season Builder" eyebrow="Experience Studio">
+    <AppShell role="admin" title="Season Planner" eyebrow="Experience Studio">
       <ChapterManagementClient />
 
       <Panel className="mt-5">

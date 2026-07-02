@@ -8,21 +8,12 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
+import { SupabaseAuthPanel } from "@/components/SupabaseAuthPanel";
 import { LinkButton, Button } from "@/components/ui/Button";
+import { routeForRole } from "@/lib/access-control";
 import { useJourneyState } from "@/lib/journey-state";
 import { productLanguage } from "@/lib/product-language";
-
-function routeForRole(role: string) {
-  if (role === "manager") {
-    return "/leadership/dashboard";
-  }
-
-  if (role === "admin") {
-    return "/admin/dashboard";
-  }
-
-  return "/home";
-}
+import type { Role } from "@/lib/types";
 
 export function WorkspaceLoginPanel() {
   const router = useRouter();
@@ -50,7 +41,7 @@ export function WorkspaceLoginPanel() {
     }
 
     window.localStorage.setItem("journey-active-account-id", account.id);
-    router.push(routeForRole(account.role));
+    router.push(routeForRole(account.role as Role));
   }
 
   return (
@@ -62,9 +53,13 @@ export function WorkspaceLoginPanel() {
         <h2 className="mt-2 text-3xl font-black">Choose Workspace</h2>
       </div>
 
+      <div className="mt-5">
+        <SupabaseAuthPanel />
+      </div>
+
       <div className="mt-5 grid gap-3 rounded-lg border border-journey-line bg-journey-mist p-4">
         <label className="grid gap-2 text-sm font-bold text-journey-black">
-          Preview Access Code
+          Preview Access Code Fallback
           <input
             value={accessCode}
             onChange={(event) => {
@@ -87,7 +82,7 @@ export function WorkspaceLoginPanel() {
           <p className="text-sm font-black text-journey-red">{error}</p>
         ) : (
           <p className="text-xs font-bold text-journey-steel">
-            Admin-created preview accounts route by role. Supabase Auth comes next.
+            Preview accounts route by role when production auth is not required.
           </p>
         )}
       </div>

@@ -13,9 +13,9 @@ Campaign phrase: **More Than A Movie Starts With Us.**
 ## Core Rules
 
 - Employees do not self-submit XP.
-- Managers capture and verify Experience Moments.
-- Managers do not earn employee XP.
-- Managers receive Leadership Recognition.
+- Leaders capture and verify Experience Moments.
+- Leaders do not earn employee XP.
+- Leaders receive Leadership Recognition and LP.
 - Recognition matters more than competition.
 - Every XP entry represents a Moment That Mattered.
 
@@ -26,6 +26,7 @@ Campaign phrase: **More Than A Movie Starts With Us.**
 - Tailwind CSS
 - Framer Motion
 - Supabase-ready state bridge
+- Supabase Auth role scaffolding
 - Vercel-ready deployment
 
 ## Run Locally
@@ -62,9 +63,11 @@ Optional Supabase variables:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=false
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
+Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after Supabase Auth users are created and connected to employee profile rows.
 
 ## Supabase Setup
 
@@ -73,16 +76,18 @@ SUPABASE_SERVICE_ROLE_KEY=
 3. Run `supabase/schema.sql`.
 4. Run `supabase/seed.sql`.
 5. Add the environment variables above to `.env.local`.
-6. Restart the dev server.
+6. Create Supabase Auth users for employees, leaders, and Experience Designers.
+7. Connect each Auth user to the matching `employees.auth_user_id`.
+8. Restart the dev server.
 
-The current persistence bridge stores configurable operating state in `journey_operating_state` as JSON for compatibility. Some internal table, field, storage, and CSS names still use legacy `journey`, `chapter`, or `miles` terminology while the product UI uses Experience, Seasons, and XP.
+The current persistence bridge stores configurable operating state in `journey_operating_state` as JSON for compatibility while the normalized tables mature. Some internal table, field, storage, and CSS names still use legacy `journey`, `chapter`, `passport`, or `miles` terminology while the product UI uses Experience, Seasons, Experience Cards, and XP.
 
 ## Demo Access Codes
 
 Use the Welcome screen access code field:
 
 - Employee: `AR1570`
-- Manager: `JE1570`
+- Leader: `JE1570`
 - Admin/GM: `SC1570`
 
 Demo buttons:
@@ -103,7 +108,7 @@ Employee:
 - `/profile` Profile
 - `/leaderboard` Experience Leaderboard
 
-Manager:
+Leadership:
 
 - `/leadership/dashboard` Leadership Dashboard
 - `/manager/recognize` Capture Moment
@@ -119,11 +124,19 @@ Admin/GM:
 - `/admin/dashboard` Command Center
 - `/admin/employees` Employees
 - `/admin/photo-approvals` Photo Approvals
-- `/admin/recognition-library` Recognition Studio
+- `/admin/seasons` Seasons
+- `/admin/season-planner` Season Planner
+- `/admin/recognition-library` Recognition
 - `/admin/rewards` Rewards
-- `/admin/settings` Experience Studio
-- `/admin/chapters` Season Builder
-- `/admin/events` Experience Events
+- `/admin/events` Events
+- `/admin/standards` Standards
+- `/admin/leadership` Leadership
+- `/admin/achievements` Achievements
+- `/admin/displays` Displays
+- `/admin/scoring` Scoring
+- `/admin/launch-readiness` Launch Readiness
+- `/admin/settings` Experience Studio / Skin Developer
+- `/admin/studio` Experience Studio overview
 - `/admin/analytics` Reports
 
 Utility:
@@ -155,7 +168,7 @@ Rewards:
 
 1. Employee opens `/rewards`.
 2. Employee requests an affordable reward.
-3. Manager/Admin opens Rewards Approvals.
+3. Leader/Admin opens Rewards Approvals.
 4. Approve, fulfill, or cancel.
 5. Fulfillment reduces inventory.
 
@@ -166,8 +179,9 @@ Admin configuration:
 - Configure recognition types and excellence checks.
 - Configure Experience Card templates.
 - Configure reward inventory, costs, images, collections, tiers, and flags.
-- Configure Season One settings.
-- Configure Experience Events and TV slides.
+- Configure unlimited Seasons and preview/publish one active Season.
+- Configure Events and Displays.
+- Configure Standards, Achievements, Leadership LP rules, Scoring, and Launch Readiness.
 - Configure skins through Skin Developer.
 
 ## Vercel Deployment
@@ -208,16 +222,17 @@ Use Admin/GM tools where possible:
 - Recognition Studio: `/admin/recognition-library`
 - Rewards: `/admin/rewards`
 - Experience Studio: `/admin/settings`
-- Season Builder: `/admin/chapters`
+- Season Planner: `/admin/season-planner`
+- Launch Readiness: `/admin/launch-readiness`
 
 Browser preview state can also be reset by clearing localStorage for the local site.
 
 ## Known Issues
 
-- Full Supabase Auth is not yet wired; access codes are preview-friendly role routing.
+- Supabase Auth sign-in is wired, but production enforcement is off by default until Auth users are created and connected.
 - Some internals still use legacy names for compatibility.
 - Experience Moments for the live TV feed still use browser event storage plus the operating-state bridge.
-- The Supabase persistence bridge is JSON-first; fully normalized per-action writes should be hardened in V1.1.
+- The Supabase persistence bridge is still JSON-first for some preview edits; fully normalized per-action writes should be hardened in V1.1.
 - Uploaded reward/profile images are stored as browser data URLs in preview mode unless a storage provider is added.
 
 ## Screenshots

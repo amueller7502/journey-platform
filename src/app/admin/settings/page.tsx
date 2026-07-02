@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChapterSettingsEditor } from "@/components/admin/ChapterSettingsEditor";
+import { ExperienceStudioOverview } from "@/components/admin/ExperienceStudioOverview";
 import { FeatureBuildoutPanel } from "@/components/admin/FeatureBuildoutPanel";
 import { MenuConfigurationPanel } from "@/components/admin/MenuConfigurationPanel";
 import { SettingsActionCards } from "@/components/admin/SettingsActionCards";
@@ -20,7 +21,11 @@ import {
 export default function SettingsPage() {
   return (
     <AppShell role="admin" title="Experience Studio" eyebrow="Rules and Display">
-      <SettingsActionCards />
+      <ExperienceStudioOverview />
+
+      <div className="mt-5">
+        <SettingsActionCards />
+      </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Panel id="recognition-policy">

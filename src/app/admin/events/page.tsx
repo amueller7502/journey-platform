@@ -3,7 +3,7 @@ import { ExperienceEventsManager } from "@/components/admin/ExperienceEventsMana
 
 export default function AdminExperienceEventsPage() {
   return (
-    <AppShell role="admin" title="Experience Events" eyebrow="Experience Studio">
+    <AppShell role="admin" title="Events" eyebrow="Experience Studio">
       <ExperienceEventsManager />
     </AppShell>
   );

@@ -108,7 +108,7 @@ export function ExperienceEventsManager() {
   if (!selectedEvent) {
     return (
       <Panel>
-        <PanelHeader title="Experience Events" eyebrow="Season engine" />
+        <PanelHeader title="Events" eyebrow="Season engine" />
         <Button type="button" icon={Plus} onClick={addEvent}>
           Add Event
         </Button>
@@ -120,7 +120,7 @@ export function ExperienceEventsManager() {
     <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
       <Panel>
         <PanelHeader
-          title="Experience Events"
+          title="Events"
           eyebrow="Season engine"
           action={<Megaphone className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />

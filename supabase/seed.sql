@@ -24,6 +24,42 @@ insert into public.skins (
   ('odyssey', 'Odyssey / North Stars', 'active', 'Odyssey skin with IMAX 15/70 film cues, projection texture, and recognition leaderboard energy.', true, 'Opening signal card, recognition leaderboard, film grain, projection sweep, and 15/70 activation card', 'waves', 'immersive', 78, 64, 28, 58, 82, 68, 18, 'blockbuster', 'poster', 'filmstrip', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
   ('dune_3', 'Dune 3', 'draft', 'Future activation skin slot for desert and premium event theming.', true, 'Draft concept', 'doodles', 'playful', 55, 80, 70, 72, 40, 48, 70, 'handbill', 'ticket', 'ticket-stub', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
 
+insert into public.experience_seasons (
+  id,
+  name,
+  subtitle,
+  season_label,
+  season_title,
+  starts_on,
+  ends_on,
+  community_xp_goal,
+  welcome_message,
+  tagline,
+  hero_artwork_url,
+  experience_card_artwork_url,
+  skin_id,
+  status,
+  active,
+  preview_enabled
+) values (
+  'chapter-one-odyssey',
+  'Experience',
+  'Employee Experience Platform',
+  'Season One',
+  'The Odyssey',
+  '2026-07-16',
+  '2026-08-12',
+  15700,
+  'Welcome to Experience. Recognize the moments that make Celebration Cinema North feel extraordinary.',
+  'More Than A Movie Starts With Us.',
+  '/brand/celebration-c-frame.png',
+  '/brand/celebration-c-frame.png',
+  'odyssey',
+  'active',
+  true,
+  true
+);
+
 insert into public.chapters (
   id,
   name,
@@ -43,7 +79,7 @@ insert into public.chapters (
   '2026-08-12',
   15700,
   'Odyssey / North Stars / IMAX 1570',
-  'Every Mile Matters',
+  'More Than A Movie Starts With Us.',
   'Inspired by IMAX 1570 film',
   'active'
 );
@@ -129,9 +165,25 @@ insert into public.leadership_rewards (
   enabled,
   sort_order
 ) values
-  ('77777777-7777-4777-8777-777777777721', 'Leadership Development Pick', 'Choose a leadership skill focus for the next one-on-one with the GM.', 'available', 'Scheduled through the GM, not purchased with employee Miles.', true, 10),
+  ('77777777-7777-4777-8777-777777777721', 'Leadership Development Pick', 'Choose a leadership skill focus for the next one-on-one with the GM.', 'available', 'Scheduled through the GM, not purchased with employee XP.', true, 10),
   ('77777777-7777-4777-8777-777777777722', 'Manager Movie Night Host', 'Host a small crew recognition moment before a manager-approved screening.', 'scheduled', 'Requires GM approval and staffing coverage.', true, 20),
-  ('77777777-7777-4777-8777-777777777723', 'Premium Handoff Badge', 'Recognition for clean shift communication and follow-through.', 'earned', 'Shown in Leadership Achievements instead of the employee Trading Post.', true, 30);
+  ('77777777-7777-4777-8777-777777777723', 'Premium Handoff Badge', 'Recognition for clean shift communication and follow-through.', 'earned', 'Shown in Leadership Achievements instead of employee Rewards.', true, 30);
+
+insert into public.leadership_point_rules (
+  id,
+  season_id,
+  name,
+  description,
+  lp_value,
+  category,
+  requires_note,
+  enabled,
+  lifecycle,
+  sort_order
+) values
+  ('lp-capture-specific-moment', 'chapter-one-odyssey', 'Capture specific Experience Moment', 'Leader captures a clear, behavior-based story for an employee.', 5, 'Coaching', true, true, 'published', 10),
+  ('lp-close-coverage-gap', 'chapter-one-odyssey', 'Close recognition coverage gap', 'Leader recognizes an employee who was awaiting recognition.', 10, 'Coverage', true, true, 'published', 20),
+  ('lp-clean-shift-handoff', 'chapter-one-odyssey', 'Clean shift handoff', 'Leader records a concise operational handoff that protects follow-through.', 8, 'Communication', true, true, 'published', 30);
 
 insert into public.coaching_insights (
   id,
@@ -157,7 +209,7 @@ insert into public.menu_items (
 ) values
   ('employee', 'Employee', 'Home', '/home', 'Employee Experience home', true, true, 10),
   ('employee', 'Employee', 'My Experience', '/my-journey', 'Employee progress and history', true, true, 20),
-  ('employee', 'Employee', 'Trading Post', '/trading-post', 'Rewards marketplace', true, true, 30),
+  ('employee', 'Employee', 'Rewards', '/rewards', 'Rewards marketplace', true, true, 30),
   ('employee', 'Employee', 'Community', '/community', 'Community progress and recognition', true, true, 40),
   ('employee', 'Employee', 'Profile', '/profile', 'Employee profile and Experience Journal', true, true, 50),
   ('manager', 'Manager', 'Leadership Dashboard', '/leadership/dashboard', 'Leadership Experience home', true, true, 10),
@@ -165,18 +217,25 @@ insert into public.menu_items (
   ('manager', 'Manager', 'Leadership Journal', '/leadership/journal', 'Leadership recognition history', true, true, 30),
   ('manager', 'Manager', 'Achievements', '/leadership/achievements', 'Leadership achievement tracking', true, true, 40),
   ('manager', 'Manager', 'Leadership Recognition', '/leadership/recognition', 'Manager recognition without employee XP', true, true, 50),
-  ('manager', 'Manager', 'Leadership Rewards', '/leadership/rewards', 'Leadership rewards without employee Miles', true, true, 60),
+  ('manager', 'Manager', 'Leadership Rewards', '/leadership/rewards', 'Leadership rewards without employee XP', true, true, 60),
   ('manager', 'Manager', 'Recognition Coverage', '/leadership/coverage', 'Employee recognition coverage', true, true, 70),
   ('manager', 'Manager', 'Coaching Insights', '/leadership/coaching', 'Coaching action guidance', true, true, 80),
   ('manager', 'Manager', 'Awaiting Recognition', '/leadership/awaiting-recognition', 'Employees awaiting recognition', true, true, 90),
-  ('admin', 'Admin/GM', 'Dashboard', '/admin/dashboard', 'GM overview', true, true, 10),
+  ('admin', 'Admin/GM', 'Command Center', '/admin/dashboard', 'GM overview', true, true, 10),
   ('admin', 'Admin/GM', 'Employees', '/admin/employees', 'Employee roster', true, true, 20),
-  ('admin', 'Admin/GM', 'Recognition Library', '/admin/recognition-library', 'Recognition type management', true, true, 30),
-  ('admin', 'Admin/GM', 'Rewards / Inventory', '/admin/rewards', 'Trading Post editor', true, true, 40),
-  ('admin', 'Admin/GM', 'Experience Cards', '/admin/passports', 'Experience Card management', true, true, 50),
-  ('admin', 'Admin/GM', 'Recognition Analytics', '/admin/analytics', 'Recognition reporting', true, true, 60),
-  ('admin', 'Admin/GM', 'Settings', '/admin/settings', 'Skins, menus, and display settings', true, true, 70),
-  ('admin', 'Admin/GM', 'Activation Management', '/admin/chapters', 'Activation setup and scheduling', true, true, 80),
+  ('admin', 'Admin/GM', 'Seasons', '/admin/seasons', 'Season management', true, true, 30),
+  ('admin', 'Admin/GM', 'Season Planner', '/admin/season-planner', 'Season planning and publishing', true, true, 40),
+  ('admin', 'Admin/GM', 'Recognition', '/admin/recognition-library', 'Recognition type management', true, true, 50),
+  ('admin', 'Admin/GM', 'Rewards', '/admin/rewards', 'Rewards editor', true, true, 60),
+  ('admin', 'Admin/GM', 'Events', '/admin/events', 'Event engine', true, true, 70),
+  ('admin', 'Admin/GM', 'Standards', '/admin/standards', 'Experience standards', true, true, 80),
+  ('admin', 'Admin/GM', 'Leadership', '/admin/leadership', 'Leadership Studio', true, true, 90),
+  ('admin', 'Admin/GM', 'Achievements', '/admin/achievements', 'Achievements Studio', true, true, 100),
+  ('admin', 'Admin/GM', 'Displays', '/admin/displays', 'TV and display settings', true, true, 110),
+  ('admin', 'Admin/GM', 'Scoring', '/admin/scoring', 'Experience scoring weights', true, true, 120),
+  ('admin', 'Admin/GM', 'Launch Readiness', '/admin/launch-readiness', 'Operational launch checklist', true, true, 130),
+  ('admin', 'Admin/GM', 'Reports', '/admin/analytics', 'Recognition reporting', true, true, 140),
+  ('admin', 'Admin/GM', 'Experience Studio', '/admin/settings', 'Skins, menus, and display settings', true, true, 150),
   (null, 'Utility', 'TV Display', '/tv', 'Shared display mode', true, true, 10),
   (null, 'Utility', 'Welcome', '/', 'Role selection and launch', true, true, 20);
 
@@ -218,6 +277,104 @@ insert into public.recognition_types (
   ('44444444-4444-4444-8444-444444440305', 'perfect_punctuality_weekly', '11111111-1111-4111-8111-111111111111', 'Perfect Punctuality Weekly', 'Employee clocked in on time and ready for every shift this week.', 'Reliability', 'shift_counts', 20, 'Gauge', true, true, 440, 'reliability'),
   ('44444444-4444-4444-8444-444444440401', 'manager_above_beyond', '11111111-1111-4111-8111-111111111111', 'Manager Above & Beyond', 'Manager-awarded recognition for uncommon ownership or detail.', 'Manager Award', 'detail_matters', 50, 'Award', true, true, 500, 'detail');
 
+insert into public.experience_events (
+  id,
+  season_id,
+  event_type,
+  title,
+  description,
+  starts_at,
+  ends_at,
+  xp_modifier,
+  eligible_recognition_type_ids,
+  department_slugs,
+  tv_announcement,
+  banner,
+  enabled,
+  lifecycle,
+  sort_order
+) values
+  ('event-todays-focus-lobby-readiness', 'chapter-one-odyssey', 'Today''s Focus', 'Lobby readiness before the rush', 'Recognize warm greetings, clear queues, clean sightlines, and confident guest answers before peak showtimes.', '2026-07-24T10:00:00-04:00', '2026-07-24T23:59:59-04:00', 1, array['lobby_excellence','guest_compliment'], array['floor','guest_services','box_office'], 'Today''s Focus: Lobby readiness before the rush.', 'Make the first five minutes feel effortless.', true, 'published', 10),
+  ('event-community-challenge-imax', 'chapter-one-odyssey', 'Community Challenge', 'IMAX 15/70 presentation push', 'A community XP challenge for guest flow, auditorium resets, signage accuracy, and presentation details around premium shows.', '2026-07-25T00:00:00-04:00', '2026-07-27T23:59:59-04:00', 1.25, array['theater_excellence','digital_signage_excellence','imax_queue_excellence'], array['floor','guest_services','facilities'], 'Community Challenge: protect the premium IMAX experience.', 'Premium presentation earns bonus momentum.', true, 'published', 20),
+  ('event-surprise-drop-rewards', 'chapter-one-odyssey', 'Surprise Drop', 'Collector reward drop', 'Feature collector and season-exclusive rewards on the TV loop to drive attention during the weekend.', '2026-07-26T14:00:00-04:00', '2026-07-26T20:00:00-04:00', 1, array[]::text[], array['guest_services','concessions','kitchen','floor','box_office','facilities'], 'Surprise Drop: check Rewards for collector items.', 'Limited rewards are live while inventory lasts.', true, 'published', 30);
+
+insert into public.experience_display_slides (
+  id,
+  season_id,
+  slide_type,
+  label,
+  headline,
+  supporting_text,
+  duration_seconds,
+  show_on_tv,
+  enabled,
+  lifecycle,
+  sort_order
+) values
+  ('display-community-xp', 'chapter-one-odyssey', 'Community XP', 'Community XP', '15,700 XP Starts With Daily Moments', 'Show progress toward the season goal without making recognition feel like a race.', 7, true, true, 'published', 10),
+  ('display-todays-focus', 'chapter-one-odyssey', 'Today''s Focus', 'Today''s Focus', 'Lobby Readiness Before The Rush', 'Help leaders keep recognition connected to the shift''s most important behavior.', 7, true, true, 'published', 20),
+  ('display-recognition-spotlight', 'chapter-one-odyssey', 'Recognition Spotlight', 'Recognition Spotlight', 'Moments That Mattered', 'Celebrate specific stories from the team, not just totals.', 8, true, true, 'published', 30),
+  ('display-reward-spotlight', 'chapter-one-odyssey', 'Reward Spotlight', 'Reward Spotlight', 'Rewards Worth Earning', 'Rotate several curated rewards so employees can see what is available.', 8, true, true, 'published', 40),
+  ('display-experience-score', 'chapter-one-odyssey', 'Experience Score', 'Experience Score', 'Culture Health At A Glance', 'A configurable composite of recognition coverage, presentation, and rewards health.', 7, false, true, 'draft', 50);
+
+insert into public.scoring_metrics (
+  id,
+  season_id,
+  label,
+  description,
+  weight,
+  target,
+  current_value,
+  enabled,
+  lifecycle,
+  sort_order
+) values
+  ('experience_score', 'chapter-one-odyssey', 'Experience Score', 'Overall culture health across recognition, rewards, presentation, and season progress.', 35, 90, 86, true, 'published', 10),
+  ('leadership_health', 'chapter-one-odyssey', 'Leadership Health', 'Measures leader follow-through, coaching rhythm, coverage, and handoff quality.', 25, 85, 83, true, 'published', 20),
+  ('presentation_score', 'chapter-one-odyssey', 'Presentation Score', 'Measures excellence checks and building presentation readiness.', 20, 92, 91, true, 'published', 30),
+  ('recognition_coverage', 'chapter-one-odyssey', 'Recognition Coverage', 'Measures whether recognition is reaching the full team, not only frequent standouts.', 20, 88, 83, true, 'published', 40);
+
+insert into public.launch_readiness_items (
+  id,
+  season_id,
+  label,
+  owner,
+  status,
+  due_on,
+  notes,
+  enabled,
+  lifecycle,
+  sort_order
+) values
+  ('launch-season-configured', 'chapter-one-odyssey', 'Season configured', 'Experience Designer', 'ready', '2026-07-09', 'Season One: The Odyssey dates, goal, message, and skin are ready.', true, 'published', 10),
+  ('launch-recognition-published', 'chapter-one-odyssey', 'Recognition published', 'Admin/GM', 'ready', '2026-07-09', 'Recognition and Experience Card task libraries are active.', true, 'published', 20),
+  ('launch-rewards-published', 'chapter-one-odyssey', 'Rewards published', 'Admin/GM', 'ready', '2026-07-09', 'Rewards are grouped into curated collections and inventory thresholds are set.', true, 'published', 30),
+  ('launch-events-scheduled', 'chapter-one-odyssey', 'Events scheduled', 'Experience Designer', 'in_progress', '2026-07-12', 'Opening focus is ready; finale and surprise drops need final approval.', true, 'published', 40),
+  ('launch-cards-generated', 'chapter-one-odyssey', 'Experience Cards generated', 'Leader', 'in_progress', '2026-07-15', 'Print runs are available by employee and scheduled work area.', true, 'published', 50),
+  ('launch-tv-configured', 'chapter-one-odyssey', 'TV configured', 'Experience Designer', 'ready', '2026-07-09', 'Slides, durations, and visibility are editable in Displays Studio.', true, 'published', 60),
+  ('launch-employees-imported', 'chapter-one-odyssey', 'Employees imported', 'Admin/GM', 'in_progress', '2026-07-15', 'CSV/Excel import is available; final employee list still needs to be loaded.', true, 'published', 70),
+  ('launch-auth-configured', 'chapter-one-odyssey', 'Authentication configured', 'Experience Designer', 'in_progress', '2026-07-15', 'Supabase Auth form is built; production users must be created in Supabase.', true, 'published', 80),
+  ('launch-supabase-connected', 'chapter-one-odyssey', 'Supabase connected', 'Experience Designer', 'in_progress', '2026-07-15', 'Schema covers platform objects; environment variables control live persistence.', true, 'published', 90);
+
+insert into public.experience_achievements (
+  id,
+  season_id,
+  audience,
+  title,
+  description,
+  collection,
+  hidden,
+  badge_image_url,
+  criteria,
+  enabled,
+  lifecycle,
+  sort_order
+) values
+  ('badge-first-moment', 'chapter-one-odyssey', 'employee', 'First Moment', 'Earned when an employee receives their first Experience Moment.', 'Season Badges', false, '/brand/celebration-c-frame.png', 'First published Experience Moment in the active season.', true, 'published', 10),
+  ('badge-premium-presentation', 'chapter-one-odyssey', 'employee', 'Premium Presentation', 'Recognizes repeated presentation and detail moments.', 'Season Badges', false, '/brand/celebration-c-frame.png', 'Three presentation-related Experience Moments.', true, 'published', 20),
+  ('badge-secret-recovery', 'chapter-one-odyssey', 'employee', 'Guest Recovery Signal', 'Hidden badge for an exceptional guest recovery story.', 'Hidden Achievements', true, '/brand/celebration-c-frame.png', 'Leader marks an Experience Moment as hidden-achievement eligible.', true, 'draft', 30),
+  ('lead-achievement-coverage-builder', 'chapter-one-odyssey', 'leader', 'Coverage Builder', 'Leader kept recognition coverage visible across departments for a full week.', 'Leadership Achievements', false, '/brand/celebration-c-frame.png', 'Recognition coverage reaches the weekly target.', true, 'published', 40);
+
 insert into public.rewards (
   id,
   chapter_id,
@@ -258,6 +415,52 @@ insert into public.recognition_batches (
   40,
   4,
   '2026-07-24 18:35:00-04'
+);
+
+insert into public.experience_cards (
+  id,
+  season_id,
+  employee_id,
+  journey_card_area_id,
+  card_number,
+  shift_date,
+  status,
+  printed_at,
+  created_by
+) values (
+  '88888888-8888-4888-8888-888888888801',
+  'chapter-one-odyssey',
+  '33333333-3333-4333-8333-333333333301',
+  'floor_lobby',
+  'ODY-1570-001',
+  '2026-07-24',
+  'entered',
+  '2026-07-24T15:00:00-04:00',
+  '33333333-3333-4333-8333-333333333306'
+);
+
+insert into public.experience_card_batches (
+  id,
+  experience_card_id,
+  recognition_batch_id,
+  season_id,
+  employee_id,
+  manager_id,
+  selected_recognition_type_ids,
+  total_xp,
+  shift_note,
+  submitted_at
+) values (
+  '88888888-8888-4888-8888-888888888811',
+  '88888888-8888-4888-8888-888888888801',
+  '66666666-6666-4666-8666-666666666601',
+  'chapter-one-odyssey',
+  '33333333-3333-4333-8333-333333333301',
+  '33333333-3333-4333-8333-333333333306',
+  array['theater_excellence','help_another_department'],
+  40,
+  'Experience Card turned in after closing rush.',
+  '2026-07-24T18:35:00-04:00'
 );
 
 insert into public.recognition_records (

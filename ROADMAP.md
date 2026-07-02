@@ -7,28 +7,29 @@
 - Move Experience Card print runs to the manager workflow.
 - Keep admin card template configuration in Experience Studio.
 - Redesign the old reward store into Rewards.
-- Add configurable Experience Events.
+- Add configurable Events.
 - Add Leadership Dashboard, Leadership Health, Leadership Journal, Leadership Achievements, Leadership Recognition, Leadership Rewards, Recognition Coverage, Coaching Insights, and Employees Awaiting Recognition.
 - Keep TV signage focused on Community XP, Today's Focus, Recognition Spotlight, Department Progress, Rewards, Countdown, and Experience Leaderboard.
 
 ## V1.1 Operational Hardening
 
-- Replace preview access codes with Supabase Auth and role-based permissions.
-- Normalize writes for Experience Moments, rewards, redemptions, Experience Events, seasons, card batches, and leadership recognition.
+- Create production Supabase Auth users and connect them to employee records.
+- Turn on `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED` after account setup.
+- Normalize writes for Experience Moments, rewards, redemptions, seasons, card batches, leadership recognition, LP, displays, scoring, and achievements.
 - Add audit history for admin changes.
 - Add image storage for reward photos and profile photo approvals.
 - Add manager handoff notes and shift summaries.
 - Add budget tracking for Rewards.
 - Add downloadable CSV exports for reports and reward liability.
 
-## V1.2 Season System
+## V1.2 Platform Expansion
 
-- Support unlimited seasons.
-- Add season cloning.
+- Harden season cloning into a full copy wizard for rewards, recognitions, displays, scoring, and skins.
 - Add season-specific reward availability.
-- Add badge/badge-art management.
-- Add per-season TV slide packages.
+- Add badge-art uploads through Supabase Storage.
+- Add per-season TV slide packages with scheduled playlists.
 - Add skin versioning and preview before activation.
+- Add Studio audit log and rollback.
 
 ## Future Ideas
 

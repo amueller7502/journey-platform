@@ -4,17 +4,17 @@ import { LockKeyhole, MonitorPlay, Palette } from "lucide-react";
 
 const actions = [
   {
-    label: "Recognition Entry",
-    value: "Manager",
-    detail: "Employees cannot self-submit",
+    label: "Access Model",
+    value: "Role-Based",
+    detail: "Employee, Leader, Experience Designer",
     href: "#recognition-policy",
     icon: LockKeyhole,
   },
   {
     label: "TV Mode",
-    value: "Control Loop",
-    detail: "Turn slides on/off",
-    href: "#tv-dashboard-settings",
+    value: "Displays",
+    detail: "Slides, timing, visibility",
+    href: "/admin/displays",
     icon: MonitorPlay,
   },
   {

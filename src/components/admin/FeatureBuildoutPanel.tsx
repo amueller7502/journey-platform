@@ -27,20 +27,20 @@ const featureRows = [
   },
   {
     area: "Supabase writes",
-    status: "Next",
-    detail: "Schema is ready; UI currently writes to browser-saved configuration.",
+    status: "Configured",
+    detail: "Important platform objects are represented in schema and the preview state bridge.",
     icon: Database,
   },
   {
     area: "Authentication",
-    status: "Next",
-    detail: "Role buttons work now; production auth and permissions are the next hardening pass.",
+    status: "Configured",
+    detail: "Supabase Auth sign-in and optional role enforcement are built; preview codes remain fallback.",
     icon: ShieldCheck,
   },
   {
     area: "Shared multi-device state",
-    status: "Next",
-    detail: "Use Supabase mutations so managers, admin, and TV share the same live data.",
+    status: "Configurable",
+    detail: "The shared operating-state table syncs preview configuration across devices when Supabase is connected.",
     icon: Clock,
   },
 ];

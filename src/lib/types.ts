@@ -2,6 +2,19 @@ import type { LucideIcon } from "lucide-react";
 
 export type Role = "employee" | "manager" | "admin";
 
+export type PlatformRole = "employee" | "leader" | "experience_designer";
+
+export type ConfigLifecycle = "draft" | "published" | "archived";
+
+export type ConfigurableMeta = {
+  lifecycle: ConfigLifecycle;
+  enabled: boolean;
+  sortOrder: number;
+  seasonId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type StandardId =
   | "guest_welcome"
   | "space_exceptional"
@@ -60,6 +73,36 @@ export type RecognitionStandard = {
   label: string;
   shortLabel: string;
   description: string;
+  storyPrompt?: string;
+  enabled?: boolean;
+  sortOrder?: number;
+  lifecycle?: ConfigLifecycle;
+  seasonId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type SeasonStatus = "draft" | "preview" | "active" | "archived";
+
+export type ExperienceSeason = {
+  id: string;
+  name: string;
+  subtitle: string;
+  seasonLabel: string;
+  seasonTitle: string;
+  startDate: string;
+  endDate: string;
+  communityXpGoal: number;
+  welcomeMessage: string;
+  tagline: string;
+  heroArtworkUrl: string;
+  experienceCardArtworkUrl: string;
+  skinId: string;
+  status: SeasonStatus;
+  active: boolean;
+  previewEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Employee = {
@@ -220,6 +263,87 @@ export type ExperienceEvent = {
   banner: string;
   enabled: boolean;
   sortOrder: number;
+  lifecycle?: ConfigLifecycle;
+  seasonId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type DisplaySlideType =
+  | "Community XP"
+  | "Today's Focus"
+  | "Recognition Spotlight"
+  | "Department Progress"
+  | "Reward Spotlight"
+  | "Countdown"
+  | "Experience Score"
+  | "Leaderboard"
+  | "Custom";
+
+export type ExperienceDisplaySlide = ConfigurableMeta & {
+  id: string;
+  type: DisplaySlideType;
+  label: string;
+  headline: string;
+  supportingText: string;
+  durationSeconds: number;
+  showOnTv: boolean;
+};
+
+export type ScoringMetricId =
+  | "experience_score"
+  | "leadership_health"
+  | "presentation_score"
+  | "recognition_coverage";
+
+export type ScoringMetric = ConfigurableMeta & {
+  id: ScoringMetricId;
+  label: string;
+  description: string;
+  weight: number;
+  target: number;
+  currentValue: number;
+};
+
+export type LaunchReadinessItem = ConfigurableMeta & {
+  id: string;
+  label: string;
+  owner: "Admin/GM" | "Leader" | "Experience Designer";
+  status: "not_started" | "in_progress" | "ready" | "blocked";
+  dueDate: string;
+  notes: string;
+};
+
+export type ExperienceAchievementAudience = "employee" | "leader";
+
+export type ExperienceAchievement = ConfigurableMeta & {
+  id: string;
+  audience: ExperienceAchievementAudience;
+  title: string;
+  description: string;
+  collection: string;
+  hidden: boolean;
+  badgeImageUrl: string;
+  criteria: string;
+};
+
+export type LeadershipPointRule = ConfigurableMeta & {
+  id: string;
+  name: string;
+  description: string;
+  lpValue: number;
+  category: LeadershipRecognitionCategory;
+  requiresNote: boolean;
+};
+
+export type StudioModuleStatus = "configured" | "needs_attention" | "planned";
+
+export type StudioModule = {
+  id: string;
+  name: string;
+  href: string;
+  description: string;
+  status: StudioModuleStatus;
 };
 
 export type MenuConfiguration = {
@@ -296,6 +420,14 @@ export type LeadershipReward = {
   description: string;
   status: "available" | "earned" | "scheduled";
   fulfillmentNotes: string;
+  lpCost?: number;
+  collection?: "Everyday Leadership" | "Professional Development" | "Premium" | "Leadership Experiences" | "Season Exclusives";
+  enabled?: boolean;
+  sortOrder?: number;
+  lifecycle?: ConfigLifecycle;
+  seasonId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type CoachingInsight = {

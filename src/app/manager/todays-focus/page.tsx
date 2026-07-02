@@ -54,17 +54,17 @@ export default function ManagerTodaysFocusPage() {
       ) : (
         <Panel>
           <p className="text-sm font-bold text-journey-steel">
-            No active Experience Events are configured.
+            No active Events are configured.
           </p>
         </Panel>
       )}
 
       <Panel className="mt-5">
-        <PanelHeader title="Active Experience Events" eyebrow="Configured by Admin" />
+        <PanelHeader title="Active Events" eyebrow="Configured by Admin" />
         <div className="grid gap-3">
           {!activeEvents.length ? (
             <p className="rounded-lg border border-dashed border-journey-line p-4 text-sm font-bold text-journey-steel">
-              Add Today&apos;s Focus or community events in Admin / Experience Events.
+              Add Today&apos;s Focus or community events in Admin / Events.
             </p>
           ) : null}
           {activeEvents.map((event) => (

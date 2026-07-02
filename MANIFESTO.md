@@ -17,9 +17,9 @@ The community goal is **15,700 XP**.
 ## Product Rules
 
 - Employees do not self-submit XP.
-- Managers capture and verify Experience Moments.
-- Managers do not earn employee XP.
-- Managers receive Leadership Recognition for coaching, communication, coverage, and operational impact.
+- Leaders capture and verify Experience Moments.
+- Leaders do not earn employee XP.
+- Leaders earn LP and receive Leadership Recognition for coaching, communication, coverage, and operational impact.
 - Recognition matters more than competition.
 - Every XP entry represents a Moment That Mattered.
 
@@ -27,8 +27,8 @@ The community goal is **15,700 XP**.
 
 Employees feel seen.
 
-Managers notice great work while it is happening.
+Leaders notice great work while it is happening.
 
-Admin/GM leaders can configure seasons, rewards, recognition types, Experience Cards, and TV signage without code.
+Admin/GM leaders can configure seasons, rewards, recognition types, Experience Cards, displays, scoring, launch readiness, and TV signage without code.
 
 The building becomes more intentional about guest experience, presentation, teamwork, reliability, and attention to detail.
