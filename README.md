@@ -98,6 +98,16 @@ For an existing Supabase project that already ran an older schema, run:
 
 If account creation shows `permission denied for table profiles`, run `supabase/migrations/202607020002_api_grants.sql`. That migration grants Supabase API access to the public tables while row-level security still controls which rows each role can read or write.
 
+If Builder access still shows `permission denied for table profiles`, run:
+
+```sql
+-- In the Supabase SQL editor
+-- Paste and run:
+-- supabase/migrations/202607020003_auth_access_repair.sql
+```
+
+Then confirm Vercel has the real `SUPABASE_SERVICE_ROLE_KEY`, not the anon key. The service role key must be server-only and should never use a `NEXT_PUBLIC_` prefix.
+
 The app now writes operational state to Supabase through server routes:
 
 - Capture Moment writes the shared operating state and `experience_moments`.
