@@ -29,7 +29,7 @@ Journey makes recognizing great work easier than overlooking it.
 - Manager verifies Journey Card items from a QR link.
 - Employee views miles, recent moments, rewards, and community progress.
 - Admin manages recognition types, excellence checks, reward inventory, chapter settings, skins, and launch readiness.
-- TV mode celebrates community progress, spotlight moments, department progress, rewards, countdown, and crew-based fleet progress.
+- TV mode celebrates community progress, spotlight moments, recognition leaderboard, department progress, rewards, and countdown.
 
 ## Launch Scope
 

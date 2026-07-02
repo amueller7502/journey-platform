@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Gift, PackageCheck } from "lucide-react";
 import { RewardCard } from "@/components/dashboard/RewardCard";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -10,7 +11,18 @@ import { formatShortDateTime } from "@/lib/utils";
 
 export function TradingPostClient() {
   const { state } = useJourneyState();
+  const [accountId, setAccountId] = useState("");
+
+  useEffect(() => {
+    const load = () =>
+      setAccountId(window.localStorage.getItem("journey-active-account-id") ?? "");
+    load();
+    window.addEventListener("storage", load);
+    return () => window.removeEventListener("storage", load);
+  }, []);
+
   const currentEmployee =
+    state.employees.find((employee) => employee.id === accountId) ??
     state.employees.find(
       (employee) => employee.role === "employee" && employee.active !== false,
     ) ?? state.employees[0];

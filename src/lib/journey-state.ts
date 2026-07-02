@@ -11,6 +11,7 @@ import {
   journeySkins as defaultSkins,
   recognitionTypes as defaultRecognitionTypes,
   rewards as defaultRewards,
+  tvPanelSettings as defaultTvPanelSettings,
 } from "@/lib/data";
 import type {
   Department,
@@ -20,6 +21,7 @@ import type {
   JourneySkin,
   RecognitionType,
   Reward,
+  TvPanelSetting,
 } from "@/lib/types";
 
 export type JourneyChapter = typeof defaultChapter;
@@ -32,6 +34,7 @@ export type JourneyOperatingState = {
   recognitionTypes: RecognitionType[];
   rewards: Reward[];
   excellenceLogs: ExcellenceLog[];
+  tvPanelSettings: TvPanelSetting[];
   skins: JourneySkin[];
   activeSkinId: string;
   skinEnabled: boolean;
@@ -49,6 +52,7 @@ const defaultState: JourneyOperatingState = {
   recognitionTypes: defaultRecognitionTypes,
   rewards: defaultRewards,
   excellenceLogs: defaultExcellenceLogs,
+  tvPanelSettings: defaultTvPanelSettings,
   skins: defaultSkins,
   activeSkinId: activeSkin.id,
   skinEnabled: activeSkin.id !== "standard",
@@ -88,6 +92,7 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
     recognitionTypes: mergeById(defaultState.recognitionTypes, value?.recognitionTypes),
     rewards: mergeById(defaultState.rewards, value?.rewards),
     excellenceLogs: mergeById(defaultState.excellenceLogs, value?.excellenceLogs),
+    tvPanelSettings: mergeById(defaultState.tvPanelSettings, value?.tvPanelSettings),
     skins: mergeById(defaultState.skins, value?.skins),
   };
 

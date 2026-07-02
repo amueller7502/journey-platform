@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Pencil, Plus, Save, ToggleLeft, ToggleRight } from "lucide-react";
+import { Pencil, Plus, Save, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { chapter, iconNames, recognitionStandards } from "@/lib/data";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
@@ -98,6 +98,14 @@ export function RecognitionLibraryManager() {
     });
   }
 
+  function removeRecognitionType(id: string) {
+    setSaved(false);
+    updateState((current) => ({
+      ...current,
+      recognitionTypes: current.recognitionTypes.filter((type) => type.id !== id),
+    }));
+  }
+
   return (
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -174,7 +182,7 @@ export function RecognitionLibraryManager() {
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1520px] border-collapse text-left">
+        <table className="w-full min-w-[1600px] border-collapse text-left">
           <thead>
             <tr className="border-b border-journey-line text-xs font-black uppercase text-journey-steel">
               <th className="py-3 pr-4">Status</th>
@@ -190,6 +198,7 @@ export function RecognitionLibraryManager() {
               <th className="py-3 pr-4">Verification</th>
               <th className="py-3 pr-4">Sort</th>
               <th className="py-3 pr-4">Edit</th>
+              <th className="py-3 pr-4">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -375,6 +384,16 @@ export function RecognitionLibraryManager() {
                         <Pencil className="h-4 w-4" aria-hidden="true" />
                         Edit
                       </Link>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        icon={Trash2}
+                        onClick={() => removeRecognitionType(type.id)}
+                      >
+                        Delete
+                      </Button>
                     </td>
                   </tr>
                 );

@@ -1,17 +1,19 @@
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function Panel({
   children,
   className,
+  ...props
 }: {
   children: ReactNode;
   className?: string;
-}) {
+} & ComponentPropsWithoutRef<"section">) {
   const hasCustomBackground = typeof className === "string" && /\bbg-/.test(className);
 
   return (
     <section
+      {...props}
       className={cn(
         "rounded-lg border border-journey-line p-5 shadow-line",
         !hasCustomBackground && "bg-journey-white",

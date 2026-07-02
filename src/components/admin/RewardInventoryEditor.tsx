@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Save, Trash2 } from "lucide-react";
+import { ImagePlus, Plus, Save, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { RewardCard } from "@/components/dashboard/RewardCard";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,15 @@ import { useJourneyState } from "@/lib/journey-state";
 import type { Reward } from "@/lib/types";
 
 const rewardCategories: Reward["category"][] = ["Food", "Cinema", "Gear", "Experience"];
+
+function readImageAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 export function RewardInventoryEditor({ initialRewards }: { initialRewards: Reward[] }) {
   const { state, updateState } = useJourneyState();
@@ -95,7 +104,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
               <th className="py-3 pr-3">Miles</th>
               <th className="py-3 pr-3">Stock</th>
               <th className="py-3 pr-3">Category</th>
-              <th className="py-3 pr-3">Image URL</th>
+              <th className="py-3 pr-3">Photo</th>
               <th className="py-3 pr-3">Spotlight</th>
               <th className="py-3 pr-3">Remove</th>
             </tr>
@@ -172,13 +181,29 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
                   </select>
                 </td>
                 <td className="py-3 pr-3">
-                  <input
-                    value={reward.imageUrl}
-                    onChange={(event) =>
-                      updateReward(reward.id, { imageUrl: event.target.value })
-                    }
-                    className="focus-ring min-h-10 w-full min-w-64 rounded-md border border-journey-line px-3 text-sm"
-                  />
+                  <label className="focus-ring inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-journey-line bg-journey-white px-4 py-2 text-sm font-bold text-journey-black hover:bg-journey-mist">
+                    <ImagePlus className="h-4 w-4 text-journey-red" aria-hidden="true" />
+                    Upload Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (!file) {
+                          return;
+                        }
+
+                        void readImageAsDataUrl(file).then((imageUrl) =>
+                          updateReward(reward.id, { imageUrl }),
+                        );
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                  <p className="mt-2 text-xs font-bold text-journey-steel">
+                    Square photos display best.
+                  </p>
                 </td>
                 <td className="py-3 pr-3">
                   <input

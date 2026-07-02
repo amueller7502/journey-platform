@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CalendarClock,
@@ -17,6 +17,7 @@ import { PreviewModeBadge } from "@/components/PreviewModeBadge";
 import { SkinRuntimeClass } from "@/components/SkinRuntimeClass";
 import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
 import { DepartmentProgress } from "@/components/dashboard/DepartmentProgress";
+import { LeaderboardBoard } from "@/components/dashboard/LeaderboardBoard";
 import {
   type JourneyMoment,
   getJourneyMoments,
@@ -24,9 +25,7 @@ import {
 } from "@/lib/demo-moments";
 import {
   chapterStats,
-  fleetStandings,
   recognitions,
-  tvPanels,
 } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
 import { daysRemaining, formatMiles } from "@/lib/utils";
@@ -34,17 +33,22 @@ import { daysRemaining, formatMiles } from "@/lib/utils";
 export function TvDashboard() {
   const { state } = useJourneyState();
   const panels = useMemo(() => {
+    const configuredPanels = state.tvPanelSettings
+      .filter((panel) => panel.enabled)
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((panel) => panel.label);
+
     if (state.skinEnabled && state.activeSkinId !== "standard") {
-      return tvPanels;
+      return configuredPanels;
     }
 
-    return tvPanels.filter(
+    return configuredPanels.filter(
       (panel) =>
         panel !== "Odyssey Signal" &&
-        panel !== "North Stars Fleet" &&
         panel !== "15,700 / IMAX 1570",
     );
-  }, [state.activeSkinId, state.skinEnabled]);
+  }, [state.activeSkinId, state.skinEnabled, state.tvPanelSettings]);
   const [index, setIndex] = useState(0);
   const [journeyMoments, setJourneyMoments] = useState<JourneyMoment[]>([]);
   const spotlight = recognitions.find((recognition) => recognition.spotlight) ?? recognitions[0];
@@ -76,12 +80,14 @@ export function TvDashboard() {
   }, []);
 
   useEffect(() => {
+    const panelSetting = state.tvPanelSettings.find((item) => item.label === activePanel);
+    const seconds = panelSetting?.seconds ?? 7;
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % Math.max(panels.length, 1));
-    }, 7000);
+    }, seconds * 1000);
 
     return () => window.clearInterval(timer);
-  }, [panels.length]);
+  }, [activePanel, panels.length, state.tvPanelSettings]);
 
   const panel = useMemo(() => {
     if (activePanel === "Odyssey Signal") {
@@ -193,87 +199,10 @@ export function TvDashboard() {
       );
     }
 
-    if (activePanel === "North Stars Fleet") {
+    if (activePanel === "Recognition Leaderboard") {
       return (
-        <TvPanel icon={Route} eyebrow="North Stars Fleet" title="Fleet Progress">
-          <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
-            <div className="fleet-ocean odyssey-frame rounded-lg p-6">
-              <div className="relative z-10 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase text-journey-red tracking-normal">
-                    Animated North Stars Course
-                  </p>
-                  <p className="mt-2 max-w-xl text-2xl font-black text-journey-white">
-                    Every crew moves the whole building toward port.
-                  </p>
-                  <p className="mt-2 max-w-xl text-lg font-bold text-journey-line">
-                    Crews sail by shared recognition miles, with the whole building
-                    moving toward 15,700.
-                  </p>
-                </div>
-                <div className="rounded-md border border-journey-steel bg-journey-black/75 px-4 py-3 text-right">
-                  <p className="text-xs font-black uppercase text-journey-red">
-                    Current Leader
-                  </p>
-                  <p className="mt-1 text-3xl font-black text-journey-white">
-                    {fleetStandings[0].crew}
-                  </p>
-                </div>
-              </div>
-
-              {fleetStandings.map((standing, index) => {
-                const boatTop = 24 + index * 8.6;
-                const boatStyle = {
-                  "--boat-progress": `${standing.progress}`,
-                  "--boat-top": `${boatTop}%`,
-                  "--boat-delay": `${index * 0.22}s`,
-                } as CSSProperties;
-                const laneStyle = {
-                  "--lane-top": `${boatTop + 4}%`,
-                } as CSSProperties;
-
-                return (
-                  <div key={standing.rank}>
-                    <div className="fleet-lane" style={laneStyle} />
-                    <div className="fleet-boat" style={boatStyle}>
-                      <div className="fleet-sail">
-                        <div className="fleet-mast" />
-                      </div>
-                      <div className="fleet-hull" />
-                      <span className="fleet-rank">#{standing.rank}</span>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="fleet-horizon" />
-            </div>
-
-            <div className="grid gap-3">
-              {fleetStandings.map((standing) => (
-                <article
-                  key={standing.rank}
-                  className="rounded-lg border border-journey-steel bg-journey-coal p-4"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase text-journey-red">
-                        #{standing.rank} {standing.vessel}
-                      </p>
-                      <h3 className="mt-1 text-2xl font-black text-journey-white">
-                        {standing.crew}
-                      </h3>
-                    </div>
-                    <p className="text-xl font-black text-journey-white">
-                      {formatMiles(standing.miles)}
-                    </p>
-                  </div>
-                  <p className="mt-2 text-sm font-bold text-journey-line">
-                    {standing.signal}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
+        <TvPanel icon={Route} eyebrow="Recognition Leaderboard" title="Who's Moving North">
+          <LeaderboardBoard mode="tv" />
         </TvPanel>
       );
     }

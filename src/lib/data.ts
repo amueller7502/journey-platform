@@ -22,6 +22,7 @@ import {
   Settings,
   Sparkles,
   Store,
+  Trophy,
   User,
   Users,
 } from "lucide-react";
@@ -30,7 +31,6 @@ import type {
   DepartmentId,
   Employee,
   ExcellenceLog,
-  FleetStanding,
   JourneyCardArea,
   JourneySkin,
   MenuConfiguration,
@@ -43,6 +43,7 @@ import type {
   Redemption,
   Reward,
   Role,
+  TvPanelSetting,
 } from "./types";
 
 export const chapter = {
@@ -79,6 +80,14 @@ export const journeySkins: JourneySkin[] = [
     motionStyle: "Clean fades and projection sweeps only.",
     texture: "Subtle film grain",
     builderNotes: "Use this when Journey needs to feel reusable outside Chapter One.",
+    patternStyle: "film",
+    backgroundMode: "clean",
+    animationIntensity: 30,
+    funLevel: 20,
+    doodleDensity: 10,
+    titleTreatment: "clean",
+    cardTreatment: "flat",
+    frameStyle: "standard",
     palette: {
       primary: "#050505",
       secondary: "#ffffff",
@@ -92,16 +101,24 @@ export const journeySkins: JourneySkin[] = [
     name: "Odyssey / North Stars",
     status: "active",
     description:
-      "A premium North Stars voyage skin with storm-dark cinema, animated fleet progress, IMAX 15/70 projection cues, and restrained gold signal accents.",
+      "A premium North Stars skin with storm-dark cinema, recognition leaderboard energy, IMAX 15/70 projection cues, and restrained signal accents.",
     canDisable: true,
-    tvTreatment: "Opening signal card, animated fleet race, wave floor, projection sweep, 15/70 chapter card, and cinematic recognition wall",
+    tvTreatment: "Opening signal card, recognition leaderboard, wave floor, projection sweep, 15/70 chapter card, and cinematic recognition wall",
     headline: "North Stars",
     visualDirection:
       "Clean cinematic Odyssey without mythology clip art: naval silhouettes, waves, film perforations, premium typography, and Celebration red as the action color.",
-    motionStyle: "Slow ocean drift, ship bob, projector sweep, and large type transitions.",
+    motionStyle: "Slow wave drift, projector sweep, and large type transitions.",
     texture: "Film grain, waterline bands, and 15/70 frame marks",
     builderNotes:
       "Inspired by the provided North Stars reference while staying inside black, white, gray, and Celebration red with only subtle metallic signal accents.",
+    patternStyle: "waves",
+    backgroundMode: "immersive",
+    animationIntensity: 78,
+    funLevel: 64,
+    doodleDensity: 28,
+    titleTreatment: "blockbuster",
+    cardTreatment: "poster",
+    frameStyle: "filmstrip",
     palette: {
       primary: "#050505",
       secondary: "#d8d8d8",
@@ -123,6 +140,14 @@ export const journeySkins: JourneySkin[] = [
     motionStyle: "Draft",
     texture: "Draft",
     builderNotes: "Placeholder for future chapter development.",
+    patternStyle: "doodles",
+    backgroundMode: "playful",
+    animationIntensity: 55,
+    funLevel: 80,
+    doodleDensity: 70,
+    titleTreatment: "handbill",
+    cardTreatment: "ticket",
+    frameStyle: "ticket-stub",
     palette: {
       primary: "#050505",
       secondary: "#f4f4f4",
@@ -1047,6 +1072,7 @@ export const redemptions: Redemption[] = [
 export const employeeNav: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
   { label: "My Journey", href: "/my-journey", icon: Route },
+  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Trading Post", href: "/trading-post", icon: Store },
   { label: "Community", href: "/community", icon: Users },
   { label: "Profile", href: "/profile", icon: User },
@@ -1056,6 +1082,7 @@ export const managerNav: NavItem[] = [
   { label: "Capture Moment", href: "/manager/recognize", icon: HandHeart },
   { label: "Journey Card Entry", href: "/manager/passport", icon: QrCode },
   { label: "Excellence Checks", href: "/manager/excellence-checks", icon: ClipboardCheck },
+  { label: "Leaderboard", href: "/manager/leaderboard", icon: Trophy },
   { label: "Pending Rewards", href: "/manager/pending-rewards", icon: Gift },
   { label: "Daily Spotlight", href: "/manager/daily-spotlight", icon: Sparkles },
   { label: "Moment Feed", href: "/manager/recognition-feed", icon: Megaphone },
@@ -1064,6 +1091,7 @@ export const managerNav: NavItem[] = [
 export const adminNav: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Employees", href: "/admin/employees", icon: Users },
+  { label: "Leaderboard", href: "/admin/leaderboard", icon: Trophy },
   { label: "Recognition Library", href: "/admin/recognition-library", icon: Library },
   { label: "Rewards / Inventory", href: "/admin/rewards", icon: Package },
   { label: "Journey Cards", href: "/admin/passports", icon: QrCode },
@@ -1248,7 +1276,7 @@ export const filmFacts = [
   "15/70 reference",
   "Projection-inspired motion",
   "Film grain and perforation accents",
-  "Crew fleet race, no individual TV leaderboard",
+  "Recognition leaderboard available in app and TV display",
 ];
 
 export const journalEvents = [
@@ -1272,7 +1300,7 @@ export const journalEvents = [
 export const tvPanels = [
   "Odyssey Signal",
   "Community Progress",
-  "North Stars Fleet",
+  "Recognition Leaderboard",
   "15,700 / IMAX 1570",
   "Today's Spotlight",
   "Recognition Wall",
@@ -1281,72 +1309,13 @@ export const tvPanels = [
   "Countdown",
 ];
 
-export const fleetStandings: FleetStanding[] = [
-  {
-    rank: 1,
-    crew: "Boat 01",
-    vessel: "North Star",
-    miles: 1830,
-    progress: 88,
-    signal: "Presentation and detail",
-  },
-  {
-    rank: 2,
-    crew: "Boat 02",
-    vessel: "Beacon",
-    miles: 1710,
-    progress: 79,
-    signal: "Guest recovery",
-  },
-  {
-    rank: 3,
-    crew: "Boat 03",
-    vessel: "Horizon",
-    miles: 1645,
-    progress: 72,
-    signal: "Cross-department assists",
-  },
-  {
-    rank: 4,
-    crew: "Boat 04",
-    vessel: "Marquee",
-    miles: 1510,
-    progress: 65,
-    signal: "Reliability streaks",
-  },
-  {
-    rank: 5,
-    crew: "Boat 05",
-    vessel: "Signal",
-    miles: 1365,
-    progress: 56,
-    signal: "Excellence checks",
-  },
-  {
-    rank: 6,
-    crew: "Boat 06",
-    vessel: "Reel One",
-    miles: 1220,
-    progress: 49,
-    signal: "Weekend coverage",
-  },
-  {
-    rank: 7,
-    crew: "Boat 07",
-    vessel: "House Light",
-    miles: 1105,
-    progress: 41,
-    signal: "Survey mentions",
-  },
-  {
-    rank: 8,
-    crew: "Boat 08",
-    vessel: "Encore",
-    miles: 980,
-    progress: 34,
-    signal: "Crew recognition",
-  },
-];
+export const tvPanelSettings: TvPanelSetting[] = tvPanels.map((panel, index) => ({
+  id: panel.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, ""),
+  label: panel,
+  enabled: true,
+  sortOrder: index + 1,
+  seconds: panel === "Recognition Wall" ? 9 : 7,
+}));
 
 export const iconNames = [
   "Award",

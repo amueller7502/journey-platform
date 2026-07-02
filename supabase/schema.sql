@@ -1,7 +1,6 @@
 create extension if not exists pgcrypto;
 
 drop table if exists public.daily_spotlights cascade;
-drop table if exists public.tv_fleet_standings cascade;
 drop table if exists public.tv_display_settings cascade;
 drop table if exists public.reward_redemptions cascade;
 drop table if exists public.rewards cascade;
@@ -53,6 +52,14 @@ create table public.skins (
   motion_style text,
   texture text,
   builder_notes text,
+  pattern_style text not null default 'film' check (pattern_style in ('none', 'film', 'doodles', 'waves', 'marquee')),
+  background_mode text not null default 'clean' check (background_mode in ('clean', 'cinematic', 'playful', 'immersive')),
+  animation_intensity integer not null default 30 check (animation_intensity between 0 and 100),
+  fun_level integer not null default 20 check (fun_level between 0 and 100),
+  doodle_density integer not null default 10 check (doodle_density between 0 and 100),
+  title_treatment text not null default 'clean' check (title_treatment in ('clean', 'marquee', 'blockbuster', 'handbill')),
+  card_treatment text not null default 'flat' check (card_treatment in ('flat', 'poster', 'ticket', 'lobby')),
+  frame_style text not null default 'standard' check (frame_style in ('standard', 'filmstrip', 'ticket-stub', 'lightbox')),
   palette jsonb not null default '{}'::jsonb,
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
@@ -112,6 +119,9 @@ create table public.employees (
   email text,
   access_code text unique,
   account_status text not null default 'invited' check (account_status in ('invited', 'active', 'disabled')),
+  profile_photo_url text,
+  pending_profile_photo_url text,
+  profile_photo_status text not null default 'none' check (profile_photo_status in ('none', 'pending', 'approved', 'rejected')),
   active boolean not null default true,
   hired_on date,
   created_at timestamptz not null default now()
@@ -241,7 +251,7 @@ create table public.tv_display_settings (
   chapter_id uuid not null references public.chapters (id) on delete cascade,
   panel_order text[] not null default array[
     'community_progress',
-    'north_stars_fleet',
+    'recognition_leaderboard',
     'imax_1570_reference',
     'todays_spotlight',
     'recognition_wall',
@@ -249,23 +259,10 @@ create table public.tv_display_settings (
     'reward_spotlight',
     'countdown'
   ],
+  panel_settings jsonb not null default '[]'::jsonb,
   seconds_per_panel integer not null default 7 check (seconds_per_panel between 4 and 60),
-  show_individual_leaderboard boolean not null default false,
-  updated_at timestamptz not null default now(),
-  check (show_individual_leaderboard = false)
-);
-
-create table public.tv_fleet_standings (
-  id uuid primary key default gen_random_uuid(),
-  chapter_id uuid not null references public.chapters (id) on delete cascade,
-  rank integer not null check (rank between 1 and 99),
-  crew_name text not null,
-  vessel_name text not null,
-  miles integer not null default 0 check (miles >= 0),
-  progress integer not null default 0 check (progress between 0 and 100),
-  signal text not null,
-  updated_at timestamptz not null default now(),
-  unique (chapter_id, rank)
+  show_recognition_leaderboard boolean not null default true,
+  updated_at timestamptz not null default now()
 );
 
 create index recognition_types_chapter_idx on public.recognition_types (chapter_id, enabled, sort_order);
@@ -281,7 +278,6 @@ create index reward_redemptions_status_idx on public.reward_redemptions (status)
 create index employees_passport_idx on public.employees (passport_id);
 create index employees_access_code_idx on public.employees (access_code);
 create index menu_items_role_idx on public.menu_items (role, enabled, sort_order);
-create index tv_fleet_standings_chapter_idx on public.tv_fleet_standings (chapter_id, rank);
 
 create or replace function public.current_employee_id()
 returns uuid
@@ -329,7 +325,6 @@ alter table public.rewards enable row level security;
 alter table public.reward_redemptions enable row level security;
 alter table public.daily_spotlights enable row level security;
 alter table public.tv_display_settings enable row level security;
-alter table public.tv_fleet_standings enable row level security;
 
 create policy "authenticated users read active chapters"
   on public.chapters for select to authenticated
@@ -456,16 +451,5 @@ create policy "authenticated users read tv settings"
 
 create policy "admins manage tv settings"
   on public.tv_display_settings for all to authenticated
-  using (public.current_journey_role() = 'admin')
-  with check (
-    public.current_journey_role() = 'admin'
-    and show_individual_leaderboard = false
-  );
-
-create policy "authenticated users read tv fleet standings"
-  on public.tv_fleet_standings for select to authenticated using (true);
-
-create policy "admins manage tv fleet standings"
-  on public.tv_fleet_standings for all to authenticated
   using (public.current_journey_role() = 'admin')
   with check (public.current_journey_role() = 'admin');

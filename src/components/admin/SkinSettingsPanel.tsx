@@ -1,10 +1,43 @@
 "use client";
 
-import { Palette, Plus, Power, Save, ToggleLeft, ToggleRight } from "lucide-react";
+import { Palette, Plus, Power, Save, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
 import type { JourneySkin } from "@/lib/types";
+
+const patternOptions: NonNullable<JourneySkin["patternStyle"]>[] = [
+  "none",
+  "film",
+  "doodles",
+  "waves",
+  "marquee",
+];
+const backgroundOptions: NonNullable<JourneySkin["backgroundMode"]>[] = [
+  "clean",
+  "cinematic",
+  "playful",
+  "immersive",
+];
+const titleOptions: NonNullable<JourneySkin["titleTreatment"]>[] = [
+  "clean",
+  "marquee",
+  "blockbuster",
+  "handbill",
+];
+const cardOptions: NonNullable<JourneySkin["cardTreatment"]>[] = [
+  "flat",
+  "poster",
+  "ticket",
+  "lobby",
+];
+const frameOptions: NonNullable<JourneySkin["frameStyle"]>[] = [
+  "standard",
+  "filmstrip",
+  "ticket-stub",
+  "lightbox",
+];
 
 export function SkinSettingsPanel({
   skins,
@@ -63,6 +96,14 @@ export function SkinSettingsPanel({
         motionStyle: "Describe motion cues for TV and hero surfaces.",
         texture: "Describe grain, frames, light, or environmental texture.",
         builderNotes: "Internal creative notes for this skin.",
+        patternStyle: "doodles",
+        backgroundMode: "playful",
+        animationIntensity: 50,
+        funLevel: 70,
+        doodleDensity: 60,
+        titleTreatment: "handbill",
+        cardTreatment: "ticket",
+        frameStyle: "filmstrip",
         palette: {
           primary: "#050505",
           secondary: "#ffffff",
@@ -92,6 +133,22 @@ export function SkinSettingsPanel({
       })),
     }));
     setSelectedSkin(id);
+  }
+
+  function removeSkin(id: string) {
+    if (id === "standard") {
+      return;
+    }
+
+    setSaved(false);
+    const nextSkin = configuredSkins.find((skin) => skin.id !== id) ?? configuredSkins[0];
+    setSelectedSkin(nextSkin?.id ?? "standard");
+    updateState((current) => ({
+      ...current,
+      activeSkinId: current.activeSkinId === id ? "standard" : current.activeSkinId,
+      skinEnabled: current.activeSkinId === id ? false : current.skinEnabled,
+      skins: current.skins.filter((skin) => skin.id !== id),
+    }));
   }
 
   return (
@@ -200,6 +257,16 @@ export function SkinSettingsPanel({
               >
                 {state.skinEnabled ? "Disable Skin" : "Enable Skin"}
               </Button>
+              {selected.id !== "standard" ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  icon={Trash2}
+                  onClick={() => removeSkin(selected.id)}
+                >
+                  Delete Skin
+                </Button>
+              ) : null}
             </div>
           </div>
 
@@ -252,6 +319,57 @@ export function SkinSettingsPanel({
               className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
             />
           </label>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <SkinSelect
+              label="Pattern Style"
+              value={selected.patternStyle ?? "film"}
+              options={patternOptions}
+              onChange={(value) => updateSkin(selected.id, { patternStyle: value })}
+            />
+            <SkinSelect
+              label="Background Mode"
+              value={selected.backgroundMode ?? "cinematic"}
+              options={backgroundOptions}
+              onChange={(value) => updateSkin(selected.id, { backgroundMode: value })}
+            />
+            <SkinSelect
+              label="Title Treatment"
+              value={selected.titleTreatment ?? "clean"}
+              options={titleOptions}
+              onChange={(value) => updateSkin(selected.id, { titleTreatment: value })}
+            />
+            <SkinSelect
+              label="Card Treatment"
+              value={selected.cardTreatment ?? "poster"}
+              options={cardOptions}
+              onChange={(value) => updateSkin(selected.id, { cardTreatment: value })}
+            />
+            <SkinSelect
+              label="Frame Style"
+              value={selected.frameStyle ?? "filmstrip"}
+              options={frameOptions}
+              onChange={(value) => updateSkin(selected.id, { frameStyle: value })}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <SkinSlider
+              label="Animation Intensity"
+              value={selected.animationIntensity ?? 60}
+              onChange={(value) => updateSkin(selected.id, { animationIntensity: value })}
+            />
+            <SkinSlider
+              label="Fun Level"
+              value={selected.funLevel ?? 50}
+              onChange={(value) => updateSkin(selected.id, { funLevel: value })}
+            />
+            <SkinSlider
+              label="Doodle Density"
+              value={selected.doodleDensity ?? 20}
+              onChange={(value) => updateSkin(selected.id, { doodleDensity: value })}
+            />
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-journey-black">
@@ -335,10 +453,12 @@ export function SkinSettingsPanel({
           </div>
 
           <div
-            className="overflow-hidden rounded-lg border border-journey-line p-5 text-journey-white"
+            className={`skin-preview-pattern skin-pattern-${selected.patternStyle ?? "film"} overflow-hidden rounded-lg border border-journey-line p-5 text-journey-white`}
             style={{
               background: `linear-gradient(135deg, ${selected.palette.deep ?? selected.palette.primary}, ${selected.palette.primary})`,
-            }}
+              "--skin-preview-density": `${(selected.doodleDensity ?? 20) / 100}`,
+              "--skin-preview-speed": `${Math.max(5, 16 - (selected.animationIntensity ?? 50) / 8)}s`,
+            } as CSSProperties}
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -354,6 +474,24 @@ export function SkinSettingsPanel({
                 <p className="mt-3 max-w-2xl text-sm font-bold leading-6 text-journey-line">
                   {selected.visualDirection || selected.description}
                 </p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {[
+                    selected.patternStyle,
+                    selected.backgroundMode,
+                    selected.titleTreatment,
+                    selected.cardTreatment,
+                    selected.frameStyle,
+                  ].map((value) =>
+                    value ? (
+                      <span
+                        key={value}
+                        className="rounded-sm border border-journey-steel bg-journey-black/60 px-2 py-1 text-xs font-black uppercase text-journey-line"
+                      >
+                        {value}
+                      </span>
+                    ) : null,
+                  )}
+                </div>
               </div>
               <div
                 className="rounded-md border px-4 py-3 text-right"
@@ -413,5 +551,61 @@ export function SkinSettingsPanel({
         </div>
       </div>
     </div>
+  );
+}
+
+function SkinSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: T[];
+  onChange: (value: T) => void;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-bold text-journey-black">
+      {label}
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function SkinSlider({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-bold text-journey-black">
+      <span className="flex items-center justify-between gap-3">
+        {label}
+        <span className="font-black text-journey-red">{value}</span>
+      </span>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="accent-journey-red"
+      />
+    </label>
   );
 }

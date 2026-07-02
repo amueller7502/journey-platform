@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, Plus, Save, ToggleLeft, ToggleRight } from "lucide-react";
+import { ClipboardList, Plus, Save, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
@@ -70,6 +70,28 @@ export function JourneyCardDesigner() {
     });
   }
 
+  function removeArea(id: string) {
+    setSaved(false);
+    const nextArea = areas.find((area) => area.id !== id);
+    setSelectedAreaId(nextArea?.id ?? "");
+    updateState((current) => ({
+      ...current,
+      journeyCardAreas: current.journeyCardAreas.filter((area) => area.id !== id),
+      employees: current.employees.map((employee) =>
+        employee.journeyCardAreaId === id
+          ? {
+              ...employee,
+              journeyCardAreaId: nextArea?.id,
+            }
+          : employee,
+      ),
+      recognitionTypes: current.recognitionTypes.map((type) => ({
+        ...type,
+        journeyCardAreaIds: type.journeyCardAreaIds?.filter((areaId) => areaId !== id),
+      })),
+    }));
+  }
+
   function updateTask(id: string, patch: Partial<RecognitionType>) {
     setSaved(false);
     updateState((current) => ({
@@ -124,6 +146,14 @@ export function JourneyCardDesigner() {
         recognitionTypes: [...current.recognitionTypes, nextTask],
       };
     });
+  }
+
+  function removeTask(id: string) {
+    setSaved(false);
+    updateState((current) => ({
+      ...current,
+      recognitionTypes: current.recognitionTypes.filter((type) => type.id !== id),
+    }));
   }
 
   if (!selectedArea) {
@@ -219,6 +249,14 @@ export function JourneyCardDesigner() {
               >
                 {selectedArea.enabled ? "Enabled" : "Disabled"}
               </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                icon={Trash2}
+                onClick={() => removeArea(selectedArea.id)}
+              >
+                Delete Area
+              </Button>
             </div>
 
             <label className="mt-4 grid gap-2 text-sm font-bold text-journey-black">
@@ -290,6 +328,7 @@ export function JourneyCardDesigner() {
                   <th className="p-3">Standard</th>
                   <th className="p-3">Miles</th>
                   <th className="p-3">Status</th>
+                  <th className="p-3">Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -363,6 +402,16 @@ export function JourneyCardDesigner() {
                           onClick={() => updateTask(task.id, { enabled: !task.enabled })}
                         >
                           {task.enabled ? "Enabled" : "Disabled"}
+                        </Button>
+                      </td>
+                      <td className="p-3">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          icon={Trash2}
+                          onClick={() => removeTask(task.id)}
+                        >
+                          Delete
                         </Button>
                       </td>
                     </tr>

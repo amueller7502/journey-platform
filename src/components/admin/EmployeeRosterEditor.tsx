@@ -1,8 +1,20 @@
 "use client";
 
-import { KeyRound, Plus, Save, ToggleLeft, ToggleRight, UserPlus } from "lucide-react";
+import Image from "next/image";
+import {
+  CheckCircle2,
+  KeyRound,
+  Plus,
+  Save,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { EmployeeImportTool } from "@/components/admin/EmployeeImportTool";
 import {
   buildJourneyCardUrl,
   getJourneyCardAreaForEmployee,
@@ -57,7 +69,11 @@ export function EmployeeRosterEditor() {
 
   const activeCrewCount = employees.filter(
     (employee) => employee.role === "employee" && employee.active !== false,
-    ).length;
+  ).length;
+  const pendingPhotoRequests = employees.filter(
+    (employee) =>
+      employee.profilePhotoStatus === "pending" && employee.pendingProfilePhotoUrl,
+  );
 
   function suggestedAreaId(department: DepartmentId) {
     return (
@@ -94,7 +110,8 @@ export function EmployeeRosterEditor() {
         initials: makeInitials(name),
         passportId,
         passportQrUrl: buildJourneyCardUrl(passportId),
-        journeyCardAreaId: newEmployee.journeyCardAreaId || suggestedAreaId(newEmployee.department),
+        journeyCardAreaId:
+          newEmployee.journeyCardAreaId || suggestedAreaId(newEmployee.department),
         email: newEmployee.email.trim() || undefined,
         accessCode: newEmployee.accessCode.trim() || makeAccessCode(name),
         accountStatus: status,
@@ -124,6 +141,47 @@ export function EmployeeRosterEditor() {
     }));
   }
 
+  function deleteEmployee(id: string) {
+    setSaved(false);
+    updateState((current) => ({
+      ...current,
+      employees: current.employees.filter((employee) => employee.id !== id),
+    }));
+  }
+
+  function approveProfilePhoto(id: string) {
+    setSaved(false);
+    updateState((current) => ({
+      ...current,
+      employees: current.employees.map((employee) =>
+        employee.id === id
+          ? {
+              ...employee,
+              profilePhotoUrl: employee.pendingProfilePhotoUrl,
+              pendingProfilePhotoUrl: undefined,
+              profilePhotoStatus: "approved",
+            }
+          : employee,
+      ),
+    }));
+  }
+
+  function rejectProfilePhoto(id: string) {
+    setSaved(false);
+    updateState((current) => ({
+      ...current,
+      employees: current.employees.map((employee) =>
+        employee.id === id
+          ? {
+              ...employee,
+              pendingProfilePhotoUrl: undefined,
+              profilePhotoStatus: "rejected",
+            }
+          : employee,
+      ),
+    }));
+  }
+
   return (
     <div className="grid gap-5">
       <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
@@ -147,6 +205,63 @@ export function EmployeeRosterEditor() {
           </Button>
         </div>
       </div>
+
+      <EmployeeImportTool />
+
+      {pendingPhotoRequests.length ? (
+        <div className="rounded-lg border border-journey-line bg-journey-white p-4 shadow-line">
+          <p className="text-xs font-black uppercase text-journey-red">
+            Profile Photo Approvals
+          </p>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            {pendingPhotoRequests.map((employee) => (
+              <div
+                key={employee.id}
+                className="flex items-center justify-between gap-4 rounded-lg border border-journey-line p-3"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-journey-mist">
+                    <Image
+                      src={employee.pendingProfilePhotoUrl ?? ""}
+                      alt=""
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-black text-journey-black">
+                      {employee.name}
+                    </p>
+                    <p className="text-sm font-bold text-journey-steel">
+                      Waiting for approval
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    icon={CheckCircle2}
+                    onClick={() => approveProfilePhoto(employee.id)}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    icon={XCircle}
+                    onClick={() => rejectProfilePhoto(employee.id)}
+                  >
+                    Reject
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="rounded-lg border border-journey-line bg-journey-mist p-4">
         <div className="mb-4 flex items-start gap-3">
@@ -305,7 +420,7 @@ export function EmployeeRosterEditor() {
       />
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1580px] border-collapse text-left">
+        <table className="w-full min-w-[1680px] border-collapse text-left">
           <thead>
             <tr className="border-b border-journey-line text-xs font-black uppercase text-journey-steel">
               <th className="py-3 pr-3">Status</th>
@@ -320,6 +435,7 @@ export function EmployeeRosterEditor() {
               <th className="py-3 pr-3">Miles</th>
               <th className="py-3 pr-3">Weekly</th>
               <th className="py-3 pr-3">Streak</th>
+              <th className="py-3 pr-3">Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -525,6 +641,16 @@ export function EmployeeRosterEditor() {
                       }
                       className="focus-ring min-h-10 w-24 rounded-md border border-journey-line px-3 font-black"
                     />
+                  </td>
+                  <td className="py-3 pr-3">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      icon={Trash2}
+                      onClick={() => deleteEmployee(employee.id)}
+                    >
+                      Delete
+                    </Button>
                   </td>
                 </tr>
               );

@@ -75,6 +75,9 @@ export type Employee = {
   email?: string;
   accessCode?: string;
   accountStatus?: "invited" | "active" | "disabled";
+  profilePhotoUrl?: string;
+  pendingProfilePhotoUrl?: string;
+  profilePhotoStatus?: "none" | "pending" | "approved" | "rejected";
   active?: boolean;
   miles: number;
   weeklyMiles: number;
@@ -142,6 +145,14 @@ export type JourneySkin = {
   motionStyle?: string;
   texture?: string;
   builderNotes?: string;
+  patternStyle?: "none" | "film" | "doodles" | "waves" | "marquee";
+  backgroundMode?: "clean" | "cinematic" | "playful" | "immersive";
+  animationIntensity?: number;
+  funLevel?: number;
+  doodleDensity?: number;
+  titleTreatment?: "clean" | "marquee" | "blockbuster" | "handbill";
+  cardTreatment?: "flat" | "poster" | "ticket" | "lobby";
+  frameStyle?: "standard" | "filmstrip" | "ticket-stub" | "lightbox";
   palette: {
     primary: string;
     secondary: string;
@@ -149,6 +160,14 @@ export type JourneySkin = {
     foil?: string;
     deep?: string;
   };
+};
+
+export type TvPanelSetting = {
+  id: string;
+  label: string;
+  enabled: boolean;
+  sortOrder: number;
+  seconds: number;
 };
 
 export type MenuConfiguration = {
@@ -159,15 +178,6 @@ export type MenuConfiguration = {
   purpose: string;
   enabled: boolean;
   reusable: boolean;
-};
-
-export type FleetStanding = {
-  rank: number;
-  crew: string;
-  vessel: string;
-  miles: number;
-  progress: number;
-  signal: string;
 };
 
 export type Redemption = {

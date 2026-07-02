@@ -1,52 +1,29 @@
 import {
-  LockKeyhole,
-  MonitorPlay,
   Navigation,
-  Palette,
-  ShieldCheck,
   SlidersHorizontal,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ChapterSettingsEditor } from "@/components/admin/ChapterSettingsEditor";
 import { FeatureBuildoutPanel } from "@/components/admin/FeatureBuildoutPanel";
 import { MenuConfigurationPanel } from "@/components/admin/MenuConfigurationPanel";
+import { SettingsActionCards } from "@/components/admin/SettingsActionCards";
 import { SkinSettingsPanel } from "@/components/admin/SkinSettingsPanel";
-import { MetricCard } from "@/components/ui/MetricCard";
+import { TvDisplaySettingsPanel } from "@/components/admin/TvDisplaySettingsPanel";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import {
   activeSkin,
   chapterSettings,
   journeySkins,
   menuConfigurations,
-  tvPanels,
 } from "@/lib/data";
 
 export default function SettingsPage() {
   return (
     <AppShell role="admin" title="Settings" eyebrow="Rules and Display">
-      <div className="grid gap-5 lg:grid-cols-3">
-        <MetricCard
-          label="Recognition Entry"
-          value="Manager"
-          detail="Employees cannot self-submit"
-          icon={LockKeyhole}
-        />
-        <MetricCard
-          label="TV Mode"
-          value={`${tvPanels.length} panels`}
-          detail="Community recognition loop"
-          icon={MonitorPlay}
-        />
-        <MetricCard
-          label="Active Skin"
-          value={activeSkin.name}
-          detail="Can be disabled per chapter"
-          icon={Palette}
-        />
-      </div>
+      <SettingsActionCards />
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <Panel>
+        <Panel id="recognition-policy">
           <PanelHeader title="Recognition Policy" eyebrow="Access" />
           <div className="grid gap-3">
             {[
@@ -64,30 +41,18 @@ export default function SettingsPage() {
             ))}
           </div>
         </Panel>
-        <Panel>
+        <Panel id="tv-dashboard-settings">
           <PanelHeader
             title="TV Dashboard"
             eyebrow="Display loop"
             action={<SlidersHorizontal className="h-5 w-5 text-journey-red" aria-hidden="true" />}
           />
-          <div className="grid gap-3">
-            {tvPanels.map((panel, index) => (
-              <div
-                key={panel}
-                className="flex items-center justify-between rounded-lg border border-journey-line p-4"
-              >
-                <span className="font-black text-journey-black">{panel}</span>
-                <span className="text-sm font-bold text-journey-steel">
-                  {index + 1}
-                </span>
-              </div>
-            ))}
-          </div>
+          <TvDisplaySettingsPanel />
         </Panel>
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
-        <Panel>
+        <Panel id="skin-developer">
           <PanelHeader title="Skin Developer" eyebrow="Chapter visuals" />
           <SkinSettingsPanel skins={journeySkins} activeSkinId={activeSkin.id} />
         </Panel>

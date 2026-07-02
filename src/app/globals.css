@@ -155,162 +155,51 @@ textarea {
   animation: tvSignalDrift 13s ease-in-out infinite;
 }
 
-.fleet-ocean {
+.skin-preview-pattern {
   position: relative;
-  overflow: hidden;
-  min-height: 520px;
-  border: 1px solid var(--skin-line);
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.09), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 100%),
-    linear-gradient(180deg, rgba(7, 24, 32, 0.9), rgba(2, 8, 11, 0.98));
-  background-size:
-    auto,
-    100% 54px,
-    auto;
+  isolation: isolate;
 }
 
-.fleet-ocean::before,
-.fleet-ocean::after {
+.skin-preview-pattern::before {
   content: "";
   position: absolute;
-  left: -20%;
-  width: 140%;
-  height: 130px;
-  background:
-    radial-gradient(70px 20px at 50% 100%, rgba(255, 255, 255, 0.24), transparent 72%),
-    radial-gradient(90px 24px at 0% 100%, rgba(201, 168, 77, 0.18), transparent 72%);
-  background-size: 190px 70px;
-  opacity: 0.65;
-  animation: waveDrift 12s linear infinite;
+  inset: 0;
+  z-index: -1;
+  opacity: calc(0.12 + var(--skin-preview-density, 0.2) * 0.35);
+  animation: skinPatternDrift var(--skin-preview-speed, 10s) linear infinite;
 }
 
-.fleet-ocean::before {
-  bottom: 24px;
+.skin-pattern-doodles::before {
+  background-image:
+    radial-gradient(circle at 10% 20%, transparent 0 11px, rgba(255, 255, 255, 0.95) 12px 13px, transparent 14px),
+    linear-gradient(45deg, transparent 0 45%, rgba(255, 255, 255, 0.95) 46% 50%, transparent 51%),
+    radial-gradient(circle at 70% 30%, transparent 0 18px, rgba(215, 25, 32, 0.9) 19px 21px, transparent 22px),
+    linear-gradient(90deg, transparent 0 35%, rgba(255, 255, 255, 0.9) 36% 42%, transparent 43%);
+  background-size: 120px 90px, 90px 90px, 160px 130px, 150px 120px;
 }
 
-.fleet-ocean::after {
-  bottom: 92px;
-  opacity: 0.32;
-  animation-duration: 18s;
-  animation-direction: reverse;
+.skin-pattern-film::before {
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 255, 255, 0.8) 18px 23px, transparent 23px 40px),
+    repeating-linear-gradient(0deg, transparent 0 36px, rgba(215, 25, 32, 0.5) 36px 38px, transparent 38px 76px);
 }
 
-.fleet-lane {
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: var(--lane-top);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+.skin-pattern-waves::before {
+  background-image:
+    radial-gradient(70px 18px at 50% 100%, rgba(255, 255, 255, 0.75), transparent 72%),
+    radial-gradient(90px 24px at 0% 100%, rgba(215, 25, 32, 0.45), transparent 72%);
+  background-size: 180px 70px;
 }
 
-.fleet-boat {
-  position: absolute;
-  z-index: 3;
-  left: calc(var(--boat-progress) * 1%);
-  top: var(--boat-top);
-  width: 96px;
-  transform: translate(-50%, -50%);
-  animation: boatBob 3.6s ease-in-out infinite;
-  animation-delay: var(--boat-delay);
+.skin-pattern-marquee::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 3px, transparent 4px),
+    linear-gradient(90deg, rgba(215, 25, 32, 0.35), transparent, rgba(215, 25, 32, 0.35));
+  background-size: 42px 42px, 100% 100%;
 }
 
-.fleet-horizon {
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  top: 18%;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(201, 168, 77, 0.45),
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
-  box-shadow: 0 0 28px rgba(201, 168, 77, 0.22);
-}
-
-.fleet-sail {
-  position: relative;
-  width: 74px;
-  height: 58px;
-  margin-inline: auto;
-}
-
-.fleet-sail::before,
-.fleet-sail::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-}
-
-.fleet-sail::before {
-  left: 32px;
-  border-width: 0 0 58px 30px;
-  border-color: transparent transparent rgba(255, 255, 255, 0.92) transparent;
-}
-
-.fleet-sail::after {
-  right: 34px;
-  border-width: 30px 22px 0 0;
-  border-color: var(--skin-foil) transparent transparent transparent;
-}
-
-.fleet-mast {
-  position: absolute;
-  left: 48px;
-  top: 0;
-  z-index: 2;
-  height: 66px;
-  width: 3px;
-  background: var(--skin-foil);
-}
-
-.fleet-hull {
-  height: 17px;
-  border-radius: 0 0 999px 999px;
-  background: linear-gradient(90deg, #d71920, #7a0c10);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-}
-
-.fleet-rank {
-  position: absolute;
-  right: 0;
-  top: 40px;
-  display: flex;
-  min-width: 36px;
-  justify-content: center;
-  border-radius: 4px;
-  border: 1px solid var(--skin-line);
-  background: rgba(5, 5, 5, 0.86);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 900;
-  padding: 4px 6px;
-}
-
-@keyframes waveDrift {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(190px);
-  }
-}
-
-@keyframes boatBob {
-  0%,
-  100% {
-    transform: translate(-50%, -52%) rotate(-1deg);
-  }
-  50% {
-    transform: translate(-50%, -46%) rotate(1.5deg);
-  }
+.skin-pattern-none::before {
+  display: none;
 }
 
 @keyframes projectionSweep {
@@ -333,6 +222,15 @@ textarea {
   }
 }
 
+@keyframes skinPatternDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(90px, 40px, 0);
+  }
+}
+
 .focus-ring {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -340,4 +238,41 @@ textarea {
 
 .focus-ring:focus-visible {
   outline-color: #d71920;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .journey-print-section,
+  .journey-print-section * {
+    visibility: visible;
+  }
+
+  .journey-print-section {
+    position: absolute;
+    inset: 0;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .journey-card-sheet {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25in;
+    padding: 0.25in;
+  }
+
+  .journey-print-card {
+    break-inside: avoid;
+    min-height: 5in;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
 }

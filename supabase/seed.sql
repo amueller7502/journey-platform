@@ -5,12 +5,20 @@ insert into public.skins (
   description,
   can_disable,
   tv_treatment,
+  pattern_style,
+  background_mode,
+  animation_intensity,
+  fun_level,
+  doodle_density,
+  title_treatment,
+  card_treatment,
+  frame_style,
   palette,
   sort_order
 ) values
-  ('standard', 'Cinema Standard', 'available', 'Clean black, white, gray, and Celebration red base system.', false, 'Standard recognition loop', '{"primary":"#050505","secondary":"#ffffff","accent":"#d71920"}', 1),
-  ('odyssey', 'Odyssey / North Stars', 'active', 'Naval voyage, IMAX 1570 film cues, animated waves, and fleet standings.', true, 'Fleet race, film grain, projection sweep, and 15/70 chapter card', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
-  ('dune_3', 'Dune 3', 'draft', 'Future chapter skin slot for desert and premium event theming.', true, 'Draft concept', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
+  ('standard', 'Cinema Standard', 'available', 'Clean black, white, gray, and Celebration red base system.', false, 'Standard recognition loop', 'film', 'clean', 30, 20, 10, 'clean', 'flat', 'standard', '{"primary":"#050505","secondary":"#ffffff","accent":"#d71920"}', 1),
+  ('odyssey', 'Odyssey / North Stars', 'active', 'Odyssey skin with IMAX 15/70 film cues, projection texture, and recognition leaderboard energy.', true, 'Opening signal card, recognition leaderboard, film grain, projection sweep, and 15/70 chapter card', 'waves', 'immersive', 78, 64, 28, 'blockbuster', 'poster', 'filmstrip', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
+  ('dune_3', 'Dune 3', 'draft', 'Future chapter skin slot for desert and premium event theming.', true, 'Draft concept', 'doodles', 'playful', 55, 80, 70, 'handbill', 'ticket', 'ticket-stub', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
 
 insert into public.chapters (
   id,
@@ -239,27 +247,9 @@ insert into public.daily_spotlights (
 insert into public.tv_display_settings (
   chapter_id,
   seconds_per_panel,
-  show_individual_leaderboard
+  show_recognition_leaderboard
 ) values (
   '11111111-1111-4111-8111-111111111111',
   7,
-  false
+  true
 );
-
-insert into public.tv_fleet_standings (
-  chapter_id,
-  rank,
-  crew_name,
-  vessel_name,
-  miles,
-  progress,
-  signal
-) values
-  ('11111111-1111-4111-8111-111111111111', 1, 'Boat 01', 'North Star', 1830, 88, 'Presentation and detail'),
-  ('11111111-1111-4111-8111-111111111111', 2, 'Boat 02', 'Beacon', 1710, 79, 'Guest recovery'),
-  ('11111111-1111-4111-8111-111111111111', 3, 'Boat 03', 'Horizon', 1645, 72, 'Cross-department assists'),
-  ('11111111-1111-4111-8111-111111111111', 4, 'Boat 04', 'Marquee', 1510, 65, 'Reliability streaks'),
-  ('11111111-1111-4111-8111-111111111111', 5, 'Boat 05', 'Signal', 1365, 56, 'Excellence checks'),
-  ('11111111-1111-4111-8111-111111111111', 6, 'Boat 06', 'Reel One', 1220, 49, 'Weekend coverage'),
-  ('11111111-1111-4111-8111-111111111111', 7, 'Boat 07', 'House Light', 1105, 41, 'Survey mentions'),
-  ('11111111-1111-4111-8111-111111111111', 8, 'Boat 08', 'Encore', 980, 34, 'Crew recognition');

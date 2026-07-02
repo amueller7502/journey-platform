@@ -28,7 +28,7 @@ Chapter One is **The Odyssey**, running **July 16-August 12, 2026**. The managem
 - Admin-managed rewards, costs, inventory, and Trading Post cards
 - Admin skin controls with Cinema Standard, Odyssey / North Stars, and a future Dune 3 slot
 - Visible launch readiness checklist on the Admin/GM Dashboard
-- TV mode focused on community progress, spotlight moments, department progress, rewards, countdown, and crew-based fleet progress
+- TV mode focused on community progress, spotlight moments, recognition leaderboard, department progress, rewards, and countdown
 - Subtle configurable-build indicator across screens
 
 ## Brand Asset
@@ -97,7 +97,7 @@ Seed data lives in `supabase/seed.sql` and includes:
 - Excellence Checks as editable recognition types
 - Rewards, inventory, and pending reward requests
 - Daily spotlight and recent Journey Moments
-- Skins, chapter skin settings, menu items, TV display settings, and fleet standings
+- Skins, chapter skin settings, menu items, and TV display settings
 
 The database keeps the internal `passport_id` field name for stability. Employee- and manager-facing copy uses **Journey Card**.
 
@@ -166,6 +166,7 @@ Admin editors that work in the configurable build:
 - Add/Edit Recognition Type forms
 - Rewards / Inventory catalog editor
 - Skin Developer
+- TV Display Settings
 - Menu Configuration
 - Chapter Settings
 
@@ -202,7 +203,6 @@ The schema in `supabase/schema.sql` includes:
 - `reward_redemptions`
 - `daily_spotlights`
 - `tv_display_settings`
-- `tv_fleet_standings`
 
 ## Routes
 
@@ -211,9 +211,11 @@ The schema in `supabase/schema.sql` includes:
 - `/my-journey` My Journey
 - `/trading-post` Trading Post
 - `/community` Community
+- `/leaderboard` Leaderboard
 - `/profile` Profile
 - `/manager/recognize` Capture Moment
 - `/manager/excellence-checks` Excellence Checks
+- `/manager/leaderboard` Manager Leaderboard
 - `/manager/passport` Journey Card lookup
 - `/manager/passport/[passport_id]` Journey Card batch entry
 - `/manager/pending-rewards` Pending Rewards
@@ -221,6 +223,7 @@ The schema in `supabase/schema.sql` includes:
 - `/manager/recognition-feed` Moment Feed
 - `/admin/dashboard` Admin/GM Dashboard
 - `/admin/employees` Employees
+- `/admin/leaderboard` Admin Leaderboard
 - `/admin/rewards` Rewards / Inventory
 - `/admin/recognition-library` Recognition Library
 - `/admin/recognition-library/new` Add Recognition Type
@@ -238,7 +241,7 @@ Legacy aliases remain for `/manager/recognize/passport` and `/manager/recognize/
 The TV dashboard rotates through:
 
 - Community Progress
-- North Stars Fleet
+- Recognition Leaderboard
 - 15,700 / IMAX 1570
 - Today's Spotlight
 - Recognition Wall
@@ -246,7 +249,7 @@ The TV dashboard rotates through:
 - Reward Spotlight
 - Countdown
 
-The schema includes a hard check that `show_individual_leaderboard` remains false. The fleet race is crew/community based, not an individual employee leaderboard.
+The leaderboard is now available to employees, managers, Admin/GM users, and the TV loop. It focuses on weekly recognition and keeps community progress visible alongside standings.
 
 For fullscreen during the preview, open `/tv` and click the fullscreen icon in the TV header, or use the browser fullscreen command.
 
@@ -315,5 +318,5 @@ The archive excludes dependency folders, local build output, local environment f
 - Journey Card batch entry persists Miles and TV feed updates in the current browser; shared production persistence needs Supabase writes.
 - Journey Card QR links use local preview URLs in seed data until deployment URLs are assigned.
 - The C-frame is cropped from the provided raster logo, not a vector source file.
-- TV mode rotates panels client-side and intentionally does not include an individual employee leaderboard.
+- TV mode rotates panels client-side and includes the configurable Recognition Leaderboard slide.
 - If screenshots are recaptured after a rebuild, restart the local Next.js preview first so the browser does not hold stale chunk references.
