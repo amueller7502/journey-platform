@@ -89,7 +89,10 @@ For an existing Supabase project that already ran an older schema, run:
 -- In the Supabase SQL editor
 -- Paste and run:
 -- supabase/migrations/202607020001_experience_shared_state.sql
+-- supabase/migrations/202607020002_api_grants.sql
 ```
+
+If account creation shows `permission denied for table profiles`, run `supabase/migrations/202607020002_api_grants.sql`. That migration grants Supabase API access to the public tables while row-level security still controls which rows each role can read or write.
 
 The app now writes operational state to Supabase through server routes:
 
