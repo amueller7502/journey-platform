@@ -1,4 +1,4 @@
-import type { Role } from "@/lib/types";
+import type { PlatformRole, Role } from "@/lib/types";
 
 export const roleRank: Record<Role, number> = {
   employee: 1,
@@ -43,4 +43,28 @@ export function routeForRole(role: Role) {
   }
 
   return "/home";
+}
+
+export function appRoleForPlatformRole(role: PlatformRole): Role {
+  if (role === "experience_designer") {
+    return "admin";
+  }
+
+  if (role === "leader") {
+    return "manager";
+  }
+
+  return "employee";
+}
+
+export function platformRoleRank(role: PlatformRole) {
+  if (role === "experience_designer") {
+    return 3;
+  }
+
+  if (role === "leader") {
+    return 2;
+  }
+
+  return 1;
 }

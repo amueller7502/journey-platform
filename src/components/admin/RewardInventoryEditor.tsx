@@ -253,6 +253,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
                     {[
                       ["Spotlight", "spotlight"],
                       ["Featured", "featured"],
+                      ["New", "isNew"],
                       ["Season", "seasonExclusive"],
                       ["Collector", "collector"],
                       ["Coming soon", "comingSoon"],

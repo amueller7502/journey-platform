@@ -1,12 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CalendarDays, ClipboardCheck, Printer, Trash2, Users } from "lucide-react";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import QRCode from "qrcode";
+import { CalendarDays, ClipboardCheck, FileDown, Trash2, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
-import { useJourneyState } from "@/lib/journey-state";
-import type { JourneyCardArea, JourneyCardShiftAssignment, RecognitionType } from "@/lib/types";
+import { buildJourneyCardUrl, useJourneyState } from "@/lib/journey-state";
+import type {
+  Employee,
+  ExperienceSeason,
+  JourneyCardArea,
+  JourneyCardShiftAssignment,
+  RecognitionType,
+} from "@/lib/types";
 import { formatXp } from "@/lib/utils";
 
 function todayString() {
@@ -19,6 +27,248 @@ function sortAreas(a: JourneyCardArea, b: JourneyCardArea) {
 
 function sortTasks(a: RecognitionType, b: RecognitionType) {
   return a.sortOrder - b.sortOrder;
+}
+
+const pageWidth = 612;
+const pageHeight = 792;
+const margin = 36;
+const gutter = 18;
+const cardWidth = pageWidth - margin * 2;
+const cardHeight = (pageHeight - margin * 2 - gutter) / 2;
+const black = rgb(0.02, 0.02, 0.02);
+const red = rgb(0.843, 0.098, 0.125);
+const gray = rgb(0.28, 0.28, 0.28);
+const lightGray = rgb(0.93, 0.93, 0.93);
+const white = rgb(1, 1, 1);
+
+function fileDate(value: string) {
+  return value.replace(/[^0-9]/g, "") || todayString().replace(/[^0-9]/g, "");
+}
+
+function wrapText(text: string, maxWidth: number, font: { widthOfTextAtSize: (text: string, size: number) => number }, size: number) {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+
+  words.forEach((word) => {
+    const candidate = current ? `${current} ${word}` : word;
+    if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+      current = candidate;
+      return;
+    }
+
+    if (current) {
+      lines.push(current);
+    }
+    current = word;
+  });
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines;
+}
+
+async function drawExperienceCard({
+  pdfDoc,
+  page,
+  x,
+  y,
+  assignment,
+  employee,
+  area,
+  tasks,
+  season,
+  shiftDate,
+  fonts,
+}: {
+  pdfDoc: PDFDocument;
+  page: ReturnType<PDFDocument["addPage"]>;
+  x: number;
+  y: number;
+  assignment: JourneyCardShiftAssignment;
+  employee?: Employee;
+  area?: JourneyCardArea;
+  tasks: RecognitionType[];
+  season?: ExperienceSeason;
+  shiftDate: string;
+  fonts: {
+    regular: Awaited<ReturnType<PDFDocument["embedFont"]>>;
+    bold: Awaited<ReturnType<PDFDocument["embedFont"]>>;
+  };
+}) {
+  page.drawRectangle({
+    x,
+    y,
+    width: cardWidth,
+    height: cardHeight,
+    color: white,
+    borderColor: black,
+    borderWidth: 1.5,
+  });
+  page.drawLine({
+    start: { x: margin - 12, y: y + cardHeight + gutter / 2 },
+    end: { x: pageWidth - margin + 12, y: y + cardHeight + gutter / 2 },
+    thickness: 0.5,
+    color: gray,
+    dashArray: [4, 4],
+  });
+  page.drawRectangle({
+    x,
+    y: y + cardHeight - 52,
+    width: cardWidth,
+    height: 52,
+    color: black,
+  });
+  page.drawRectangle({
+    x,
+    y: y + cardHeight - 55,
+    width: cardWidth,
+    height: 3,
+    color: red,
+  });
+
+  const employeeName = employee?.name ?? "Crew Member";
+  const areaName = area?.name ?? "Experience Card";
+  const seasonTitle = season?.seasonTitle ?? "The Odyssey";
+  const cardUrl = `${buildJourneyCardUrl(employee?.passportId ?? assignment.employeeId)}?area=${encodeURIComponent(assignment.journeyCardAreaId)}`;
+  const qrData = await QRCode.toDataURL(cardUrl, {
+    margin: 1,
+    width: 96,
+    color: { dark: "#050505", light: "#ffffff" },
+  });
+  const qrPng = await pdfDoc.embedPng(qrData);
+
+  page.drawText("EXPERIENCE CARD", {
+    x: x + 18,
+    y: y + cardHeight - 25,
+    size: 8,
+    font: fonts.bold,
+    color: red,
+  });
+  page.drawText("More Than A Movie Starts With Us", {
+    x: x + 18,
+    y: y + cardHeight - 43,
+    size: 17,
+    font: fonts.bold,
+    color: white,
+  });
+  page.drawText(seasonTitle.toUpperCase(), {
+    x: x + cardWidth - 178,
+    y: y + cardHeight - 28,
+    size: 8,
+    font: fonts.bold,
+    color: lightGray,
+  });
+
+  const infoTop = y + cardHeight - 82;
+  page.drawText(employeeName, {
+    x: x + 18,
+    y: infoTop,
+    size: 20,
+    font: fonts.bold,
+    color: black,
+  });
+  page.drawText(`${employee?.title ?? "Employee"} / ${areaName}`, {
+    x: x + 18,
+    y: infoTop - 17,
+    size: 9,
+    font: fonts.bold,
+    color: gray,
+  });
+  page.drawText(`Shift Date: ${shiftDate}`, {
+    x: x + 18,
+    y: infoTop - 32,
+    size: 8.5,
+    font: fonts.regular,
+    color: gray,
+  });
+  page.drawText(`Experience Card ID: ${employee?.passportId ?? "Unassigned"}`, {
+    x: x + 18,
+    y: infoTop - 45,
+    size: 8.5,
+    font: fonts.bold,
+    color: black,
+  });
+  page.drawText("Today's Focus Area", {
+    x: x + cardWidth - 188,
+    y: infoTop,
+    size: 8,
+    font: fonts.bold,
+    color: red,
+  });
+  wrapText(area?.description ?? areaName, 138, fonts.regular, 8.2)
+    .slice(0, 3)
+    .forEach((line, index) => {
+      page.drawText(line, {
+        x: x + cardWidth - 188,
+        y: infoTop - 14 - index * 11,
+        size: 8.2,
+        font: fonts.regular,
+        color: gray,
+      });
+    });
+  page.drawImage(qrPng, {
+    x: x + cardWidth - 58,
+    y: infoTop - 47,
+    width: 42,
+    height: 42,
+  });
+
+  const listTop = infoTop - 76;
+  const rowHeight = Math.min(24, Math.max(17, 156 / Math.max(tasks.length, 1)));
+  tasks.slice(0, 8).forEach((task, index) => {
+    const rowY = listTop - index * rowHeight;
+    page.drawRectangle({
+      x: x + 18,
+      y: rowY - rowHeight + 3,
+      width: cardWidth - 36,
+      height: rowHeight,
+      borderColor: lightGray,
+      borderWidth: 0.6,
+    });
+    page.drawRectangle({
+      x: x + 26,
+      y: rowY - 12,
+      width: 9,
+      height: 9,
+      borderColor: black,
+      borderWidth: 1,
+    });
+    page.drawText(task.name, {
+      x: x + 42,
+      y: rowY - 9,
+      size: 8.5,
+      font: fonts.bold,
+      color: black,
+    });
+    page.drawText(`+${task.milesValue} XP`, {
+      x: x + cardWidth - 72,
+      y: rowY - 9,
+      size: 8,
+      font: fonts.bold,
+      color: red,
+    });
+    const description = wrapText(task.description, cardWidth - 160, fonts.regular, 6.8)[0];
+    if (description) {
+      page.drawText(description, {
+        x: x + 42,
+        y: rowY - 19,
+        size: 6.8,
+        font: fonts.regular,
+        color: gray,
+      });
+    }
+  });
+
+  const footerY = y + 18;
+  page.drawText("Employee initials", { x: x + 18, y: footerY + 14, size: 7.5, font: fonts.bold, color: gray });
+  page.drawLine({ start: { x: x + 18, y: footerY + 8 }, end: { x: x + 150, y: footerY + 8 }, thickness: 0.7, color: black });
+  page.drawText("Manager initials", { x: x + 190, y: footerY + 14, size: 7.5, font: fonts.bold, color: gray });
+  page.drawLine({ start: { x: x + 190, y: footerY + 8 }, end: { x: x + 322, y: footerY + 8 }, thickness: 0.7, color: black });
+  page.drawText("Entered in Experience", { x: x + 362, y: footerY + 14, size: 7.5, font: fonts.bold, color: gray });
+  page.drawLine({ start: { x: x + 362, y: footerY + 8 }, end: { x: x + 494, y: footerY + 8 }, thickness: 0.7, color: black });
 }
 
 export function JourneyCardPrintList() {
@@ -36,6 +286,7 @@ export function JourneyCardPrintList() {
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const assignments = state.journeyCardAssignments
     .filter((assignment) => assignment.shiftDate === shiftDate)
     .slice()
@@ -125,7 +376,61 @@ export function JourneyCardPrintList() {
     }));
   }
 
-  function printCards() {
+  async function generatePdf() {
+    if (!assignments.length) {
+      setMessage("Create at least one Experience Card before generating a PDF.");
+      return;
+    }
+
+    setIsGeneratingPdf(true);
+    setMessage("Building printable PDF...");
+    const pdfDoc = await PDFDocument.create();
+    const fonts = {
+      regular: await pdfDoc.embedFont(StandardFonts.Helvetica),
+      bold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+    };
+    const activeSeason = state.seasons.find((season) => season.active);
+
+    for (let index = 0; index < assignments.length; index += 1) {
+      const pageIndex = Math.floor(index / 2);
+      const cardIndex = index % 2;
+      const page =
+        cardIndex === 0 ? pdfDoc.addPage([pageWidth, pageHeight]) : pdfDoc.getPage(pageIndex);
+      const assignment = assignments[index];
+      const employee = state.employees.find((item) => item.id === assignment.employeeId);
+      const area = areas.find((item) => item.id === assignment.journeyCardAreaId);
+      const tasks = tasksForArea(assignment.journeyCardAreaId);
+      const cardY =
+        cardIndex === 0
+          ? pageHeight - margin - cardHeight
+          : margin;
+
+      await drawExperienceCard({
+        pdfDoc,
+        page,
+        x: margin,
+        y: cardY,
+        assignment,
+        employee,
+        area,
+        tasks,
+        season: activeSeason,
+        shiftDate,
+        fonts,
+      });
+    }
+
+    const bytes = await pdfDoc.save();
+    const pdfBuffer = new ArrayBuffer(bytes.byteLength);
+    new Uint8Array(pdfBuffer).set(bytes);
+    const blob = new Blob([pdfBuffer], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `experience-card-print-run-${fileDate(shiftDate)}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+
     const now = new Date().toISOString();
     updateState((current) => ({
       ...current,
@@ -138,7 +443,8 @@ export function JourneyCardPrintList() {
           : assignment,
       ),
     }));
-    window.print();
+    setMessage(`Generated ${assignments.length} Experience Card${assignments.length === 1 ? "" : "s"} for ${shiftDate}.`);
+    setIsGeneratingPdf(false);
   }
 
   function openManagerEntry(assignment: JourneyCardShiftAssignment) {
@@ -163,12 +469,12 @@ export function JourneyCardPrintList() {
           action={
             <Button
               type="button"
-              icon={Printer}
+              icon={FileDown}
               variant="secondary"
-              onClick={printCards}
-              disabled={!assignments.length}
+              onClick={() => void generatePdf()}
+              disabled={!assignments.length || isGeneratingPdf}
             >
-              Print Today&apos;s Cards
+              {isGeneratingPdf ? "Generating PDF" : "Generate PDF"}
             </Button>
           }
         />
@@ -306,93 +612,6 @@ export function JourneyCardPrintList() {
               })}
             </div>
           </section>
-        </div>
-      </Panel>
-
-      <Panel className="mt-5 journey-print-section">
-        <PanelHeader
-          title="Printable Shift Cards"
-          eyebrow="Half-sheet checklists"
-          action={<Printer className="h-5 w-5 text-journey-red" aria-hidden="true" />}
-        />
-        <div className="journey-card-sheet grid gap-4 md:grid-cols-2">
-          {assignments.map((assignment) => {
-            const employee = state.employees.find((item) => item.id === assignment.employeeId);
-            const area = areas.find((item) => item.id === assignment.journeyCardAreaId);
-            const tasks = tasksForArea(assignment.journeyCardAreaId);
-            const totalMiles = tasks.reduce((total, task) => total + task.milesValue, 0);
-
-            return (
-              <article
-                key={`print-${assignment.id}`}
-                className="journey-print-card overflow-hidden rounded-lg border-2 border-journey-black bg-journey-white"
-              >
-                <div className="border-b-4 border-journey-red bg-journey-black p-4 text-journey-white">
-                  <p className="text-xs font-black uppercase text-journey-red">
-                    Experience / Shift Card
-                  </p>
-                  <h3 className="mt-1 text-2xl font-black">More Than A Movie Starts With Us.</h3>
-                  <p className="mt-1 text-sm font-bold text-journey-line">
-                    Turn this card in to a manager at the end of the shift.
-                  </p>
-                </div>
-                <div className="grid gap-4 p-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <p className="text-xs font-black uppercase text-journey-red">
-                        Crew Member
-                      </p>
-                      <h4 className="mt-1 text-xl font-black text-journey-black">
-                        {employee?.name ?? "Crew Member"}
-                      </h4>
-                      <p className="mt-1 text-sm font-bold text-journey-steel">
-                        {employee?.title}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-black uppercase text-journey-red">
-                        Card Type
-                      </p>
-                      <h4 className="mt-1 text-xl font-black text-journey-black">
-                        {area?.name ?? "Experience Card"}
-                      </h4>
-                      <p className="mt-1 text-sm font-bold text-journey-steel">
-                        {assignment.shiftDate} / {formatXp(totalMiles)} XP possible
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-md border border-journey-line">
-                    {tasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className="grid grid-cols-[28px_1fr_70px] gap-2 border-b border-journey-line px-3 py-2 last:border-b-0"
-                      >
-                        <span className="mt-0.5 h-5 w-5 rounded-sm border-2 border-journey-black" />
-                        <div>
-                          <p className="text-sm font-black text-journey-black">
-                            {task.name}
-                          </p>
-                          <p className="text-[11px] font-bold leading-4 text-journey-steel">
-                            {task.description}
-                          </p>
-                        </div>
-                        <p className="text-right text-xs font-black text-journey-red">
-                          +{task.milesValue} XP
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-3 text-xs font-bold text-journey-black sm:grid-cols-3">
-                    <div className="border-b border-journey-black pb-1">Employee initials</div>
-                    <div className="border-b border-journey-black pb-1">Manager initials</div>
-                    <div className="border-b border-journey-black pb-1">Entered in Experience</div>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
         </div>
       </Panel>
 

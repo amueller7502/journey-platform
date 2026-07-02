@@ -111,8 +111,26 @@ insert into public.recognition_standards (id, label, short_label, description, s
   ('shift_counts', 'Every Shift Counts', 'Reliability', 'Attendance, punctuality, coverage, and closing strong.', 4),
   ('detail_matters', 'Every Detail Matters', 'Details', 'Small choices that protect the premium cinema experience.', 5);
 
+insert into public.experience_standards (
+  id,
+  season_id,
+  label,
+  short_label,
+  description,
+  sort_order
+)
+select
+  id,
+  'chapter-one-odyssey',
+  label,
+  short_label,
+  description,
+  sort_order
+from public.recognition_standards;
+
 insert into public.employees (
   id,
+  app_id,
   department_id,
   full_name,
   initials,
@@ -120,15 +138,42 @@ insert into public.employees (
   role,
   passport_id,
   passport_qr_url,
+  journey_card_area_id,
+  email,
+  access_code,
+  account_status,
+  department_slug,
+  current_xp,
+  weekly_xp,
   active
 ) values
-  ('33333333-3333-4333-8333-333333333301', '22222222-2222-4222-8222-222222222203', 'Alex Rivera', 'AR', 'Floor Crew', 'employee', 'ODY-1570-001', 'http://127.0.0.1:3000/manager/passport/ODY-1570-001', true),
-  ('33333333-3333-4333-8333-333333333302', '22222222-2222-4222-8222-222222222202', 'Maya Thompson', 'MT', 'Concessions Crew', 'employee', 'ODY-1570-002', 'http://127.0.0.1:3000/manager/passport/ODY-1570-002', true),
-  ('33333333-3333-4333-8333-333333333303', '22222222-2222-4222-8222-222222222201', 'Eli Brooks', 'EB', 'Guest Services', 'employee', 'ODY-1570-003', 'http://127.0.0.1:3000/manager/passport/ODY-1570-003', true),
-  ('33333333-3333-4333-8333-333333333304', '22222222-2222-4222-8222-222222222204', 'Nora Patel', 'NP', 'Box Office', 'employee', 'ODY-1570-004', 'http://127.0.0.1:3000/manager/passport/ODY-1570-004', true),
-  ('33333333-3333-4333-8333-333333333305', '22222222-2222-4222-8222-222222222205', 'Dante Williams', 'DW', 'Facilities Crew', 'employee', 'ODY-1570-005', 'http://127.0.0.1:3000/manager/passport/ODY-1570-005', true),
-  ('33333333-3333-4333-8333-333333333306', '22222222-2222-4222-8222-222222222206', 'Jordan Ellis', 'JE', 'Shift Manager', 'manager', 'MGR-1570-001', 'http://127.0.0.1:3000/manager/passport/MGR-1570-001', true),
-  ('33333333-3333-4333-8333-333333333307', '22222222-2222-4222-8222-222222222206', 'Sam Carter', 'SC', 'General Manager', 'admin', 'GM-1570-001', 'http://127.0.0.1:3000/manager/passport/GM-1570-001', true);
+  ('33333333-3333-4333-8333-333333333301', 'emp-alex', '22222222-2222-4222-8222-222222222203', 'Alex Rivera', 'AR', 'Floor Crew', 'employee', 'ODY-1570-001', 'http://127.0.0.1:3000/manager/passport/ODY-1570-001', 'floor_lobby', 'alex.rivera@north.example', 'AR1570', 'active', 'floor', 660, 105, true),
+  ('33333333-3333-4333-8333-333333333302', 'emp-maya', '22222222-2222-4222-8222-222222222202', 'Maya Thompson', 'MT', 'Concessions Crew', 'employee', 'ODY-1570-002', 'http://127.0.0.1:3000/manager/passport/ODY-1570-002', 'concessions', 'maya.thompson@north.example', 'MT1570', 'active', 'concessions', 590, 80, true),
+  ('33333333-3333-4333-8333-333333333303', 'emp-eli', '22222222-2222-4222-8222-222222222201', 'Eli Brooks', 'EB', 'Guest Services', 'employee', 'ODY-1570-003', 'http://127.0.0.1:3000/manager/passport/ODY-1570-003', 'box_guest_services', 'eli.brooks@north.example', 'EB1570', 'invited', 'guest_services', 520, 65, true),
+  ('33333333-3333-4333-8333-333333333304', 'emp-nora', '22222222-2222-4222-8222-222222222204', 'Nora Patel', 'NP', 'Box Office', 'employee', 'ODY-1570-004', 'http://127.0.0.1:3000/manager/passport/ODY-1570-004', 'box_guest_services', 'nora.patel@north.example', 'NP1570', 'active', 'box_office', 450, 70, true),
+  ('33333333-3333-4333-8333-333333333305', 'emp-dante', '22222222-2222-4222-8222-222222222205', 'Dante Williams', 'DW', 'Facilities Crew', 'employee', 'ODY-1570-005', 'http://127.0.0.1:3000/manager/passport/ODY-1570-005', 'facilities_exterior', 'dante.williams@north.example', 'DW1570', 'active', 'facilities', 410, 0, true),
+  ('33333333-3333-4333-8333-333333333306', 'mgr-jordan', '22222222-2222-4222-8222-222222222206', 'Jordan Ellis', 'JE', 'Shift Manager', 'manager', 'MGR-1570-001', 'http://127.0.0.1:3000/manager/passport/MGR-1570-001', 'floor_lobby', 'jordan.ellis@north.example', 'JE1570', 'active', 'leadership', 0, 0, true),
+  ('33333333-3333-4333-8333-333333333307', 'admin-sam', '22222222-2222-4222-8222-222222222206', 'Sam Carter', 'SC', 'General Manager', 'admin', 'GM-1570-001', 'http://127.0.0.1:3000/manager/passport/GM-1570-001', 'floor_lobby', 'sam.carter@north.example', 'SC1570', 'active', 'leadership', 0, 0, true);
+
+insert into public.profiles (
+  id,
+  full_name,
+  email,
+  status
+) values
+  ('99999999-9999-4999-8999-999999999901', 'Alex Rivera', 'alex.rivera@north.example', 'active'),
+  ('99999999-9999-4999-8999-999999999902', 'Jordan Ellis', 'jordan.ellis@north.example', 'active'),
+  ('99999999-9999-4999-8999-999999999903', 'Sam Carter', 'sam.carter@north.example', 'active');
+
+insert into public.user_roles (
+  profile_id,
+  role,
+  location,
+  enabled
+) values
+  ('99999999-9999-4999-8999-999999999901', 'employee', 'Celebration Cinema North', true),
+  ('99999999-9999-4999-8999-999999999902', 'leader', 'Celebration Cinema North', true),
+  ('99999999-9999-4999-8999-999999999903', 'experience_designer', 'Celebration Cinema North', true);
 
 insert into public.leadership_recognitions (
   id,
@@ -277,6 +322,10 @@ insert into public.recognition_types (
   ('44444444-4444-4444-8444-444444440305', 'perfect_punctuality_weekly', '11111111-1111-4111-8111-111111111111', 'Perfect Punctuality Weekly', 'Employee clocked in on time and ready for every shift this week.', 'Reliability', 'shift_counts', 20, 'Gauge', true, true, 440, 'reliability'),
   ('44444444-4444-4444-8444-444444440401', 'manager_above_beyond', '11111111-1111-4111-8111-111111111111', 'Manager Above & Beyond', 'Manager-awarded recognition for uncommon ownership or detail.', 'Manager Award', 'detail_matters', 50, 'Award', true, true, 500, 'detail');
 
+update public.recognition_types
+set app_id = slug
+where app_id is null;
+
 insert into public.experience_events (
   id,
   season_id,
@@ -317,6 +366,33 @@ insert into public.experience_display_slides (
   ('display-reward-spotlight', 'chapter-one-odyssey', 'Reward Spotlight', 'Reward Spotlight', 'Rewards Worth Earning', 'Rotate several curated rewards so employees can see what is available.', 8, true, true, 'published', 40),
   ('display-experience-score', 'chapter-one-odyssey', 'Experience Score', 'Experience Score', 'Culture Health At A Glance', 'A configurable composite of recognition coverage, presentation, and rewards health.', 7, false, true, 'draft', 50);
 
+insert into public.display_settings (
+  id,
+  season_id,
+  slide_type,
+  label,
+  headline,
+  supporting_text,
+  duration_seconds,
+  show_on_tv,
+  enabled,
+  lifecycle,
+  sort_order
+)
+select
+  id,
+  season_id,
+  slide_type::text,
+  label,
+  headline,
+  supporting_text,
+  duration_seconds,
+  show_on_tv,
+  enabled,
+  lifecycle,
+  sort_order
+from public.experience_display_slides;
+
 insert into public.scoring_metrics (
   id,
   season_id,
@@ -333,6 +409,31 @@ insert into public.scoring_metrics (
   ('leadership_health', 'chapter-one-odyssey', 'Leadership Health', 'Measures leader follow-through, coaching rhythm, coverage, and handoff quality.', 25, 85, 83, true, 'published', 20),
   ('presentation_score', 'chapter-one-odyssey', 'Presentation Score', 'Measures excellence checks and building presentation readiness.', 20, 92, 91, true, 'published', 30),
   ('recognition_coverage', 'chapter-one-odyssey', 'Recognition Coverage', 'Measures whether recognition is reaching the full team, not only frequent standouts.', 20, 88, 83, true, 'published', 40);
+
+insert into public.scoring_settings (
+  id,
+  season_id,
+  label,
+  description,
+  weight,
+  target,
+  current_value,
+  enabled,
+  lifecycle,
+  sort_order
+)
+select
+  id::text,
+  season_id,
+  label,
+  description,
+  weight,
+  target,
+  current_value,
+  enabled,
+  lifecycle,
+  sort_order
+from public.scoring_metrics;
 
 insert into public.launch_readiness_items (
   id,
@@ -390,10 +491,20 @@ insert into public.rewards (
   fulfillment_notes,
   spotlight
 ) values
-  ('55555555-5555-4555-8555-555555555501', '11111111-1111-4111-8111-111111111111', 'Popcorn Combo', 'A classic break-room favorite for a strong shift.', 120, 18, '/brand/celebration-c-frame.png', 'Food', true, 10, 2, 'Manager hands off at end of shift.', false),
+  ('55555555-5555-4555-8555-555555555501', '11111111-1111-4111-8111-111111111111', '$5 C Cash', 'A flexible Celebration Cinema thank-you for a strong shift.', 125, 18, '/brand/celebration-c-frame.png', 'Cinema', true, 10, 2, 'Manager confirms employee and issues C Cash voucher.', false),
   ('55555555-5555-4555-8555-555555555502', '11111111-1111-4111-8111-111111111111', 'Movie Pass', 'One employee movie pass for an Experience milestone.', 220, 12, '/brand/celebration-c-frame.png', 'Cinema', true, 20, 2, 'Issue as employee pass voucher.', true),
   ('55555555-5555-4555-8555-555555555503', '11111111-1111-4111-8111-111111111111', 'Crew Hoodie', 'Limited Odyssey activation apparel with premium red detail.', 500, 6, '/brand/celebration-c-frame.png', 'Gear', true, 30, 1, 'Confirm size before fulfillment.', false),
   ('55555555-5555-4555-8555-555555555504', '11111111-1111-4111-8111-111111111111', 'VIP Seat Package', 'Premium seat experience for two after an exceptional run.', 750, 3, '/brand/celebration-c-frame.png', 'Experience', true, 40, 1, 'GM approval before scheduling.', false);
+
+update public.rewards
+set app_id = case name
+  when '$5 C Cash' then 'reward-c-cash-5'
+  when 'Movie Pass' then 'reward-movie-ticket'
+  when 'Crew Hoodie' then 'reward-quarter-zip'
+  when 'VIP Seat Package' then 'reward-private-imax'
+  else app_id
+end
+where app_id is null;
 
 insert into public.recognition_batches (
   id,
@@ -411,7 +522,7 @@ insert into public.recognition_batches (
   '33333333-3333-4333-8333-333333333301',
   '33333333-3333-4333-8333-333333333306',
   'passport',
-  'Passport verified after closing rush.',
+  'Experience Card verified after closing rush.',
   40,
   4,
   '2026-07-24 18:35:00-04'

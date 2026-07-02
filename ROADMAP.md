@@ -11,18 +11,26 @@
 - Add Leadership Dashboard, Leadership Health, Leadership Journal, Leadership Achievements, Leadership Recognition, Leadership Rewards, Recognition Coverage, Coaching Insights, and Employees Awaiting Recognition.
 - Keep TV signage focused on Community XP, Today's Focus, Recognition Spotlight, Department Progress, Rewards, Countdown, and Experience Leaderboard.
 
-## V1.1 Operational Hardening
+## V1.3 Completed Supabase Shared State
 
-- Create production Supabase Auth users and connect them to employee records.
+- Added Supabase Auth role mapping for `employee`, `leader`, and `experience_designer`.
+- Added `profiles` and `user_roles` setup path.
+- Added server-side shared-state writes for Capture Moment, Experience Card batches, reward requests, reward approvals, Recognition Studio, Rewards Studio, and Season Planner.
+- Added compatibility migration for stable app IDs and Experience-named tables.
+- Kept local/demo data as fallback when Supabase env vars are absent.
+
+## Next Operational Hardening
+
+- Create production Supabase Auth users and connect them to `profiles` and employee records.
 - Turn on `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED` after account setup.
-- Normalize writes for Experience Moments, rewards, redemptions, seasons, card batches, leadership recognition, LP, displays, scoring, and achievements.
+- Move the remaining Studio forms from shared-state sync to dedicated table-specific mutations.
 - Add audit history for admin changes.
 - Add image storage for reward photos and profile photo approvals.
 - Add manager handoff notes and shift summaries.
 - Add budget tracking for Rewards.
 - Add downloadable CSV exports for reports and reward liability.
 
-## V1.2 Platform Expansion
+## Platform Expansion
 
 - Harden season cloning into a full copy wizard for rewards, recognitions, displays, scoring, and skins.
 - Add season-specific reward availability.

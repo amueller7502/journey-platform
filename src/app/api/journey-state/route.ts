@@ -1,25 +1,26 @@
 import { NextResponse } from "next/server";
-import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
-
-const STATE_ID = "default";
+import {
+  normalizeExperienceState,
+  readExperienceState,
+  writeExperienceState,
+  type ExperienceOperatingState,
+} from "@/lib/server/experience-state";
+import { hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 
 export async function GET() {
   if (!hasSupabaseAdminEnv()) {
     return NextResponse.json({ state: null, mode: "local" });
   }
 
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("journey_operating_state")
-    .select("state")
-    .eq("id", STATE_ID)
-    .maybeSingle();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const { state, mode } = await readExperienceState();
+    return NextResponse.json({ state, mode });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to load Experience state" },
+      { status: 500 },
+    );
   }
-
-  return NextResponse.json({ state: data?.state ?? null, mode: "supabase" });
 }
 
 export async function PUT(request: Request) {
@@ -27,21 +28,17 @@ export async function PUT(request: Request) {
     return NextResponse.json({ ok: true, mode: "local" });
   }
 
-  const body = (await request.json()) as { state?: unknown };
+  const body = (await request.json()) as {
+    state?: Partial<ExperienceOperatingState>;
+    syncConfig?: boolean;
+  };
   if (!body.state || typeof body.state !== "object") {
     return NextResponse.json({ error: "Missing state payload" }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
-  const { error } = await supabase.from("journey_operating_state").upsert({
-    id: STATE_ID,
-    state: body.state,
-    updated_at: new Date().toISOString(),
+  const result = await writeExperienceState(normalizeExperienceState(body.state), {
+    syncConfig: body.syncConfig ?? true,
   });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ ok: true, mode: "supabase" });
+  return NextResponse.json(result, { status: result.ok ? 200 : 500 });
 }

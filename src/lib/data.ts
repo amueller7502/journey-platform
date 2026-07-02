@@ -1230,6 +1230,7 @@ export const rewards: Reward[] = [
     redemptionLimitPerEmployee: 4,
     fulfillmentNotes: "Manager confirms employee and issues C Cash voucher.",
     featured: true,
+    isNew: true,
     almostGoneThreshold: 4,
   },
   {
@@ -1286,6 +1287,7 @@ export const rewards: Reward[] = [
     redemptionLimitPerEmployee: 1,
     fulfillmentNotes: "Confirm showtime availability before fulfillment.",
     seasonExclusive: true,
+    isNew: true,
     almostGoneThreshold: 3,
   },
   {
@@ -1933,7 +1935,7 @@ export const leadershipPointRules: LeadershipPointRule[] = [
 export const studioModules: StudioModule[] = [
   {
     id: "season-planner",
-    name: "Season Planner",
+    name: "Seasons",
     href: "/admin/season-planner",
     description: "Create, duplicate, preview, publish, and archive seasons.",
     status: "configured",

@@ -34,6 +34,11 @@ Every configurable object should support:
 
 ## Core Roles
 
+Platform Auth roles:
+- `employee`: Employee Experience access.
+- `leader`: Leadership Experience and manager operations.
+- `experience_designer`: Admin/GM and Experience Studio access.
+
 Employee Experience:
 - Today
 - My Experience
@@ -77,6 +82,7 @@ Capture Moment:
 3. Leader optionally adds note.
 4. Leader captures the Experience Moment.
 5. Employee XP, recent moments, and TV feed update.
+6. The workflow persists through the Supabase shared-state route and best-effort `experience_moments` rows when Supabase env vars are present.
 
 Experience Card:
 1. Leader selects employees working a shift.
@@ -85,12 +91,14 @@ Experience Card:
 4. Employee turns in the card after the shift.
 5. Leader enters verified items as a batch.
 6. The batch creates individual Experience Moments and awards XP.
+7. The workflow persists through the Supabase shared-state route, `experience_card_batches`, and `experience_moments` when Supabase env vars are present.
 
 Rewards:
 1. Employee requests a reward they can afford.
 2. Leader/Admin approves, fulfills, or cancels.
 3. Fulfillment reduces inventory.
 4. Admin manages reward cost, inventory, collection, tier, flags, and images.
+5. Requests and approvals persist through the Supabase shared-state route and `reward_redemptions` when Supabase env vars are present.
 
 Leadership Experience:
 - Leaders do not earn employee XP.
@@ -101,7 +109,7 @@ Leadership Experience:
 ## Experience Studio
 
 Experience Studio modules:
-- Season Planner
+- Seasons
 - Recognition
 - Rewards
 - Events
@@ -111,6 +119,8 @@ Experience Studio modules:
 - Displays
 - Scoring
 - Launch Readiness
+
+Studio edits currently persist through the shared operating state and sync best-effort normalized config tables for Seasons, Recognition, Rewards, Standards, Displays, and Scoring.
 
 ## Season Planner
 

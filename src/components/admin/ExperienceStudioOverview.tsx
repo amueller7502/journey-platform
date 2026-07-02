@@ -18,12 +18,14 @@ const statusIcons = {
 export function ExperienceStudioOverview() {
   return (
     <div className="grid gap-5">
-      <Panel className="bg-journey-black text-journey-white">
-        <PanelHeader title="Experience Studio" eyebrow="Culture CMS" />
+      <Panel className="cinema-doodle-card bg-journey-black text-journey-white">
+        <PanelHeader
+          title="What kind of employee experience do you want to create today?"
+          eyebrow="Experience Studio"
+        />
         <p className="max-w-4xl text-sm font-bold leading-6 text-journey-line">
-          Experience Studio is the CMS for the Employee Experience Platform. Seasons,
-          recognition, rewards, events, standards, leadership, achievements, displays,
-          scoring, and launch readiness should all be configurable without code.
+          Design seasons, recognition, rewards, events, standards, leadership,
+          achievements, displays, scoring, and launch readiness from one place.
         </p>
       </Panel>
 

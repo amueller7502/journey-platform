@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { routeForRole } from "@/lib/access-control";
+import { appRoleForPlatformRole, platformRoleRank, routeForRole } from "@/lib/access-control";
 import { createClient, hasSupabaseBrowserEnv } from "@/lib/supabase/client";
-import type { Role } from "@/lib/types";
+import type { PlatformRole, Role } from "@/lib/types";
 
 type AuthMode = "sign_in" | "create_account";
 
@@ -52,26 +52,65 @@ export function SupabaseAuthPanel() {
       return;
     }
 
-    const { data: profile, error } = await supabase
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      setMessage(profileError.message);
+      setLoading(false);
+      return;
+    }
+
+    let resolvedRole: Role | undefined;
+    if (profile) {
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role, enabled")
+        .eq("profile_id", profile.id)
+        .eq("enabled", true);
+
+      if (rolesError) {
+        setMessage(rolesError.message);
+        setLoading(false);
+        return;
+      }
+
+      const platformRole = roles
+        ?.map((row) => row.role as PlatformRole)
+        .sort((a, b) => platformRoleRank(b) - platformRoleRank(a))[0];
+
+      if (platformRole) {
+        resolvedRole = appRoleForPlatformRole(platformRole);
+      }
+    }
+
+    const { data: employeeProfile, error: employeeError } = await supabase
       .from("employees")
       .select("id, role")
       .eq("auth_user_id", user.id)
       .maybeSingle();
 
-    if (error) {
-      setMessage(error.message);
+    if (employeeError) {
+      setMessage(employeeError.message);
       setLoading(false);
       return;
     }
 
-    if (!profile) {
+    resolvedRole = resolvedRole ?? (employeeProfile?.role as Role | undefined);
+
+    if (!resolvedRole) {
       setMessage("Signed in, but no Experience profile is connected to this account yet.");
       setLoading(false);
       return;
     }
 
-    window.localStorage.setItem("journey-active-account-id", profile.id as string);
-    router.push(routeForRole(profile.role as Role));
+    if (employeeProfile?.id) {
+      window.localStorage.setItem("journey-active-account-id", employeeProfile.id as string);
+    }
+    router.push(routeForRole(resolvedRole));
     setLoading(false);
   }
 
@@ -149,7 +188,7 @@ export function SupabaseAuthPanel() {
       ) : (
         <p className="text-xs font-bold text-journey-steel">
           {hasEnv
-            ? "Create Supabase Auth users, then connect them to employees by auth_user_id."
+            ? "Create Supabase Auth users, then connect them to profiles/user_roles and employees by auth_user_id."
             : "Supabase env vars are not present, so preview access codes remain available."}
         </p>
       )}

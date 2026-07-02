@@ -1,13 +1,30 @@
 "use client";
 
-import { Archive, Copy, Eye, Plus, Rocket, Save, ToggleLeft, ToggleRight } from "lucide-react";
+import {
+  Archive,
+  CalendarPlus,
+  Copy,
+  Eye,
+  Lock,
+  Rocket,
+  Save,
+  ToggleLeft,
+  ToggleRight,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
 import type { ExperienceSeason, SeasonStatus } from "@/lib/types";
 
-const statusOptions: SeasonStatus[] = ["draft", "preview", "active", "archived"];
+const editableStatusOptions: SeasonStatus[] = ["draft", "preview", "archived"];
+
+const statusStyles: Record<SeasonStatus, string> = {
+  active: "border-journey-red bg-journey-red text-journey-white",
+  draft: "border-journey-line bg-journey-mist text-journey-black",
+  preview: "border-journey-black bg-journey-black text-journey-white",
+  archived: "border-journey-line bg-journey-white text-journey-steel",
+};
 
 function makeId(label: string) {
   const suffix =
@@ -16,6 +33,12 @@ function makeId(label: string) {
       : new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 12);
 
   return `${makeSlugId(label, "season")}-${suffix}`;
+}
+
+function addDays(date: string, days: number) {
+  const value = new Date(`${date}T00:00:00`);
+  value.setDate(value.getDate() + days);
+  return value.toISOString().slice(0, 10);
 }
 
 export function SeasonPlannerStudio() {
@@ -43,16 +66,18 @@ export function SeasonPlannerStudio() {
   function addSeason() {
     setSaved(false);
     updateState((current) => {
+      const active = current.seasons.find((season) => season.active);
       const id = makeId("New Season");
       const createdAt = new Date().toISOString();
+      const startDate = active ? addDays(active.endDate, 1) : "2026-09-01";
       const nextSeason: ExperienceSeason = {
         id,
         name: "Experience",
         subtitle: "Employee Experience Platform",
         seasonLabel: `Season ${current.seasons.length + 1}`,
         seasonTitle: "New Season",
-        startDate: "2026-09-01",
-        endDate: "2026-09-30",
+        startDate,
+        endDate: addDays(startDate, 27),
         communityXpGoal: 12000,
         welcomeMessage: "Recognize the moments that shape the employee experience.",
         tagline: "More Than A Movie Starts With Us.",
@@ -142,14 +167,24 @@ export function SeasonPlannerStudio() {
         <Panel className="bg-journey-black text-journey-white lg:col-span-2">
           <PanelHeader title="Season Planner" eyebrow="Unlimited seasons" />
           <p className="max-w-3xl text-sm font-bold leading-6 text-journey-line">
-            Create future seasons, duplicate proven configurations, preview work before launch,
-            and publish one active season at a time. Nothing that defines culture should require
-            software development.
+            What kind of employee experience do you want to create today? Draft future
+            seasons, duplicate proven configurations, preview work before launch, and
+            publish one active season at a time.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <Button type="button" icon={Plus} onClick={addSeason}>
-              Create Season
+            <Button type="button" icon={CalendarPlus} onClick={addSeason}>
+              Create Draft Season
             </Button>
+            {activeSeason ? (
+              <Button
+                type="button"
+                variant="secondary"
+                icon={Copy}
+                onClick={() => duplicateSeason(activeSeason)}
+              >
+                Duplicate Active
+              </Button>
+            ) : null}
             <Button type="button" variant="secondary" icon={Save} onClick={() => setSaved(true)}>
               Save Planner
             </Button>
@@ -163,6 +198,11 @@ export function SeasonPlannerStudio() {
           <p className="text-2xl font-black text-journey-black">
             {activeSeason?.seasonTitle ?? "None"}
           </p>
+          {activeSeason ? (
+            <span className="mt-3 inline-flex rounded-sm bg-journey-red px-2 py-1 text-xs font-black uppercase text-journey-white">
+              Active
+            </span>
+          ) : null}
           <p className="mt-2 text-sm font-bold text-journey-steel">
             {activeSeason
               ? `${activeSeason.startDate} - ${activeSeason.endDate}`
@@ -172,8 +212,45 @@ export function SeasonPlannerStudio() {
       </div>
 
       <div className="grid gap-4">
-        {seasons.map((season) => (
-          <Panel key={season.id}>
+        {seasons.map((season) => {
+          const isActive = season.active || season.status === "active";
+          const isArchived = season.status === "archived";
+          const canEdit = !isActive && !isArchived;
+
+          return (
+          <Panel key={season.id} className={isActive ? "border-journey-red" : ""}>
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`rounded-sm border px-2 py-1 text-xs font-black uppercase ${statusStyles[season.status]}`}
+                  >
+                    {season.status}
+                  </span>
+                  {season.previewEnabled ? (
+                    <span className="rounded-sm border border-journey-line bg-journey-white px-2 py-1 text-xs font-black uppercase text-journey-steel">
+                      Preview enabled
+                    </span>
+                  ) : null}
+                  {isActive ? (
+                    <span className="inline-flex items-center gap-1 rounded-sm bg-journey-mist px-2 py-1 text-xs font-black uppercase text-journey-black">
+                      <Lock className="h-3 w-3" aria-hidden="true" />
+                      Live season protected
+                    </span>
+                  ) : null}
+                </div>
+                <h3 className="mt-2 text-2xl font-black text-journey-black">
+                  {season.seasonLabel}: {season.seasonTitle}
+                </h3>
+              </div>
+              <p className="max-w-md text-sm font-bold leading-6 text-journey-steel">
+                {isActive
+                  ? "Duplicate this season to make changes for the future without altering the live Experience."
+                  : isArchived
+                    ? "Archived seasons stay available for reference and reporting."
+                    : "Draft and preview seasons can be edited here before they are published."}
+              </p>
+            </div>
             <div className="grid gap-4 xl:grid-cols-[1fr_1fr_auto]">
               <div className="grid gap-3 md:grid-cols-2">
                 <label className="grid gap-1 text-xs font-black uppercase text-journey-steel">
@@ -181,6 +258,7 @@ export function SeasonPlannerStudio() {
                   <input
                     value={season.name}
                     onChange={(event) => updateSeason(season.id, { name: event.target.value })}
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base font-black text-journey-black"
                   />
                 </label>
@@ -191,6 +269,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { subtitle: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base font-black text-journey-black"
                   />
                 </label>
@@ -201,6 +280,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { seasonLabel: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base font-black text-journey-black"
                   />
                 </label>
@@ -211,6 +291,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { seasonTitle: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base font-black text-journey-black"
                   />
                 </label>
@@ -222,6 +303,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { startDate: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base text-journey-black"
                   />
                 </label>
@@ -233,6 +315,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { endDate: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base text-journey-black"
                   />
                 </label>
@@ -246,6 +329,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { welcomeMessage: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-24 rounded-md border border-journey-line px-3 py-2 text-sm text-journey-black"
                   />
                 </label>
@@ -261,6 +345,7 @@ export function SeasonPlannerStudio() {
                           communityXpGoal: Math.max(1, Number(event.target.value)),
                         })
                       }
+                      disabled={!canEdit}
                       className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base text-journey-black"
                     />
                   </label>
@@ -271,6 +356,7 @@ export function SeasonPlannerStudio() {
                       onChange={(event) =>
                         updateSeason(season.id, { skinId: event.target.value })
                       }
+                      disabled={!canEdit}
                       className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base text-journey-black"
                     >
                       {state.skins.map((skin) => (
@@ -287,9 +373,10 @@ export function SeasonPlannerStudio() {
                       onChange={(event) =>
                         updateSeason(season.id, { status: event.target.value as SeasonStatus })
                       }
+                      disabled={!canEdit}
                       className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base text-journey-black"
                     >
-                      {statusOptions.map((option) => (
+                      {(isActive ? ["active"] : editableStatusOptions).map((option) => (
                         <option key={option} value={option}>
                           {option}
                         </option>
@@ -304,6 +391,7 @@ export function SeasonPlannerStudio() {
                     onChange={(event) =>
                       updateSeason(season.id, { tagline: event.target.value })
                     }
+                    disabled={!canEdit}
                     className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-base font-black text-journey-black"
                   />
                 </label>
@@ -317,15 +405,17 @@ export function SeasonPlannerStudio() {
                   onClick={() =>
                     updateSeason(season.id, { previewEnabled: !season.previewEnabled })
                   }
+                  disabled={isArchived}
                   className="w-full"
                 >
-                  Preview
+                  {season.previewEnabled ? "Disable Preview" : "Preview"}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   icon={Eye}
-                  onClick={() => updateSeason(season.id, { status: "preview" })}
+                  onClick={() => updateSeason(season.id, { status: "preview", previewEnabled: true })}
+                  disabled={isActive || isArchived}
                   className="w-full"
                 >
                   Mark Preview
@@ -335,6 +425,7 @@ export function SeasonPlannerStudio() {
                   variant="dark"
                   icon={Rocket}
                   onClick={() => publishSeason(season.id)}
+                  disabled={isActive || isArchived}
                   className="w-full"
                 >
                   Publish
@@ -353,6 +444,7 @@ export function SeasonPlannerStudio() {
                   variant="ghost"
                   icon={Archive}
                   onClick={() => archiveSeason(season.id)}
+                  disabled={isActive || isArchived}
                   className="w-full"
                 >
                   Archive
@@ -360,7 +452,8 @@ export function SeasonPlannerStudio() {
               </div>
             </div>
           </Panel>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

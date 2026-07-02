@@ -3,8 +3,13 @@
 import { useId, useMemo, useState } from "react";
 import { Search, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { saveJourneyMoment } from "@/lib/demo-moments";
-import { addMilesToEmployee, useJourneyState } from "@/lib/journey-state";
+import { saveJourneyMoment, type JourneyMoment } from "@/lib/demo-moments";
+import {
+  addMilesToEmployee,
+  replaceJourneyStateFromServer,
+  useJourneyState,
+  type JourneyOperatingState,
+} from "@/lib/journey-state";
 
 const quickTypeIds = [
   "guest_compliment",
@@ -54,6 +59,8 @@ export function RecognitionForm() {
   const [miles, setMiles] = useState(recognitionOptions[0]?.milesValue ?? 0);
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [submitCount, setSubmitCount] = useState(0);
   const selectedEmployeeId = crew.some((employee) => employee.id === employeeId)
     ? employeeId
@@ -95,15 +102,17 @@ export function RecognitionForm() {
   return (
     <form
       className="grid gap-5"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         if (!employee || !recognitionType) {
           return;
         }
 
+        setSubmitting(true);
+        setError("");
         const nextSubmitCount = submitCount + 1;
         setSubmitCount(nextSubmitCount);
-        saveJourneyMoment({
+        const fallbackMoment: JourneyMoment = {
           id: `${formId}-${nextSubmitCount}`,
           employeeId: employee.id,
           employeeName: employee.name,
@@ -117,9 +126,51 @@ export function RecognitionForm() {
             `${employee.name} created an Experience Moment through ${recognitionType.name.toLowerCase()}.`,
           createdAt: new Date().toISOString(),
           managerName: "Jordan Ellis",
-        });
-        addMilesToEmployee(employee.id, effectiveMiles);
-        setSubmitted(true);
+        };
+
+        try {
+          const response = await fetch("/api/experience/moments", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              employeeId: employee.id,
+              recognitionTypeId: recognitionType.id,
+              managerId: "mgr-jordan",
+              xp: effectiveMiles,
+              note,
+            }),
+          });
+          const payload = (await response.json()) as {
+            error?: string;
+            mode?: "local" | "supabase";
+            state?: JourneyOperatingState;
+            moment?: JourneyMoment;
+          };
+
+          if (!response.ok) {
+            throw new Error(payload.error ?? "Experience Moment could not be captured.");
+          }
+
+          if (payload.mode === "supabase" && payload.state) {
+            replaceJourneyStateFromServer(payload.state);
+            saveJourneyMoment(payload.moment ?? fallbackMoment);
+          } else {
+            saveJourneyMoment(fallbackMoment);
+            addMilesToEmployee(employee.id, effectiveMiles);
+          }
+          setSubmitted(true);
+        } catch (caughtError) {
+          saveJourneyMoment(fallbackMoment);
+          addMilesToEmployee(employee.id, effectiveMiles);
+          setSubmitted(true);
+          setError(
+            caughtError instanceof Error
+              ? `${caughtError.message} Saved locally as fallback.`
+              : "Saved locally as fallback.",
+          );
+        } finally {
+          setSubmitting(false);
+        }
       }}
     >
       <div className="rounded-lg border border-journey-line bg-journey-mist p-4">
@@ -262,10 +313,20 @@ export function RecognitionForm() {
             {recognitionType?.name} becomes an Experience Moment.
           </p>
         </div>
-          <Button icon={Send} type="submit" disabled={submitted || !recognitionOptions.length}>
-            {submitted ? "Moment Captured" : "Capture Moment"}
+          <Button
+            icon={Send}
+            type="submit"
+            disabled={submitting || submitted || !recognitionOptions.length}
+          >
+            {submitting ? "Capturing..." : submitted ? "Moment Captured" : "Capture Moment"}
           </Button>
       </div>
+
+      {error ? (
+        <div className="rounded-lg border border-journey-line bg-journey-mist p-4 text-sm font-black text-journey-red">
+          {error}
+        </div>
+      ) : null}
 
       {submitted ? (
         <div className="flex items-start gap-3 rounded-lg border border-journey-red bg-journey-white p-4">

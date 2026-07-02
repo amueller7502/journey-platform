@@ -6,13 +6,18 @@ import { RewardCard } from "@/components/dashboard/RewardCard";
 import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
-import { useJourneyState } from "@/lib/journey-state";
+import {
+  replaceJourneyStateFromServer,
+  useJourneyState,
+  type JourneyOperatingState,
+} from "@/lib/journey-state";
 import { formatShortDateTime, formatXp } from "@/lib/utils";
 
 export function TradingPostClient() {
   const { state, updateState } = useJourneyState();
   const [accountId, setAccountId] = useState("");
   const [message, setMessage] = useState("");
+  const [requestingRewardId, setRequestingRewardId] = useState("");
 
   useEffect(() => {
     const load = () =>
@@ -38,7 +43,7 @@ export function TradingPostClient() {
       redemption.status === "Ready",
   );
 
-  function requestReward(rewardId: string) {
+  async function requestReward(rewardId: string) {
     const reward = state.rewards.find((item) => item.id === rewardId);
     if (!currentEmployee || !reward) {
       return;
@@ -59,20 +64,58 @@ export function TradingPostClient() {
       return;
     }
 
-    updateState((current) => ({
-      ...current,
-      redemptions: [
-        {
-          id: `redemption-${currentEmployee.id}-${reward.id}-${Date.now()}`,
+    setRequestingRewardId(rewardId);
+    setMessage("");
+    const requestedAt = new Date().toISOString();
+    const fallbackRedemption = {
+      id: `redemption-${currentEmployee.id}-${reward.id}-${requestedAt.replace(/[^0-9]/g, "")}`,
+      employeeId: currentEmployee.id,
+      rewardId: reward.id,
+      status: "Requested" as const,
+      requestedAt,
+    };
+
+    try {
+      const response = await fetch("/api/experience/reward-redemptions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
           employeeId: currentEmployee.id,
           rewardId: reward.id,
-          status: "Requested",
-          requestedAt: new Date().toISOString(),
-        },
-        ...current.redemptions,
-      ],
-    }));
-    setMessage(`${reward.name} requested. A manager can approve it from Rewards Approvals.`);
+        }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        mode?: "local" | "supabase";
+        state?: JourneyOperatingState;
+      };
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Reward request could not be submitted.");
+      }
+
+      if (payload.mode === "supabase" && payload.state) {
+        replaceJourneyStateFromServer(payload.state);
+      } else {
+        updateState((current) => ({
+          ...current,
+          redemptions: [fallbackRedemption, ...current.redemptions],
+        }));
+      }
+      setMessage(`${reward.name} requested. A manager can approve it from Rewards Approvals.`);
+    } catch (error) {
+      updateState((current) => ({
+        ...current,
+        redemptions: [fallbackRedemption, ...current.redemptions],
+      }));
+      setMessage(
+        error instanceof Error
+          ? `${error.message} Saved locally as fallback.`
+          : "Saved locally as fallback.",
+      );
+    } finally {
+      setRequestingRewardId("");
+    }
   }
 
   const enabledRewards = state.rewards
@@ -86,6 +129,14 @@ export function TradingPostClient() {
     "Collector's Vault",
     "Coming Soon",
   ];
+  const collectionCopy: Record<string, string> = {
+    "Featured Rewards": "The prizes leaders want the team to notice first.",
+    "Everyday Rewards": "C Cash and steady wins for great shifts.",
+    "Season Exclusives": "Limited rewards connected to the current season.",
+    "Experience Rewards": "Bigger moments worth saving XP for.",
+    "Collector's Vault": "Special items for employees who like the rare stuff.",
+    "Coming Soon": "A preview of what is headed to Rewards next.",
+  };
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
@@ -141,6 +192,18 @@ export function TradingPostClient() {
           eyebrow="Curated Employee Experience"
           action={<PackageCheck className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
+        <div className="cinema-doodle-card mb-5 rounded-lg border border-journey-line bg-journey-mist p-4">
+          <p className="text-xs font-black uppercase text-journey-red">
+            More Than A Movie energy
+          </p>
+          <h3 className="mt-1 text-xl font-black text-journey-black">
+            Pick the reward worth your next great shift.
+          </h3>
+          <p className="mt-2 text-sm font-bold leading-6 text-journey-steel">
+            C Cash handles the quick wins. Collector, season, and Experience rewards
+            give employees something bigger to chase.
+          </p>
+        </div>
         <div className="grid gap-6">
           {collections.map((collection) => {
             const collectionRewards = enabledRewards.filter(
@@ -163,9 +226,12 @@ export function TradingPostClient() {
                         ? "Preview what is next"
                         : "Choose a reward"}
                     </h3>
+                    <p className="mt-1 text-sm font-bold text-journey-steel">
+                      {collectionCopy[collection]}
+                    </p>
                   </div>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                   {collectionRewards.map((reward) => {
                     const alreadyOpen = openRedemptions.some(
                       (redemption) => redemption.rewardId === reward.id,
@@ -178,6 +244,7 @@ export function TradingPostClient() {
                       <RewardCard
                         key={reward.id}
                         reward={reward}
+                        canAfford={canAfford}
                         footerNote={
                           alreadyOpen
                             ? "Request pending"
@@ -193,10 +260,20 @@ export function TradingPostClient() {
                           <Button
                             type="button"
                             className="w-full"
-                            disabled={alreadyOpen || !canAfford || !inStock || comingSoon}
-                            onClick={() => requestReward(reward.id)}
+                            disabled={
+                              requestingRewardId === reward.id ||
+                              alreadyOpen ||
+                              !canAfford ||
+                              !inStock ||
+                              comingSoon
+                            }
+                            onClick={() => void requestReward(reward.id)}
                           >
-                            {alreadyOpen ? "Requested" : "Request Reward"}
+                            {requestingRewardId === reward.id
+                              ? "Requesting..."
+                              : alreadyOpen
+                                ? "Requested"
+                                : "Request Reward"}
                           </Button>
                         }
                       />

@@ -7,26 +7,33 @@ export function RewardCard({
   reward,
   action,
   footerNote,
+  canAfford,
 }: {
   reward: Reward;
   action?: ReactNode;
   footerNote?: string;
+  canAfford?: boolean;
 }) {
   const almostGone =
     reward.inventoryCount > 0 &&
     reward.inventoryCount <= (reward.almostGoneThreshold ?? 2);
+  const available = reward.enabled && !reward.comingSoon && reward.inventoryCount > 0;
   const badges = [
     reward.featured ? "Featured" : "",
+    reward.isNew ? "New" : "",
     reward.seasonExclusive ? "Season Exclusive" : "",
     reward.collector ? "Collector" : "",
     reward.comingSoon ? "Coming Soon" : "",
     almostGone ? "Almost Gone" : "",
+    available && canAfford !== false ? "Available" : "",
+    available && canAfford === false ? "Locked" : "",
   ].filter(Boolean);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-journey-line bg-journey-white shadow-line transition hover:-translate-y-0.5 hover:shadow-premium">
+    <article className="cinema-reward-card overflow-hidden rounded-lg border border-journey-line bg-journey-white shadow-line transition hover:-translate-y-0.5 hover:shadow-premium">
       <div className="relative aspect-square border-b border-journey-line bg-journey-black">
         <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,transparent_0_12px,#fff_12px_16px,transparent_16px_30px)] [background-size:30px_100%]" />
+        <div className="cinema-doodle-overlay absolute inset-0 opacity-20" />
         <div className="absolute left-4 top-4 z-10 rounded-sm bg-journey-red px-2 py-1 text-xs font-black uppercase text-journey-white">
           {reward.tier ?? "Reward"}
         </div>
@@ -62,7 +69,13 @@ export function RewardCard({
             {badges.map((badge) => (
               <span
                 key={badge}
-                className="rounded-sm border border-journey-line bg-journey-mist px-2 py-1 text-[11px] font-black uppercase text-journey-black"
+                className={`rounded-sm border px-2 py-1 text-[11px] font-black uppercase ${
+                  badge === "Available" || badge === "New"
+                    ? "border-journey-red bg-journey-red text-journey-white"
+                    : badge === "Locked" || badge === "Coming Soon"
+                      ? "border-journey-line bg-journey-mist text-journey-steel"
+                      : "border-journey-line bg-journey-white text-journey-black"
+                }`}
               >
                 {badge}
               </span>

@@ -79,6 +79,75 @@ textarea {
     auto;
 }
 
+.experience-shell {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+}
+
+.experience-shell::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg width='320' height='160' viewBox='0 0 320 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23050505' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M28 38h58l-8 34H36z'/%3E%3Cpath d='M38 38l8 34M54 38l8 34M70 38l8 34'/%3E%3Cpath d='M130 34h62v38h-62zM130 46h62M144 34v38M178 34v38'/%3E%3Cpath d='M232 36h50l-8 20 8 20h-50l8-20z'/%3E%3Ccircle cx='50' cy='118' r='16'/%3E%3Ccircle cx='86' cy='118' r='16'/%3E%3Cpath d='M66 118h4M110 118h28'/%3E%3Cpath d='M172 112l7 12 14 2-10 10 2 14-13-7-13 7 3-14-10-10 14-2z'/%3E%3Cpath d='M240 112h46v28h-46zM250 112v28M276 112v28'/%3E%3Cpath d='M30 96q20-12 40 0t40 0M212 92q22-12 44 0t44 0'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d71920' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 24h74M222 24h74'/%3E%3Cpath d='M112 104h16M120 96v16M292 122h16M300 114v16'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 160px;
+  animation: cinemaDoodleDrift 48s linear infinite;
+}
+
+.cinema-doodle-card,
+.cinema-reward-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.cinema-doodle-card::before,
+.cinema-reward-card::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(circle at 16% 28%, transparent 0 12px, rgba(5, 5, 5, 0.24) 13px 14px, transparent 15px),
+    linear-gradient(135deg, transparent 0 44%, rgba(215, 25, 32, 0.18) 45% 49%, transparent 50%),
+    radial-gradient(circle at 82% 32%, rgba(215, 25, 32, 0.2) 0 3px, transparent 4px),
+    radial-gradient(circle at 72% 76%, transparent 0 16px, rgba(5, 5, 5, 0.18) 17px 18px, transparent 19px);
+  background-size: 118px 92px, 92px 92px, 74px 74px, 150px 118px;
+}
+
+.cinema-doodle-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle at 16% 28%, transparent 0 12px, rgba(255, 255, 255, 0.8) 13px 14px, transparent 15px),
+    linear-gradient(135deg, transparent 0 44%, rgba(215, 25, 32, 0.5) 45% 49%, transparent 50%),
+    radial-gradient(circle at 82% 32%, rgba(255, 255, 255, 0.9) 0 3px, transparent 4px),
+    radial-gradient(circle at 72% 76%, transparent 0 16px, rgba(255, 255, 255, 0.7) 17px 18px, transparent 19px);
+  background-size: 118px 92px, 92px 92px, 74px 74px, 150px 118px;
+}
+
+.cinema-doodle-card::before,
+.cinema-reward-card::before {
+  opacity: 0.08;
+}
+
+.cinema-reward-card::before {
+  animation: cinemaDoodleDrift 36s linear infinite;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  background-color: #f4f4f4;
+  color: #606060;
+}
+
 .skin-odyssey .cinema-surface {
   background:
     radial-gradient(circle at 18% 8%, rgba(201, 168, 77, 0.14), transparent 28%),
@@ -269,6 +338,15 @@ textarea {
   }
 }
 
+@keyframes cinemaDoodleDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 320px 160px;
+  }
+}
+
 .focus-ring {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -276,41 +354,4 @@ textarea {
 
 .focus-ring:focus-visible {
   outline-color: #d71920;
-}
-
-@media print {
-  body {
-    background: #ffffff;
-  }
-
-  body * {
-    visibility: hidden;
-  }
-
-  .journey-print-section,
-  .journey-print-section * {
-    visibility: visible;
-  }
-
-  .journey-print-section {
-    position: absolute;
-    inset: 0;
-    border: 0 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-  }
-
-  .journey-card-sheet {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.25in;
-    padding: 0.25in;
-  }
-
-  .journey-print-card {
-    break-inside: avoid;
-    min-height: 5in;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-  }
 }

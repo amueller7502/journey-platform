@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { saveJourneyMoment } from "@/lib/demo-moments";
+import { saveJourneyMoment, type JourneyMoment } from "@/lib/demo-moments";
 import { recognitionStandards } from "@/lib/data";
 import {
   addMilesToEmployee,
   getJourneyCardAreaForEmployee,
+  replaceJourneyStateFromServer,
   useJourneyState,
+  type JourneyOperatingState,
 } from "@/lib/journey-state";
 import type { Employee } from "@/lib/types";
 
@@ -55,6 +57,8 @@ export function PassportEntryForm({
   const [selected, setSelected] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const availableSelected = selected.filter((id) =>
     enabledRecognitionTypes.some((type) => type.id === id),
   );
@@ -90,37 +94,80 @@ export function PassportEntryForm({
   return (
     <form
       className="pb-24"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
         if (!selectedTypes.length) {
           return;
         }
+
+        setSubmitting(true);
+        setError("");
         const createdAt = new Date().toISOString();
         const batchStamp = createdAt.replace(/[^0-9]/g, "");
         const batchId = `card-${currentEmployee.passportId}-${batchStamp}`;
-        selectedTypes
+        const fallbackMoments: JourneyMoment[] = selectedTypes
           .slice()
           .reverse()
-          .forEach((type, index) => {
-            saveJourneyMoment({
-              id: `card-${currentEmployee.passportId}-${batchStamp}-${index}`,
+          .map((type, index) => ({
+            id: `card-${currentEmployee.passportId}-${batchStamp}-${index}`,
+            employeeId: currentEmployee.id,
+            employeeName: currentEmployee.name,
+            employeeInitials: currentEmployee.initials,
+            recognitionTypeId: type.id,
+            recognitionTypeName: type.name,
+            standardId: type.standardId,
+            miles: type.milesValue,
+            note:
+              note.trim() ||
+              `${currentEmployee.name} had ${type.name.toLowerCase()} verified from an Experience Card.`,
+            createdAt,
+            managerName: "Jordan Ellis",
+            batchId,
+          }));
+
+        try {
+          const response = await fetch("/api/experience/card-batches", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
               employeeId: currentEmployee.id,
-              employeeName: currentEmployee.name,
-              employeeInitials: currentEmployee.initials,
-              recognitionTypeId: type.id,
-              recognitionTypeName: type.name,
-              standardId: type.standardId,
-              miles: type.milesValue,
-              note:
-                note.trim() ||
-                `${currentEmployee.name} had ${type.name.toLowerCase()} verified from an Experience Card.`,
-              createdAt,
-              managerName: "Jordan Ellis",
-              batchId,
-            });
+              managerId: "mgr-jordan",
+              areaId: cardArea?.id,
+              recognitionTypeIds: selectedTypes.map((type) => type.id),
+              note,
+            }),
           });
-        addMilesToEmployee(currentEmployee.id, totalMiles);
-        setSubmitted(true);
+          const payload = (await response.json()) as {
+            error?: string;
+            mode?: "local" | "supabase";
+            state?: JourneyOperatingState;
+            moments?: JourneyMoment[];
+          };
+
+          if (!response.ok) {
+            throw new Error(payload.error ?? "Experience Card batch could not be submitted.");
+          }
+
+          if (payload.mode === "supabase" && payload.state) {
+            replaceJourneyStateFromServer(payload.state);
+            (payload.moments ?? fallbackMoments).forEach(saveJourneyMoment);
+          } else {
+            fallbackMoments.forEach(saveJourneyMoment);
+            addMilesToEmployee(currentEmployee.id, totalMiles);
+          }
+          setSubmitted(true);
+        } catch (caughtError) {
+          fallbackMoments.forEach(saveJourneyMoment);
+          addMilesToEmployee(currentEmployee.id, totalMiles);
+          setSubmitted(true);
+          setError(
+            caughtError instanceof Error
+              ? `${caughtError.message} Saved locally as fallback.`
+              : "Saved locally as fallback.",
+          );
+        } finally {
+          setSubmitting(false);
+        }
       }}
     >
       <div className="grid gap-5">
@@ -226,6 +273,12 @@ export function PassportEntryForm({
         />
       </label>
 
+      {error ? (
+        <div className="mt-5 rounded-lg border border-journey-line bg-journey-mist p-4 text-sm font-black text-journey-red">
+          {error}
+        </div>
+      ) : null}
+
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-journey-line bg-journey-white/95 p-4 shadow-premium">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <div>
@@ -234,8 +287,8 @@ export function PassportEntryForm({
               {totalMiles} XP from {selectedTypes.length} items
             </p>
           </div>
-          <Button type="submit" icon={Send} disabled={!selectedTypes.length}>
-            Submit Experience Card Batch
+          <Button type="submit" icon={Send} disabled={submitting || !selectedTypes.length}>
+            {submitting ? "Submitting..." : "Submit Experience Card Batch"}
           </Button>
         </div>
       </div>

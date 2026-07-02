@@ -226,6 +226,19 @@ export function saveJourneyState(nextState: JourneyOperatingState) {
   void persistJourneyStateToDatabase(normalized);
 }
 
+export function replaceJourneyStateFromServer(nextState: Partial<JourneyOperatingState>) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const normalized = normalizeState(nextState);
+  const raw = JSON.stringify(normalized);
+  cachedState = normalized;
+  cachedRaw = raw;
+  window.localStorage.setItem(STORAGE_KEY, raw);
+  window.dispatchEvent(new Event(EVENT_NAME));
+}
+
 async function persistJourneyStateToDatabase(state: JourneyOperatingState) {
   if (typeof window === "undefined") {
     return;
@@ -237,7 +250,7 @@ async function persistJourneyStateToDatabase(state: JourneyOperatingState) {
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({ state }),
+      body: JSON.stringify({ state, syncConfig: true }),
     });
   } catch {
     // Browser storage remains the offline fallback.

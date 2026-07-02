@@ -121,7 +121,7 @@ export function TvDashboard() {
                 {state.chapter.themeLabel}
               </p>
               <p className="mt-5 text-4xl font-black leading-tight text-journey-white sm:text-6xl">
-                One team. One journey. Unforgettable guest experiences.
+                One team. One Experience. Unforgettable guest experiences.
               </p>
               <p className="mt-6 max-w-3xl text-2xl font-bold leading-9 text-journey-line">
                 {activeSkin?.visualDirection ?? state.chapter.themeNote}

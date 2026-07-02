@@ -30,9 +30,9 @@ export function AppShell({
   const navItems = navByRole[role];
 
   return (
-    <div className="min-h-screen bg-journey-mist">
+    <div className="experience-shell min-h-screen bg-journey-mist">
       <SkinRuntimeClass />
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
+      <div className="relative z-10 grid min-h-screen lg:grid-cols-[280px_1fr]">
         <aside className="cinema-surface border-b border-journey-steel px-5 py-5 text-journey-white lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-4 lg:block">
             <BrandLockup size="sm" />

@@ -1,7 +1,13 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { requiredRoleForPath, roleCanAccess, routeForRole } from "@/lib/access-control";
-import type { Role } from "@/lib/types";
+import {
+  appRoleForPlatformRole,
+  platformRoleRank,
+  requiredRoleForPath,
+  roleCanAccess,
+  routeForRole,
+} from "@/lib/access-control";
+import type { PlatformRole, Role } from "@/lib/types";
 
 const publicPathPrefixes = [
   "/",
@@ -87,13 +93,37 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  let actualRole: Role | undefined;
+
   const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  if (profile?.id) {
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("profile_id", profile.id)
+      .eq("enabled", true);
+
+    const platformRole = roles
+      ?.map((row) => row.role as PlatformRole)
+      .sort((a, b) => platformRoleRank(b) - platformRoleRank(a))[0];
+
+    if (platformRole) {
+      actualRole = appRoleForPlatformRole(platformRole);
+    }
+  }
+
+  const { data: employeeProfile } = await supabase
     .from("employees")
     .select("role")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
-  const actualRole = profile?.role as Role | undefined;
+  actualRole = actualRole ?? (employeeProfile?.role as Role | undefined);
   if (!actualRole || !roleCanAccess(actualRole, requiredRole)) {
     const url = request.nextUrl.clone();
     url.pathname = actualRole ? routeForRole(actualRole) : "/";

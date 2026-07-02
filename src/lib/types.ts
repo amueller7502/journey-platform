@@ -190,6 +190,7 @@ export type Reward = {
   fulfillmentNotes?: string;
   spotlight?: boolean;
   featured?: boolean;
+  isNew?: boolean;
   seasonExclusive?: boolean;
   collector?: boolean;
   comingSoon?: boolean;

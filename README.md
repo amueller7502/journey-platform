@@ -25,8 +25,9 @@ Campaign phrase: **More Than A Movie Starts With Us.**
 - TypeScript
 - Tailwind CSS
 - Framer Motion
-- Supabase-ready state bridge
-- Supabase Auth role scaffolding
+- PDF-generated Experience Cards
+- Supabase shared-state persistence
+- Supabase Auth roles for employees, leaders, and Experience Designers
 - Vercel-ready deployment
 
 ## Run Locally
@@ -57,7 +58,7 @@ Run all three before pushing to GitHub or deploying to Vercel.
 
 The app works with seeded demo data without Supabase Auth.
 
-Optional Supabase variables:
+Supabase variables:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
@@ -77,10 +78,49 @@ Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after Supabase Auth users a
 4. Run `supabase/seed.sql`.
 5. Add the environment variables above to `.env.local`.
 6. Create Supabase Auth users for employees, leaders, and Experience Designers.
-7. Connect each Auth user to the matching `employees.auth_user_id`.
-8. Restart the dev server.
+7. Connect each Auth user to the matching `profiles.auth_user_id`.
+8. Connect the same Auth user to the matching `employees.auth_user_id` when that person should have an in-app employee or leader account.
+9. Confirm `user_roles.role` is one of `employee`, `leader`, or `experience_designer`.
+10. Restart the dev server.
 
-The current persistence bridge stores configurable operating state in `journey_operating_state` as JSON for compatibility while the normalized tables mature. Some internal table, field, storage, and CSS names still use legacy `journey`, `chapter`, `passport`, or `miles` terminology while the product UI uses Experience, Seasons, Experience Cards, and XP.
+For an existing Supabase project that already ran an older schema, run:
+
+```sql
+-- In the Supabase SQL editor
+-- Paste and run:
+-- supabase/migrations/202607020001_experience_shared_state.sql
+```
+
+The app now writes operational state to Supabase through server routes:
+
+- Capture Moment writes the shared operating state and `experience_moments`.
+- Experience Card batch entry writes the shared operating state, `experience_card_batches`, and `experience_moments`.
+- Reward requests and approvals write the shared operating state and `reward_redemptions`.
+- Recognition Studio, Rewards Studio, Season Planner, Standards, Displays, Scoring, and related Studio edits write the shared operating state and best-effort normalized config rows.
+
+The shared operating state lives in `journey_operating_state` for compatibility while normalized tables mature. Some internal table, field, storage, and CSS names still use legacy `journey`, `chapter`, `passport`, or `miles` terminology while the product UI uses Experience, Seasons, Experience Cards, and XP.
+
+## Supabase Auth Roles
+
+Experience uses platform roles in `user_roles`:
+
+- `employee` routes to `/home`.
+- `leader` routes to `/leadership/dashboard`.
+- `experience_designer` routes to `/admin/dashboard`.
+
+The app still supports the legacy `employees.role` values `employee`, `manager`, and `admin` as a fallback while accounts are being migrated.
+
+To link a Supabase Auth user, copy the user UUID from Supabase Auth and update both tables:
+
+```sql
+update public.profiles
+set auth_user_id = 'AUTH_USER_UUID'
+where email = 'alex.rivera@north.example';
+
+update public.employees
+set auth_user_id = 'AUTH_USER_UUID'
+where email = 'alex.rivera@north.example';
+```
 
 ## Demo Access Codes
 
@@ -161,7 +201,7 @@ Experience Cards:
 3. Select card type for the area the employee is scheduled for that day.
 4. Bulk-select employees.
 5. Create cards.
-6. Print half-sheet cards.
+6. Generate the printable PDF.
 7. Enter turned-in cards through `/manager/passport`.
 
 Rewards:
@@ -179,7 +219,7 @@ Admin configuration:
 - Configure recognition types and excellence checks.
 - Configure Experience Card templates.
 - Configure reward inventory, costs, images, collections, tiers, and flags.
-- Configure unlimited Seasons and preview/publish one active Season.
+- Configure unlimited Seasons, duplicate the active Season, edit future drafts, preview, publish one active Season, and archive completed Seasons.
 - Configure Events and Displays.
 - Configure Standards, Achievements, Leadership LP rules, Scoring, and Launch Readiness.
 - Configure skins through Skin Developer.
@@ -230,9 +270,11 @@ Browser preview state can also be reset by clearing localStorage for the local s
 ## Known Issues
 
 - Supabase Auth sign-in is wired, but production enforcement is off by default until Auth users are created and connected.
+- This local shell did not expose the Supabase env vars during the sprint, so live database writes were not smoke-tested from the terminal.
 - Some internals still use legacy names for compatibility.
+- Experience Card PDFs are generated in the browser using preview/shared state, then downloaded locally.
 - Experience Moments for the live TV feed still use browser event storage plus the operating-state bridge.
-- The Supabase persistence bridge is still JSON-first for some preview edits; fully normalized per-action writes should be hardened in V1.1.
+- Studio edits are shared through Supabase and sync best-effort normalized rows; a future hardening pass should move every Studio form to dedicated table-specific mutations.
 - Uploaded reward/profile images are stored as browser data URLs in preview mode unless a storage provider is added.
 
 ## Screenshots
@@ -245,3 +287,5 @@ Preview screenshots should be kept in `screenshots/`. Recommended captures:
 - TV Dashboard
 - Admin Command Center
 - Mobile employee view
+
+Sample PDFs should be kept in `output/pdf/`.

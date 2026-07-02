@@ -1082,3 +1082,177 @@ create policy "admins manage operating state"
   on public.journey_operating_state for all to authenticated
   using (public.current_journey_role() = 'admin')
   with check (public.current_journey_role() = 'admin');
+
+-- Experience shared-state compatibility layer.
+-- The app uses stable text IDs in its UI state. These columns let normalized
+-- tables persist those writes without forcing a risky UUID rewrite in the UI.
+
+alter table public.employees
+  add column if not exists app_id text unique,
+  add column if not exists department_slug text,
+  add column if not exists current_xp integer not null default 0,
+  add column if not exists weekly_xp integer not null default 0;
+
+alter table public.recognition_types
+  add column if not exists app_id text unique;
+
+alter table public.rewards
+  add column if not exists app_id text unique;
+
+alter table public.reward_redemptions
+  add column if not exists app_id text unique,
+  add column if not exists employee_app_id text,
+  add column if not exists reward_app_id text,
+  add column if not exists fulfilled_at timestamptz,
+  alter column chapter_id drop not null,
+  alter column employee_id drop not null,
+  alter column reward_id drop not null;
+
+alter table public.experience_cards
+  add column if not exists app_id text unique,
+  add column if not exists employee_app_id text;
+
+alter table public.experience_card_batches
+  add column if not exists app_id text unique,
+  add column if not exists employee_app_id text,
+  add column if not exists manager_app_id text,
+  add column if not exists journey_card_area_id text,
+  alter column employee_id drop not null,
+  alter column manager_id drop not null;
+
+update public.employees
+set app_id = case passport_id
+  when 'ODY-1570-001' then 'emp-alex'
+  when 'ODY-1570-002' then 'emp-maya'
+  when 'ODY-1570-003' then 'emp-eli'
+  when 'ODY-1570-004' then 'emp-nora'
+  when 'ODY-1570-005' then 'emp-dante'
+  when 'ODY-1570-006' then 'emp-leah'
+  when 'MGR-1570-001' then 'mgr-jordan'
+  when 'GM-1570-001' then 'admin-sam'
+  else app_id
+end
+where app_id is null;
+
+update public.recognition_types
+set app_id = slug
+where app_id is null;
+
+create table public.experience_standards (
+  id text primary key,
+  season_id text references public.experience_seasons (id) on delete cascade,
+  label text not null,
+  short_label text not null,
+  description text not null,
+  enabled boolean not null default true,
+  lifecycle public.config_lifecycle not null default 'published',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.experience_moments (
+  id text primary key,
+  season_id text references public.experience_seasons (id) on delete set null,
+  employee_id text not null,
+  manager_id text not null,
+  recognition_type_id text not null,
+  standard_id text,
+  xp integer not null check (xp > 0),
+  note text not null,
+  source text not null default 'manager_entry',
+  batch_id text,
+  created_at timestamptz not null default now()
+);
+
+create table public.display_settings (
+  id text primary key,
+  season_id text references public.experience_seasons (id) on delete cascade,
+  slide_type text not null,
+  label text not null,
+  headline text not null,
+  supporting_text text not null,
+  duration_seconds integer not null default 7 check (duration_seconds between 4 and 60),
+  show_on_tv boolean not null default true,
+  enabled boolean not null default true,
+  lifecycle public.config_lifecycle not null default 'published',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.scoring_settings (
+  id text primary key,
+  season_id text references public.experience_seasons (id) on delete cascade,
+  label text not null,
+  description text not null,
+  weight integer not null default 0 check (weight between 0 and 100),
+  target integer not null default 100 check (target between 0 and 100),
+  current_value integer not null default 0 check (current_value between 0 and 100),
+  enabled boolean not null default true,
+  lifecycle public.config_lifecycle not null default 'published',
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index experience_standards_season_idx
+  on public.experience_standards (season_id, enabled, sort_order);
+create index experience_moments_created_idx
+  on public.experience_moments (created_at desc);
+create index experience_moments_employee_idx
+  on public.experience_moments (employee_id, created_at desc);
+create index display_settings_season_idx
+  on public.display_settings (season_id, enabled, sort_order);
+create index scoring_settings_season_idx
+  on public.scoring_settings (season_id, enabled, sort_order);
+
+create or replace function public.is_leader_or_designer()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(public.current_platform_role() in ('leader', 'experience_designer'), false)
+$$;
+
+alter table public.experience_standards enable row level security;
+alter table public.experience_moments enable row level security;
+alter table public.display_settings enable row level security;
+alter table public.scoring_settings enable row level security;
+
+create policy "authenticated users read experience standards"
+  on public.experience_standards for select to authenticated
+  using (enabled or public.is_experience_designer());
+
+create policy "designers manage experience standards"
+  on public.experience_standards for all to authenticated
+  using (public.is_experience_designer())
+  with check (public.is_experience_designer());
+
+create policy "authenticated users read experience moments"
+  on public.experience_moments for select to authenticated
+  using (true);
+
+create policy "leaders create experience moments"
+  on public.experience_moments for insert to authenticated
+  with check (public.is_leader_or_designer());
+
+create policy "authenticated users read display settings"
+  on public.display_settings for select to authenticated
+  using (enabled or public.is_experience_designer());
+
+create policy "designers manage display settings"
+  on public.display_settings for all to authenticated
+  using (public.is_experience_designer())
+  with check (public.is_experience_designer());
+
+create policy "authenticated users read scoring settings"
+  on public.scoring_settings for select to authenticated
+  using (enabled or public.is_experience_designer());
+
+create policy "designers manage scoring settings"
+  on public.scoring_settings for all to authenticated
+  using (public.is_experience_designer())
+  with check (public.is_experience_designer());

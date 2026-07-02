@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Check, PackageCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useJourneyState } from "@/lib/journey-state";
+import {
+  replaceJourneyStateFromServer,
+  useJourneyState,
+  type JourneyOperatingState,
+} from "@/lib/journey-state";
 import type { Redemption } from "@/lib/types";
 import { formatShortDateTime } from "@/lib/utils";
 
@@ -12,12 +17,52 @@ function openStatus(status: Redemption["status"]) {
 
 export function PendingRewardQueue() {
   const { state, updateState } = useJourneyState();
+  const [updatingId, setUpdatingId] = useState("");
+  const [message, setMessage] = useState("");
   const items = state.redemptions
     .filter((redemption) => openStatus(redemption.status))
     .slice()
     .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt));
 
-  function updateRedemption(id: string, status: Redemption["status"]) {
+  async function updateRedemption(id: string, status: Redemption["status"]) {
+    setUpdatingId(id);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/experience/reward-redemptions", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ redemptionId: id, status }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        mode?: "local" | "supabase";
+        state?: JourneyOperatingState;
+      };
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Reward request could not be updated.");
+      }
+
+      if (payload.mode === "supabase" && payload.state) {
+        replaceJourneyStateFromServer(payload.state);
+      } else {
+        updateLocalRedemption(id, status);
+      }
+      setMessage(`Reward request marked ${status.toLowerCase()}.`);
+    } catch (error) {
+      updateLocalRedemption(id, status);
+      setMessage(
+        error instanceof Error
+          ? `${error.message} Saved locally as fallback.`
+          : "Saved locally as fallback.",
+      );
+    } finally {
+      setUpdatingId("");
+    }
+  }
+
+  function updateLocalRedemption(id: string, status: Redemption["status"]) {
     updateState((current) => ({
       ...current,
       redemptions: current.redemptions.map((redemption) =>
@@ -26,7 +71,7 @@ export function PendingRewardQueue() {
               ...redemption,
               status,
               reviewedAt:
-                status === "Approved" || status === "Cancelled"
+                status === "Approved" || status === "Cancelled" || status === "Ready"
                   ? new Date().toISOString()
                   : redemption.reviewedAt,
               fulfilledAt: status === "Fulfilled" ? new Date().toISOString() : redemption.fulfilledAt,
@@ -58,6 +103,11 @@ export function PendingRewardQueue() {
           </p>
         </div>
       ) : null}
+      {message ? (
+        <p className="rounded-lg border border-journey-line bg-journey-mist p-3 text-sm font-black text-journey-red">
+          {message}
+        </p>
+      ) : null}
       {items.map((redemption) => {
         const employee = state.employees.find((item) => item.id === redemption.employeeId);
         const reward = state.rewards.find((item) => item.id === redemption.rewardId);
@@ -84,16 +134,20 @@ export function PendingRewardQueue() {
                   type="button"
                   icon={Check}
                   variant="dark"
-                  disabled={redemption.status === "Approved" || redemption.status === "Ready"}
-                  onClick={() => updateRedemption(redemption.id, "Approved")}
+                  disabled={
+                    updatingId === redemption.id ||
+                    redemption.status === "Approved" ||
+                    redemption.status === "Ready"
+                  }
+                  onClick={() => void updateRedemption(redemption.id, "Approved")}
                 >
-                  Approve
+                  {updatingId === redemption.id ? "Updating..." : "Approve"}
                 </Button>
                 <Button
                   type="button"
                   icon={PackageCheck}
-                  disabled={reward?.inventoryCount === 0}
-                  onClick={() => updateRedemption(redemption.id, "Fulfilled")}
+                  disabled={updatingId === redemption.id || reward?.inventoryCount === 0}
+                  onClick={() => void updateRedemption(redemption.id, "Fulfilled")}
                 >
                   Fulfill
                 </Button>
@@ -101,7 +155,8 @@ export function PendingRewardQueue() {
                   type="button"
                   icon={X}
                   variant="secondary"
-                  onClick={() => updateRedemption(redemption.id, "Cancelled")}
+                  disabled={updatingId === redemption.id}
+                  onClick={() => void updateRedemption(redemption.id, "Cancelled")}
                 >
                   Cancel
                 </Button>
