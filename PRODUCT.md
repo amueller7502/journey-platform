@@ -18,7 +18,7 @@
 - Leadership metric: **Leadership Health**
 - Launch mode: **Experience Lite**
 
-Internal code and database fields may still use legacy names like `miles`, `chapter`, or `journey` until the schema is fully migrated. The user-facing product should not.
+Internal code and database fields may still use older compatibility names until the schema is fully migrated. The user-facing product should not.
 
 ## Platform Philosophy
 

@@ -1,5 +1,14 @@
 # Experience Release Notes
 
+## V1.12 Experience Lite Cleanup
+
+- Tightened Experience Lite language around XP, Rewards, Seasons, Experience Cards, and Experience Moments.
+- Kept default feature visibility focused on Lite workflows while preserving advanced modules behind toggles.
+- Improved the Daily Experience Card PDF with cut marks, stronger card ID placement, manager entry link text, and no split cards.
+- Verified Lite builder delete/archive behavior uses confirmation dialogs, archive filters, and immediate removal from active workflows.
+- Added `DATA_MIGRATION.md` with production-safe Supabase guidance.
+- Updated setup notes so seed data is clearly preview-only and migrations are the path for existing projects.
+
 ## V1.11 Role-Aware Login
 
 - Removed the front-door access-level picker from sign-in.
@@ -33,8 +42,7 @@
 
 - Replaced the Welcome screen preview access-code fallback with Supabase account sign-in.
 - Added account creation that creates the Supabase Auth user, Experience profile, role, and employee/leader/builder account row together.
-- Added login experience toggles for Employee, Manager, and Experience Builder.
-- Sign-in now routes to the selected experience when the account role has permission.
+- Sign-in now routes automatically based on the account role.
 - Added missing Experience Card area seed data so `supabase/seed.sql` runs cleanly after the schema reset.
 
 ## V1.6 Builder Delete / Archive Safety
@@ -219,7 +227,7 @@ Moved Experience toward a commercial Employee Experience Platform where culture 
 - Some preview edits still persist through the JSON operating-state bridge before normalized Supabase mutations are fully wired.
 - Auth enforcement must stay disabled until Supabase Auth users are created and connected to employee records.
 - Uploaded images still need Supabase Storage hardening.
-- Some internal names remain legacy for compatibility.
+- Some internal names remain older compatibility details.
 
 ## V1.0 Management Preview Sprint
 
@@ -235,7 +243,7 @@ Prepared Experience to operate as an Employee Experience Platform rather than a 
 ### Employee Experience
 
 - Reworked Today around mission, Season One, Community XP, Today's Focus, Recognition Spotlight, countdown, current XP, level, Rewards, and Experience Journal.
-- Replaced the old reward store with Rewards while preserving the legacy `/trading-post` redirect.
+- Replaced the old reward store with Rewards while preserving the compatibility redirect to `/rewards`.
 - Added curated reward collections, tiers, and flags.
 
 ### Manager / Leadership Experience
@@ -263,6 +271,6 @@ Prepared Experience to operate as an Employee Experience Platform rather than a 
 ### Known Issues
 
 - Supabase Auth requires production users before enforcement is turned on.
-- Some internal names still use legacy `journey`, `chapter`, and `miles` terms for compatibility.
+- Some internal names remained older compatibility details until a dedicated schema rename could be planned.
 - Uploaded images are preview/local-state based until storage is added.
 - Fully normalized Supabase mutations remain a V1.1 hardening task.

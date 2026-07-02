@@ -117,10 +117,10 @@ export function AppShell({
     <div className="experience-shell min-h-screen bg-journey-mist">
       <SkinRuntimeClass />
       <div className="relative z-10 grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="cinema-surface border-b border-journey-steel px-5 py-5 text-journey-white lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between gap-4 lg:block">
-            <BrandLockup size="sm" />
-            <div className="flex flex-wrap items-center gap-2 lg:mt-6">
+        <aside className="cinema-surface min-w-0 overflow-hidden border-b border-journey-steel px-5 py-5 text-journey-white lg:border-b-0 lg:border-r">
+          <div className="grid gap-4 sm:flex sm:items-center sm:justify-between lg:block">
+            <BrandLockup size="sm" className="min-w-0" />
+            <div className="flex min-w-0 flex-wrap items-center gap-2 lg:mt-6">
               <span className="rounded-sm bg-journey-red px-2 py-1 text-xs font-black uppercase text-journey-white">
                 {roleLabels[effectiveRole]}
               </span>
@@ -134,15 +134,15 @@ export function AppShell({
                 <p className="mb-2 text-[10px] font-black uppercase tracking-normal text-journey-red">
                   {section.label}
                 </p>
-                <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+                <nav className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
                   {section.items.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="focus-ring flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
+                      className="focus-ring flex min-h-10 min-w-0 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
                     >
-                      <item.icon className="h-4 w-4" aria-hidden="true" />
-                      <span>{item.label}</span>
+                      <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 break-words">{item.label}</span>
                     </Link>
                   ))}
                 </nav>
@@ -151,15 +151,15 @@ export function AppShell({
           </div>
           {visibleUtilityNav.length ? (
             <div className="mt-6 border-t border-journey-steel pt-5">
-              <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+              <nav className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
                 {visibleUtilityNav.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="focus-ring flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
+                    className="focus-ring flex min-h-10 min-w-0 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
                   >
-                    <item.icon className="h-4 w-4" aria-hidden="true" />
-                    <span>{item.label}</span>
+                    <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 break-words">{item.label}</span>
                   </Link>
                 ))}
               </nav>
@@ -168,14 +168,14 @@ export function AppShell({
         </aside>
         <main className="min-w-0">
           <header className="border-b border-journey-line bg-journey-white px-5 py-6 shadow-line sm:px-8">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
+            <div className="grid gap-4 sm:flex sm:flex-wrap sm:items-end sm:justify-between">
+              <div className="min-w-0">
                 {eyebrow ? (
                   <p className="text-xs font-black uppercase text-journey-red">
                     {eyebrow}
                   </p>
                 ) : null}
-                <h1 className="mt-1 text-3xl font-black text-journey-black sm:text-4xl">
+                <h1 className="mt-1 break-words text-3xl font-black text-journey-black sm:text-4xl">
                   {title}
                 </h1>
               </div>

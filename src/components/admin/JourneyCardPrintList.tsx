@@ -72,6 +72,59 @@ function wrapText(text: string, maxWidth: number, font: { widthOfTextAtSize: (te
   return lines;
 }
 
+function drawCropMarks(
+  page: ReturnType<PDFDocument["addPage"]>,
+  x: number,
+  y: number,
+) {
+  const length = 10;
+  const offset = 6;
+  const thickness = 0.45;
+  const marks: Array<[{ x: number; y: number }, { x: number; y: number }]> = [
+    [
+      { x: x - offset - length, y: y + cardHeight },
+      { x: x - offset, y: y + cardHeight },
+    ],
+    [
+      { x, y: y + cardHeight + offset },
+      { x, y: y + cardHeight + offset + length },
+    ],
+    [
+      { x: x + cardWidth + offset, y: y + cardHeight },
+      { x: x + cardWidth + offset + length, y: y + cardHeight },
+    ],
+    [
+      { x: x + cardWidth, y: y + cardHeight + offset },
+      { x: x + cardWidth, y: y + cardHeight + offset + length },
+    ],
+    [
+      { x: x - offset - length, y },
+      { x: x - offset, y },
+    ],
+    [
+      { x, y: y - offset },
+      { x, y: y - offset - length },
+    ],
+    [
+      { x: x + cardWidth + offset, y },
+      { x: x + cardWidth + offset + length, y },
+    ],
+    [
+      { x: x + cardWidth, y: y - offset },
+      { x: x + cardWidth, y: y - offset - length },
+    ],
+  ];
+
+  marks.forEach(([start, end]) => {
+    page.drawLine({
+      start,
+      end,
+      thickness,
+      color: gray,
+    });
+  });
+}
+
 async function drawExperienceCard({
   page,
   x,
@@ -98,6 +151,11 @@ async function drawExperienceCard({
     bold: Awaited<ReturnType<PDFDocument["embedFont"]>>;
   };
 }) {
+  const entryPath = `/manager/passport/${encodeURIComponent(
+    employee?.passportId ?? "card-id",
+  )}?area=${encodeURIComponent(assignment.journeyCardAreaId)}`;
+
+  drawCropMarks(page, x, y);
   page.drawRectangle({
     x,
     y,
@@ -184,6 +242,13 @@ async function drawExperienceCard({
     font: fonts.bold,
     color: black,
   });
+  page.drawText(`Manager Entry: ${entryPath}`, {
+    x: x + 18,
+    y: infoTop - 58,
+    size: 7,
+    font: fonts.regular,
+    color: gray,
+  });
   page.drawText("Today's Focus Area", {
     x: x + cardWidth - 188,
     y: infoTop,
@@ -224,6 +289,13 @@ async function drawExperienceCard({
     size: 9,
     font: fonts.bold,
     color: black,
+  });
+  page.drawText("Use ID/link", {
+    x: x + cardWidth - 78,
+    y: infoTop - 48,
+    size: 6.6,
+    font: fonts.regular,
+    color: gray,
   });
 
   const listTop = infoTop - 76;

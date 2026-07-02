@@ -1,4 +1,4 @@
-import { cn, formatMiles, percent } from "@/lib/utils";
+import { cn, formatXp, percent } from "@/lib/utils";
 
 export function ProgressBar({
   value,
@@ -20,7 +20,7 @@ export function ProgressBar({
           {label}
         </span>
         <span className={cn(inverse ? "text-journey-white" : "text-journey-steel")}>
-          {formatMiles(value)} / {formatMiles(max)}
+          {formatXp(value)} XP / {formatXp(max)} XP
         </span>
       </div>
       <div

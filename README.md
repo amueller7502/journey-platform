@@ -76,10 +76,14 @@ Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after at least one Experien
 
 ## Supabase Setup
 
-1. Create a Supabase project.
+Read [DATA_MIGRATION.md](/Users/austinmueller/Documents/Project-Journey/DATA_MIGRATION.md) before running SQL against any project with real data.
+
+For a brand-new preview Supabase project:
+
+1. Create a Supabase project with no existing Experience data.
 2. Open the SQL editor.
 3. Run `supabase/schema.sql`.
-4. Run `supabase/seed.sql`.
+4. Run `supabase/seed.sql` only if you want sample Celebration Cinema North data.
 5. Add the environment variables above to `.env.local`.
 6. Restart the dev server.
 7. Open the Welcome screen and use **Create** to create the first Experience Builder account.
@@ -87,7 +91,7 @@ Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after at least one Experien
 9. Create manager and employee accounts from the Welcome screen or Employees Builder.
 10. After accounts are tested, set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` when you are ready to block direct route access for signed-out users.
 
-For an existing Supabase project that already ran an older schema, run:
+For an existing Supabase project, do not re-run `supabase/schema.sql` or `supabase/seed.sql`. Apply only migration files that have not been run yet:
 
 ```sql
 -- In the Supabase SQL editor
@@ -115,7 +119,7 @@ The app now writes operational state to Supabase through server routes:
 - Reward requests and approvals write the shared operating state and `reward_redemptions`.
 - Recognition Studio, Rewards Studio, Season Planner, Standards, Displays, Scoring, and related Studio edits write the shared operating state and best-effort normalized config rows.
 
-The shared operating state lives in `journey_operating_state` for compatibility while normalized tables mature. Some internal table, field, storage, and CSS names still use legacy `journey`, `chapter`, `passport`, or `miles` terminology while the product UI uses Experience, Seasons, Experience Cards, and XP.
+The shared operating state uses a compatibility table while normalized tables mature. Some internal table, field, storage, and CSS names remain legacy-only implementation details while the product UI uses Experience, Seasons, Experience Cards, and XP.
 
 ## Supabase Auth Roles
 
@@ -129,7 +133,7 @@ The app still supports the legacy `employees.role` values `employee`, `manager`,
 
 ## Account Creation
 
-The Welcome screen includes Sign In / Create Account tabs and experience toggles:
+The Welcome screen includes Sign In, Create Account, and Reset Password tabs:
 
 - Sign In opens the correct tools automatically based on the account role.
 - Create Account creates a starter Employee account.
@@ -189,7 +193,7 @@ Visible in Experience Lite:
 Employee:
 
 - `/home` Today
-- `/my-journey` My Experience
+- `/my-journey` My Experience, using the current compatibility URL
 - `/rewards` Rewards
 - `/profile` Profile
 
@@ -223,9 +227,9 @@ Hidden behind feature toggles for later:
 - Scoring
 - Advanced Experience Studio
 
-Legacy redirects:
+Compatibility redirects:
 
-- `/trading-post` Legacy redirect to `/rewards`
+- `/trading-post` Compatibility redirect to `/rewards`
 
 ## Feature Flags And Lite Mode
 
@@ -279,7 +283,7 @@ Experience Cards:
 4. Bulk-select employees.
 5. Create cards.
 6. Generate the printable PDF.
-7. Enter turned-in cards through `/manager/passport`.
+7. Enter turned-in cards through the Experience Card Entry route.
 
 Rewards:
 
@@ -344,7 +348,7 @@ Browser preview state can also be reset by clearing localStorage for the local s
 
 - Supabase Auth sign-in is wired, but production enforcement is off by default until Auth users are created and connected.
 - This local shell did not expose the Supabase env vars during the sprint, so live database writes were not smoke-tested from the terminal.
-- Some internals still use legacy names for compatibility.
+- Some internals still use older compatibility names; the visible product language is Experience, XP, Season, Experience Card, and Rewards.
 - Experience Card PDFs are generated in the browser using preview/shared state, then downloaded locally.
 - Experience Moments for the live TV feed still use browser event storage plus the operating-state bridge.
 - Studio edits are shared through Supabase and sync best-effort normalized rows; a future hardening pass should move every Studio form to dedicated table-specific mutations.

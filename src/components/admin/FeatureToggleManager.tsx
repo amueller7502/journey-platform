@@ -82,7 +82,69 @@ export function FeatureToggleManager() {
         ) : null}
       </Panel>
 
-      <div className="overflow-x-auto rounded-lg border border-journey-line bg-journey-white shadow-line">
+      <div className="grid gap-3 lg:hidden">
+        {flags.map((feature) => (
+          <article
+            key={feature.id}
+            className="rounded-lg border border-journey-line bg-journey-white p-4 shadow-line"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-black text-journey-black">{feature.label}</p>
+                <p className="mt-1 text-xs font-black uppercase text-journey-red">
+                  {feature.launchPhase}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant={feature.enabled ? "dark" : "secondary"}
+                icon={feature.enabled ? ToggleRight : ToggleLeft}
+                onClick={() => updateFeature(feature.id, { enabled: !feature.enabled })}
+              >
+                {feature.enabled ? "On" : "Off"}
+              </Button>
+            </div>
+            <p className="mt-3 text-sm font-bold leading-6 text-journey-steel">
+              {feature.description}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="grid gap-2 text-sm font-bold text-journey-black">
+                Minimum Role
+                <select
+                  value={feature.minimumRole}
+                  onChange={(event) =>
+                    updateFeature(feature.id, {
+                      minimumRole: event.target.value as FeatureFlag["minimumRole"],
+                    })
+                  }
+                  className="focus-ring min-h-11 rounded-md border border-journey-line px-3 text-sm font-bold"
+                >
+                  <option value="employee">Employee</option>
+                  <option value="manager">Leader</option>
+                  <option value="admin">Experience Builder</option>
+                </select>
+              </label>
+              <div className="grid gap-2 text-sm font-bold text-journey-black">
+                Navigation
+                <Button
+                  type="button"
+                  variant={feature.visibleInNavigation ? "secondary" : "ghost"}
+                  icon={feature.visibleInNavigation ? ToggleRight : ToggleLeft}
+                  onClick={() =>
+                    updateFeature(feature.id, {
+                      visibleInNavigation: !feature.visibleInNavigation,
+                    })
+                  }
+                >
+                  {feature.visibleInNavigation ? "Shown" : "Hidden"}
+                </Button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-lg border border-journey-line bg-journey-white shadow-line lg:block">
         <table className="w-full min-w-[1100px] border-collapse text-left">
           <thead>
             <tr className="border-b border-journey-line text-xs font-black uppercase text-journey-steel">
