@@ -4,26 +4,28 @@ import { Palette, Plus, Power, Save, ToggleLeft, ToggleRight } from "lucide-reac
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
-import type { JourneySkin, SkinId } from "@/lib/types";
+import type { JourneySkin } from "@/lib/types";
 
 export function SkinSettingsPanel({
   skins,
   activeSkinId,
 }: {
   skins?: JourneySkin[];
-  activeSkinId?: SkinId;
+  activeSkinId?: string;
 }) {
   const { state, updateState } = useJourneyState();
   const configuredSkins = state.skins.length ? state.skins : skins ?? [];
   const configuredActiveSkinId = activeSkinId ?? state.activeSkinId;
-  const [selectedSkin, setSelectedSkin] = useState<SkinId>(state.activeSkinId ?? configuredActiveSkinId);
+  const [selectedSkin, setSelectedSkin] = useState<string>(
+    state.activeSkinId ?? configuredActiveSkinId,
+  );
   const [saved, setSaved] = useState(false);
 
   const selected =
     configuredSkins.find((skin) => skin.id === selectedSkin) ??
     configuredSkins[0];
 
-  function updateSkin(id: SkinId, patch: Partial<JourneySkin>) {
+  function updateSkin(id: string, patch: Partial<JourneySkin>) {
     setSaved(false);
     updateState((current) => ({
       ...current,
@@ -31,7 +33,7 @@ export function SkinSettingsPanel({
     }));
   }
 
-  function updatePalette(id: SkinId, key: keyof JourneySkin["palette"], color: string) {
+  function updatePalette(id: string, key: keyof JourneySkin["palette"], color: string) {
     const skin = configuredSkins.find((item) => item.id === id);
     if (!skin) {
       return;
@@ -48,7 +50,7 @@ export function SkinSettingsPanel({
   function addSkin() {
     setSaved(false);
     updateState((current) => {
-      const id = `${makeSlugId("New Chapter Skin", "chapter_skin")}-${Date.now()}` as SkinId;
+      const id = `${makeSlugId("New Chapter Skin", "chapter_skin")}-${Date.now()}`;
       const nextSkin: JourneySkin = {
         id,
         name: "New Chapter Skin",
@@ -56,10 +58,17 @@ export function SkinSettingsPanel({
         description: "Reusable chapter visual package.",
         canDisable: true,
         tvTreatment: "Draft display treatment",
+        headline: "Chapter Headline",
+        visualDirection: "Describe the skin's cinematic world and UI tone.",
+        motionStyle: "Describe motion cues for TV and hero surfaces.",
+        texture: "Describe grain, frames, light, or environmental texture.",
+        builderNotes: "Internal creative notes for this skin.",
         palette: {
           primary: "#050505",
           secondary: "#ffffff",
           accent: "#d71920",
+          foil: "#d71920",
+          deep: "#050505",
         },
       };
 
@@ -71,7 +80,7 @@ export function SkinSettingsPanel({
     });
   }
 
-  function setActiveSkin(id: SkinId) {
+  function setActiveSkin(id: string) {
     setSaved(false);
     updateState((current) => ({
       ...current,
@@ -244,25 +253,120 @@ export function SkinSettingsPanel({
             />
           </label>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {(["primary", "secondary", "accent"] as const).map((key) => (
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="grid gap-2 text-sm font-bold text-journey-black">
+              Hero / TV Headline
+              <input
+                value={selected.headline ?? ""}
+                onChange={(event) =>
+                  updateSkin(selected.id, { headline: event.target.value })
+                }
+                className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-bold text-journey-black">
+              Motion Style
+              <input
+                value={selected.motionStyle ?? ""}
+                onChange={(event) =>
+                  updateSkin(selected.id, { motionStyle: event.target.value })
+                }
+                className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
+              />
+            </label>
+          </div>
+
+          <label className="grid gap-2 text-sm font-bold text-journey-black">
+            Visual Direction
+            <textarea
+              value={selected.visualDirection ?? ""}
+              onChange={(event) =>
+                updateSkin(selected.id, { visualDirection: event.target.value })
+              }
+              rows={3}
+              className="focus-ring resize-none rounded-md border border-journey-line px-3 py-2"
+            />
+          </label>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="grid gap-2 text-sm font-bold text-journey-black">
+              Texture
+              <textarea
+                value={selected.texture ?? ""}
+                onChange={(event) =>
+                  updateSkin(selected.id, { texture: event.target.value })
+                }
+                rows={3}
+                className="focus-ring resize-none rounded-md border border-journey-line px-3 py-2"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-bold text-journey-black">
+              Builder Notes
+              <textarea
+                value={selected.builderNotes ?? ""}
+                onChange={(event) =>
+                  updateSkin(selected.id, { builderNotes: event.target.value })
+                }
+                rows={3}
+                className="focus-ring resize-none rounded-md border border-journey-line px-3 py-2"
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-5">
+            {(["primary", "secondary", "accent", "foil", "deep"] as const).map((key) => (
               <label key={key} className="grid gap-2 text-sm font-bold text-journey-black">
                 {key}
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={selected.palette[key]}
+                    value={selected.palette[key] ?? "#050505"}
                     onChange={(event) => updatePalette(selected.id, key, event.target.value)}
                     className="h-10 w-14 rounded-md border border-journey-line"
                   />
                   <input
-                    value={selected.palette[key]}
+                    value={selected.palette[key] ?? ""}
                     onChange={(event) => updatePalette(selected.id, key, event.target.value)}
                     className="focus-ring min-h-10 min-w-0 flex-1 rounded-md border border-journey-line px-3 font-mono text-sm"
                   />
                 </div>
               </label>
             ))}
+          </div>
+
+          <div
+            className="overflow-hidden rounded-lg border border-journey-line p-5 text-journey-white"
+            style={{
+              background: `linear-gradient(135deg, ${selected.palette.deep ?? selected.palette.primary}, ${selected.palette.primary})`,
+            }}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p
+                  className="text-xs font-black uppercase"
+                  style={{ color: selected.palette.accent }}
+                >
+                  Skin Preview
+                </p>
+                <h3 className="mt-2 text-4xl font-black">
+                  {selected.headline || selected.name}
+                </h3>
+                <p className="mt-3 max-w-2xl text-sm font-bold leading-6 text-journey-line">
+                  {selected.visualDirection || selected.description}
+                </p>
+              </div>
+              <div
+                className="rounded-md border px-4 py-3 text-right"
+                style={{ borderColor: selected.palette.foil ?? selected.palette.accent }}
+              >
+                <p className="text-xs font-black uppercase text-journey-line">
+                  Motion
+                </p>
+                <p className="mt-1 text-lg font-black">
+                  {selected.motionStyle || "Standard fades"}
+                </p>
+              </div>
+            </div>
           </div>
 
           <label className="flex items-center gap-3 rounded-lg border border-journey-line p-4 text-sm font-bold text-journey-black">

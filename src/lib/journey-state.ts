@@ -6,6 +6,8 @@ import {
   chapter as defaultChapter,
   departments as defaultDepartments,
   employees as defaultEmployees,
+  excellenceLogs as defaultExcellenceLogs,
+  journeyCardAreas as defaultJourneyCardAreas,
   journeySkins as defaultSkins,
   recognitionTypes as defaultRecognitionTypes,
   rewards as defaultRewards,
@@ -13,10 +15,11 @@ import {
 import type {
   Department,
   Employee,
+  ExcellenceLog,
+  JourneyCardArea,
   JourneySkin,
   RecognitionType,
   Reward,
-  SkinId,
 } from "@/lib/types";
 
 export type JourneyChapter = typeof defaultChapter;
@@ -25,10 +28,12 @@ export type JourneyOperatingState = {
   chapter: JourneyChapter;
   departments: Department[];
   employees: Employee[];
+  journeyCardAreas: JourneyCardArea[];
   recognitionTypes: RecognitionType[];
   rewards: Reward[];
+  excellenceLogs: ExcellenceLog[];
   skins: JourneySkin[];
-  activeSkinId: SkinId;
+  activeSkinId: string;
   skinEnabled: boolean;
   updatedAt: string;
 };
@@ -40,8 +45,10 @@ const defaultState: JourneyOperatingState = {
   chapter: defaultChapter,
   departments: defaultDepartments,
   employees: defaultEmployees,
+  journeyCardAreas: defaultJourneyCardAreas,
   recognitionTypes: defaultRecognitionTypes,
   rewards: defaultRewards,
+  excellenceLogs: defaultExcellenceLogs,
   skins: defaultSkins,
   activeSkinId: activeSkin.id,
   skinEnabled: activeSkin.id !== "standard",
@@ -55,6 +62,18 @@ function cloneState(state: JourneyOperatingState): JourneyOperatingState {
   return JSON.parse(JSON.stringify(state)) as JourneyOperatingState;
 }
 
+function mergeById<T extends { id: string }>(defaults: T[], stored?: T[]) {
+  if (!stored?.length) {
+    return defaults;
+  }
+
+  const storedIds = new Set(stored.map((item) => item.id));
+  return [
+    ...stored,
+    ...defaults.filter((defaultItem) => !storedIds.has(defaultItem.id)),
+  ];
+}
+
 function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOperatingState {
   const next = {
     ...cloneState(defaultState),
@@ -63,13 +82,13 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
       ...defaultState.chapter,
       ...(value?.chapter ?? {}),
     },
-    departments: value?.departments?.length ? value.departments : defaultState.departments,
-    employees: value?.employees?.length ? value.employees : defaultState.employees,
-    recognitionTypes: value?.recognitionTypes?.length
-      ? value.recognitionTypes
-      : defaultState.recognitionTypes,
-    rewards: value?.rewards?.length ? value.rewards : defaultState.rewards,
-    skins: value?.skins?.length ? value.skins : defaultState.skins,
+    departments: mergeById(defaultState.departments, value?.departments),
+    employees: mergeById(defaultState.employees, value?.employees),
+    journeyCardAreas: mergeById(defaultState.journeyCardAreas, value?.journeyCardAreas),
+    recognitionTypes: mergeById(defaultState.recognitionTypes, value?.recognitionTypes),
+    rewards: mergeById(defaultState.rewards, value?.rewards),
+    excellenceLogs: mergeById(defaultState.excellenceLogs, value?.excellenceLogs),
+    skins: mergeById(defaultState.skins, value?.skins),
   };
 
   const activeExists = next.skins.some((skin) => skin.id === next.activeSkinId);
@@ -213,6 +232,23 @@ export function buildJourneyCardUrl(passportId: string) {
   return `/manager/passport/${passportId}`;
 }
 
+export function getJourneyCardAreaForEmployee(
+  employee: Employee,
+  areas: JourneyCardArea[],
+) {
+  const assignedArea = areas.find(
+    (area) => area.enabled && area.id === employee.journeyCardAreaId,
+  );
+
+  if (assignedArea) {
+    return assignedArea;
+  }
+
+  return areas.find(
+    (area) => area.enabled && area.departmentIds.includes(employee.department),
+  );
+}
+
 export function addMilesToEmployee(employeeId: string, miles: number) {
   updateJourneyState((current) => {
     const employee = current.employees.find((item) => item.id === employeeId);
@@ -240,6 +276,64 @@ export function addMilesToEmployee(employeeId: string, miles: number) {
               : department,
           )
         : current.departments,
+      updatedAt: now,
+    };
+  });
+}
+
+export function addDepartmentProgressMiles(departmentId: string, miles: number) {
+  updateJourneyState((current) => ({
+    ...current,
+    departments: current.departments.map((department) =>
+      department.id === departmentId
+        ? {
+            ...department,
+            progressMiles: department.progressMiles + miles,
+          }
+        : department,
+    ),
+    updatedAt: new Date().toISOString(),
+  }));
+}
+
+export function logExcellenceCheck({
+  recognitionTypeId,
+  departmentId,
+  managerId,
+  note,
+  communityMiles,
+}: {
+  recognitionTypeId: string;
+  departmentId: Employee["department"];
+  managerId: string;
+  note: string;
+  communityMiles: number;
+}) {
+  updateJourneyState((current) => {
+    const now = new Date().toISOString();
+
+    return {
+      ...current,
+      excellenceLogs: [
+        {
+          id: `check-${recognitionTypeId}-${Date.now()}`,
+          recognitionTypeId,
+          departmentId,
+          managerId,
+          createdAt: now,
+          note,
+          communityMiles,
+        },
+        ...current.excellenceLogs,
+      ].slice(0, 60),
+      departments: current.departments.map((department) =>
+        department.id === departmentId
+          ? {
+              ...department,
+              progressMiles: department.progressMiles + communityMiles,
+            }
+          : department,
+      ),
       updatedAt: now,
     };
   });

@@ -25,6 +25,9 @@ function createBlankType(sortOrder: number): RecognitionType {
     requiresManagerVerification: true,
     sortOrder,
     type: "recognition",
+    creditScope: "employee",
+    journeyCardEligible: false,
+    journeyCardAreaIds: [],
   };
 }
 
@@ -97,6 +100,7 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
             className="focus-ring min-h-11 rounded-md border border-journey-line px-3"
           >
             <option value="recognition">recognition</option>
+            <option value="journey_card_task">journey_card_task</option>
             <option value="excellence_check">excellence_check</option>
             <option value="reliability">reliability</option>
             <option value="teamwork">teamwork</option>
@@ -207,6 +211,37 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
             }
           />
           Requires manager verification
+        </label>
+        <label className="grid gap-2 rounded-lg border border-journey-line p-4 text-sm font-bold text-journey-black">
+          Credit Scope
+          <select
+            value={form.creditScope ?? "employee"}
+            onChange={(event) =>
+              setForm({
+                ...form,
+                creditScope: event.target.value as RecognitionType["creditScope"],
+              })
+            }
+            className="focus-ring min-h-10 rounded-md border border-journey-line px-3"
+          >
+            <option value="employee">Employee Miles</option>
+            <option value="department">Department / building progress</option>
+            <option value="community">Community progress only</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-3 rounded-lg border border-journey-line p-4 text-sm font-bold text-journey-black">
+          <input
+            type="checkbox"
+            checked={Boolean(form.journeyCardEligible)}
+            onChange={(event) =>
+              setForm({
+                ...form,
+                journeyCardEligible: event.target.checked,
+                type: event.target.checked ? "journey_card_task" : form.type,
+              })
+            }
+          />
+          Available on Journey Cards
         </label>
       </div>
 

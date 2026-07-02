@@ -26,7 +26,12 @@ export function RecognitionForm() {
   const recognitionOptions = useMemo(
     () =>
       state.recognitionTypes
-        .filter((type) => type.enabled && type.type !== "excellence_check")
+        .filter(
+          (type) =>
+            type.enabled &&
+            type.type !== "excellence_check" &&
+            type.type !== "journey_card_task",
+        )
         .sort((a, b) => a.sortOrder - b.sortOrder),
     [state.recognitionTypes],
   );

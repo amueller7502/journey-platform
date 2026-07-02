@@ -12,6 +12,7 @@ export type StandardId =
 export type DepartmentId =
   | "guest_services"
   | "concessions"
+  | "kitchen"
   | "floor"
   | "box_office"
   | "facilities"
@@ -27,11 +28,14 @@ export type RecognitionCategory =
 
 export type RecognitionTypeKind =
   | "recognition"
+  | "journey_card_task"
   | "excellence_check"
   | "reliability"
   | "teamwork"
   | "guest_experience"
   | "detail";
+
+export type RecognitionCreditScope = "employee" | "department" | "community";
 
 export type RecognitionType = {
   id: string;
@@ -46,6 +50,9 @@ export type RecognitionType = {
   requiresManagerVerification: boolean;
   sortOrder: number;
   type: RecognitionTypeKind;
+  creditScope?: RecognitionCreditScope;
+  journeyCardEligible?: boolean;
+  journeyCardAreaIds?: string[];
 };
 
 export type RecognitionStandard = {
@@ -64,6 +71,10 @@ export type Employee = {
   initials: string;
   passportId: string;
   passportQrUrl: string;
+  journeyCardAreaId?: string;
+  email?: string;
+  accessCode?: string;
+  accountStatus?: "invited" | "active" | "disabled";
   active?: boolean;
   miles: number;
   weeklyMiles: number;
@@ -77,6 +88,15 @@ export type Department = {
   name: string;
   progressMiles: number;
   goalMiles: number;
+};
+
+export type JourneyCardArea = {
+  id: string;
+  name: string;
+  description: string;
+  departmentIds: DepartmentId[];
+  enabled: boolean;
+  sortOrder: number;
 };
 
 export type Recognition = {
@@ -111,16 +131,23 @@ export type Reward = {
 export type SkinId = "standard" | "odyssey" | "dune_3";
 
 export type JourneySkin = {
-  id: SkinId;
+  id: SkinId | string;
   name: string;
   status: "active" | "available" | "draft";
   description: string;
   canDisable: boolean;
   tvTreatment: string;
+  headline?: string;
+  visualDirection?: string;
+  motionStyle?: string;
+  texture?: string;
+  builderNotes?: string;
   palette: {
     primary: string;
     secondary: string;
     accent: string;
+    foil?: string;
+    deep?: string;
   };
 };
 
@@ -160,6 +187,16 @@ export type RecognitionBatch = {
   source: "passport" | "manager_entry";
   itemCount: number;
   totalMiles: number;
+};
+
+export type ExcellenceLog = {
+  id: string;
+  recognitionTypeId: string;
+  departmentId: DepartmentId;
+  managerId: string;
+  createdAt: string;
+  note: string;
+  communityMiles: number;
 };
 
 export type NavItem = {

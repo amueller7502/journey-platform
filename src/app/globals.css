@@ -147,6 +147,14 @@ textarea {
   animation: projectionSweep 8s ease-in-out infinite;
 }
 
+.tv-signal-beam {
+  opacity: 0.52;
+  background:
+    linear-gradient(112deg, transparent 0 42%, rgba(255, 255, 255, 0.08) 46%, transparent 54%),
+    radial-gradient(circle at 72% 12%, rgba(215, 25, 32, 0.16), transparent 34%);
+  animation: tvSignalDrift 13s ease-in-out infinite;
+}
+
 .fleet-ocean {
   position: relative;
   overflow: hidden;
@@ -154,7 +162,12 @@ textarea {
   border: 1px solid var(--skin-line);
   background:
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.09), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 100%),
     linear-gradient(180deg, rgba(7, 24, 32, 0.9), rgba(2, 8, 11, 0.98));
+  background-size:
+    auto,
+    100% 54px,
+    auto;
 }
 
 .fleet-ocean::before,
@@ -200,6 +213,23 @@ textarea {
   width: 96px;
   transform: translate(-50%, -50%);
   animation: boatBob 3.6s ease-in-out infinite;
+  animation-delay: var(--boat-delay);
+}
+
+.fleet-horizon {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 18%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 168, 77, 0.45),
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  box-shadow: 0 0 28px rgba(201, 168, 77, 0.22);
 }
 
 .fleet-sail {
@@ -290,6 +320,16 @@ textarea {
   45%,
   100% {
     transform: translateX(420%) skewX(-18deg);
+  }
+}
+
+@keyframes tvSignalDrift {
+  0%,
+  100% {
+    transform: translateX(-2%) scale(1);
+  }
+  50% {
+    transform: translateX(2%) scale(1.02);
   }
 }
 

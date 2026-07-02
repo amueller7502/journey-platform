@@ -5,24 +5,42 @@ import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { saveJourneyMoment } from "@/lib/demo-moments";
 import { recognitionStandards } from "@/lib/data";
-import { addMilesToEmployee, useJourneyState } from "@/lib/journey-state";
+import {
+  addMilesToEmployee,
+  getJourneyCardAreaForEmployee,
+  useJourneyState,
+} from "@/lib/journey-state";
 import type { Employee } from "@/lib/types";
 
 export function PassportEntryForm({ employee }: { employee: Employee }) {
   const { state } = useJourneyState();
   const currentEmployee =
     state.employees.find((item) => item.passportId === employee.passportId) ?? employee;
+  const cardArea = getJourneyCardAreaForEmployee(
+    currentEmployee,
+    state.journeyCardAreas,
+  );
   const enabledRecognitionTypes = useMemo(
     () =>
       state.recognitionTypes
-        .filter((type) => type.enabled)
+        .filter((type) => {
+          if (!type.enabled || !type.journeyCardEligible) {
+            return false;
+          }
+
+          if (!cardArea) {
+            return true;
+          }
+
+          return (
+            !type.journeyCardAreaIds?.length ||
+            type.journeyCardAreaIds.includes(cardArea.id)
+          );
+        })
         .sort((a, b) => a.sortOrder - b.sortOrder),
-    [state.recognitionTypes],
+    [cardArea, state.recognitionTypes],
   );
-  const [selected, setSelected] = useState<string[]>([
-    "lobby_excellence",
-    "guest_compliment",
-  ]);
+  const [selected, setSelected] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const availableSelected = selected.filter((id) =>
@@ -50,8 +68,8 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
           Journey Card Batch Submitted
         </h2>
         <p className="mt-3 text-lg font-bold text-journey-steel">
-          {currentEmployee.name} earned {totalMiles} Miles from {selectedTypes.length} verified
-          Journey Card items.
+          {currentEmployee.name} earned {totalMiles} Miles from {selectedTypes.length} verified{" "}
+          {cardArea?.name ?? "Journey Card"} items.
         </p>
         <p className="mt-4 text-sm font-bold text-journey-steel">
           Batch: card-{currentEmployee.passportId.toLowerCase()}-today
@@ -65,6 +83,9 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
       className="pb-24"
       onSubmit={(event) => {
         event.preventDefault();
+        if (!selectedTypes.length) {
+          return;
+        }
         const createdAt = new Date().toISOString();
         selectedTypes
           .slice()
@@ -91,7 +112,29 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
       }}
     >
       <div className="grid gap-5">
+        <section className="rounded-lg border border-journey-line bg-journey-mist p-4">
+          <p className="text-xs font-black uppercase text-journey-red">
+            {cardArea?.name ?? "Unassigned Journey Card"}
+          </p>
+          <h3 className="mt-1 text-xl font-black text-journey-black">
+            Area-specific verified tasks
+          </h3>
+          <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-journey-steel">
+            These are employee-earning card tasks for this area. Excellence Checks
+            are logged separately as building readiness and do not become spendable
+            employee Miles unless a manager also captures a Journey Moment.
+          </p>
+        </section>
+
+        {!enabledRecognitionTypes.length ? (
+          <section className="rounded-lg border border-journey-line bg-journey-white p-4 text-sm font-bold text-journey-steel">
+            No enabled Journey Card tasks match this employee&apos;s card area. Add tasks
+            in Admin / Journey Cards.
+          </section>
+        ) : null}
+
         {grouped.map(({ standard, items }) => (
+          items.length ? (
           <section key={standard.id} className="rounded-lg border border-journey-line bg-journey-white p-4 shadow-line">
             <div className="mb-4">
               <p className="text-xs font-black uppercase text-journey-red">
@@ -139,6 +182,7 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
               })}
             </div>
           </section>
+          ) : null
         ))}
       </div>
 
@@ -161,7 +205,7 @@ export function PassportEntryForm({ employee }: { employee: Employee }) {
               {totalMiles} Miles from {selectedTypes.length} items
             </p>
           </div>
-          <Button type="submit" icon={Send}>
+          <Button type="submit" icon={Send} disabled={!selectedTypes.length}>
             Submit Journey Card Batch
           </Button>
         </div>

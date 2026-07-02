@@ -1,13 +1,9 @@
 import {
   Clapperboard,
-  LayoutDashboard,
-  MonitorPlay,
-  ShieldCheck,
-  UserRound,
 } from "lucide-react";
 import { BrandLockup } from "@/components/BrandLockup";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
-import { LinkButton } from "@/components/ui/Button";
+import { WorkspaceLoginPanel } from "@/components/WorkspaceLoginPanel";
 import { chapter, filmFacts } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 
@@ -69,43 +65,7 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-journey-steel bg-journey-white p-5 text-journey-black shadow-premium">
-            <div className="border-b border-journey-line pb-4">
-              <p className="text-xs font-black uppercase text-journey-red">
-                Welcome / Login
-              </p>
-              <h2 className="mt-2 text-3xl font-black">Choose Workspace</h2>
-            </div>
-            <div className="mt-5 grid gap-3">
-              <LinkButton href="/home" icon={UserRound} className="justify-start">
-                Employee Workspace
-              </LinkButton>
-              <LinkButton
-                href="/manager/recognize"
-                icon={ShieldCheck}
-                variant="dark"
-                className="justify-start"
-              >
-                Manager Workspace
-              </LinkButton>
-              <LinkButton
-                href="/admin/dashboard"
-                icon={LayoutDashboard}
-                variant="secondary"
-                className="justify-start"
-              >
-                Admin/GM Workspace
-              </LinkButton>
-              <LinkButton
-                href="/tv"
-                icon={MonitorPlay}
-                variant="secondary"
-                className="justify-start"
-              >
-                TV Display
-              </LinkButton>
-            </div>
-          </div>
+          <WorkspaceLoginPanel />
         </section>
 
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-journey-steel pt-5 text-sm font-bold text-journey-line">

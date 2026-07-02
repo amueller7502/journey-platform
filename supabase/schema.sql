@@ -7,9 +7,11 @@ drop table if exists public.reward_redemptions cascade;
 drop table if exists public.rewards cascade;
 drop table if exists public.recognition_records cascade;
 drop table if exists public.recognition_batches cascade;
+drop table if exists public.excellence_check_logs cascade;
 drop table if exists public.recognition_types cascade;
 drop table if exists public.recognition_standards cascade;
 drop table if exists public.employees cascade;
+drop table if exists public.journey_card_areas cascade;
 drop table if exists public.menu_items cascade;
 drop table if exists public.departments cascade;
 drop table if exists public.chapter_skin_settings cascade;
@@ -31,6 +33,7 @@ create type public.reward_redemption_status as enum (
 create type public.chapter_status as enum ('draft', 'active', 'complete', 'archived');
 create type public.recognition_type_kind as enum (
   'recognition',
+  'journey_card_task',
   'excellence_check',
   'reliability',
   'teamwork',
@@ -45,6 +48,11 @@ create table public.skins (
   description text not null,
   can_disable boolean not null default true,
   tv_treatment text not null,
+  headline text,
+  visual_direction text,
+  motion_style text,
+  texture text,
+  builder_notes text,
   palette jsonb not null default '{}'::jsonb,
   sort_order integer not null default 0,
   created_at timestamptz not null default now()
@@ -80,6 +88,16 @@ create table public.departments (
   sort_order integer not null default 0
 );
 
+create table public.journey_card_areas (
+  id text primary key,
+  name text not null,
+  description text not null,
+  department_slugs text[] not null default '{}',
+  enabled boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
 create table public.employees (
   id uuid primary key default gen_random_uuid(),
   auth_user_id uuid unique references auth.users (id) on delete set null,
@@ -90,6 +108,10 @@ create table public.employees (
   role public.journey_role not null default 'employee',
   passport_id text not null unique,
   passport_qr_url text not null,
+  journey_card_area_id text references public.journey_card_areas (id),
+  email text,
+  access_code text unique,
+  account_status text not null default 'invited' check (account_status in ('invited', 'active', 'disabled')),
   active boolean not null default true,
   hired_on date,
   created_at timestamptz not null default now()
@@ -130,8 +152,22 @@ create table public.recognition_types (
   requires_manager_verification boolean not null default true,
   sort_order integer not null default 0,
   kind public.recognition_type_kind not null default 'recognition',
+  credit_scope text not null default 'employee' check (credit_scope in ('employee', 'department', 'community')),
+  journey_card_eligible boolean not null default false,
+  journey_card_area_ids text[] not null default '{}',
   created_at timestamptz not null default now(),
   unique (chapter_id, slug)
+);
+
+create table public.excellence_check_logs (
+  id uuid primary key default gen_random_uuid(),
+  chapter_id uuid not null references public.chapters (id) on delete cascade,
+  recognition_type_id uuid not null references public.recognition_types (id),
+  department_id uuid not null references public.departments (id),
+  manager_id uuid not null references public.employees (id),
+  note text not null,
+  community_miles integer not null check (community_miles > 0),
+  created_at timestamptz not null default now()
 );
 
 create table public.recognition_batches (
@@ -233,6 +269,9 @@ create table public.tv_fleet_standings (
 );
 
 create index recognition_types_chapter_idx on public.recognition_types (chapter_id, enabled, sort_order);
+create index recognition_types_card_idx on public.recognition_types (chapter_id, journey_card_eligible, enabled);
+create index excellence_check_logs_chapter_created_idx
+  on public.excellence_check_logs (chapter_id, created_at desc);
 create index recognition_records_chapter_created_idx
   on public.recognition_records (chapter_id, created_at desc);
 create index recognition_records_employee_idx on public.recognition_records (employee_id);
@@ -240,6 +279,7 @@ create index recognition_batches_employee_idx on public.recognition_batches (emp
 create index rewards_chapter_idx on public.rewards (chapter_id, enabled, sort_order);
 create index reward_redemptions_status_idx on public.reward_redemptions (status);
 create index employees_passport_idx on public.employees (passport_id);
+create index employees_access_code_idx on public.employees (access_code);
 create index menu_items_role_idx on public.menu_items (role, enabled, sort_order);
 create index tv_fleet_standings_chapter_idx on public.tv_fleet_standings (chapter_id, rank);
 
@@ -277,10 +317,12 @@ alter table public.chapters enable row level security;
 alter table public.skins enable row level security;
 alter table public.chapter_skin_settings enable row level security;
 alter table public.departments enable row level security;
+alter table public.journey_card_areas enable row level security;
 alter table public.menu_items enable row level security;
 alter table public.employees enable row level security;
 alter table public.recognition_standards enable row level security;
 alter table public.recognition_types enable row level security;
+alter table public.excellence_check_logs enable row level security;
 alter table public.recognition_batches enable row level security;
 alter table public.recognition_records enable row level security;
 alter table public.rewards enable row level security;
@@ -312,6 +354,14 @@ create policy "admins manage chapter skin settings"
 create policy "authenticated users read departments"
   on public.departments for select to authenticated using (true);
 
+create policy "authenticated users read journey card areas"
+  on public.journey_card_areas for select to authenticated using (enabled);
+
+create policy "admins manage journey card areas"
+  on public.journey_card_areas for all to authenticated
+  using (public.current_journey_role() = 'admin')
+  with check (public.current_journey_role() = 'admin');
+
 create policy "authenticated users read enabled menu items"
   on public.menu_items for select to authenticated using (enabled);
 
@@ -338,6 +388,16 @@ create policy "admins manage recognition types"
   on public.recognition_types for all to authenticated
   using (public.current_journey_role() = 'admin')
   with check (public.current_journey_role() = 'admin');
+
+create policy "authenticated users read excellence check logs"
+  on public.excellence_check_logs for select to authenticated using (true);
+
+create policy "managers create excellence check logs"
+  on public.excellence_check_logs for insert to authenticated
+  with check (
+    public.is_manager_or_admin()
+    and manager_id = public.current_employee_id()
+  );
 
 create policy "authenticated users read recognition records"
   on public.recognition_records for select to authenticated using (true);

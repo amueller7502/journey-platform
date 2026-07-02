@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ActiveAccountBadge } from "@/components/ActiveAccountBadge";
 import { BrandLockup } from "@/components/BrandLockup";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
+import { SkinRuntimeClass } from "@/components/SkinRuntimeClass";
 import { adminNav, employeeNav, managerNav, roleLabels, utilityNav } from "@/lib/data";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-journey-mist">
+      <SkinRuntimeClass />
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
         <aside className="cinema-surface border-b border-journey-steel px-5 py-5 text-journey-white lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-4 lg:block">
@@ -40,6 +43,7 @@ export function AppShell({
               <PreviewModeBadge />
             </div>
           </div>
+          <ActiveAccountBadge />
           <nav className="mt-6 grid grid-cols-2 gap-2 lg:grid-cols-1">
             {navItems.map((item) => (
               <Link

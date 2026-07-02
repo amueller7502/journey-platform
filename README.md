@@ -22,6 +22,8 @@ Chapter One is **The Odyssey**, running **July 16-August 12, 2026**. The managem
 - Employee, Manager, and Admin/GM page groups
 - Manager Capture Moment flow designed for under 10 seconds
 - Journey Card paper-to-digital batch entry workflow
+- Area-specific Journey Card builder for Floor/Lobby, Concessions, Kitchen/Oscar's, Box Office/Guest Services, and Facilities/Exterior
+- Preview account creation with role, department, access code, account status, and Journey Card assignment
 - Admin-managed recognition type and excellence check library
 - Admin-managed rewards, costs, inventory, and Trading Post cards
 - Admin skin controls with Cinema Standard, Odyssey / North Stars, and a future Dune 3 slot
@@ -101,14 +103,27 @@ The database keeps the internal `passport_id` field name for stability. Employee
 
 ## Role Entry
 
-The welcome screen uses role-selection cards:
+The welcome screen supports preview access codes plus demo role buttons:
 
 - Employee opens `/home`
 - Manager opens `/manager/recognize`
 - Admin/GM opens `/admin/dashboard`
 - TV Display opens `/tv`
 
+Seed access codes:
+
+- `AR1570` employee
+- `JE1570` manager
+- `SC1570` admin/GM
+
 No password is required in Sprint Alpha. Production authentication is a known follow-up.
+
+## Miles Rules In This Build
+
+- Journey Moments and Journey Card tasks award spendable employee Miles.
+- Excellence Checks log building readiness and add department/community progress.
+- If a manager wants to reward the person behind an Excellence Check, they should capture a separate Journey Moment.
+- Journey Cards are assigned by area, so kitchen, lobby, concessions, box office, guest services, and facilities can have different task lists.
 
 ## Management Preview Flow
 
@@ -175,10 +190,12 @@ The schema in `supabase/schema.sql` includes:
 - `skins`
 - `chapter_skin_settings`
 - `departments`
+- `journey_card_areas`
 - `menu_items`
 - `employees`
 - `recognition_standards`
 - `recognition_types`
+- `excellence_check_logs`
 - `recognition_batches`
 - `recognition_records`
 - `rewards`

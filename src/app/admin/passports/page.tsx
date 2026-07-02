@@ -1,5 +1,6 @@
 import { QrCode } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { JourneyCardDesigner } from "@/components/admin/JourneyCardDesigner";
 import { JourneyCardPrintList } from "@/components/admin/JourneyCardPrintList";
 import { LinkButton } from "@/components/ui/Button";
 
@@ -11,6 +12,7 @@ export default function AdminPassportsPage() {
       eyebrow="Paper to digital workflow"
       actions={<LinkButton href="/manager/passport" icon={QrCode}>Manager Entry</LinkButton>}
     >
+      <JourneyCardDesigner />
       <JourneyCardPrintList />
     </AppShell>
   );

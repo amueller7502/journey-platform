@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { BrandLockup } from "@/components/BrandLockup";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
+import { SkinRuntimeClass } from "@/components/SkinRuntimeClass";
 import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
 import { DepartmentProgress } from "@/components/dashboard/DepartmentProgress";
 import {
@@ -38,7 +39,10 @@ export function TvDashboard() {
     }
 
     return tvPanels.filter(
-      (panel) => panel !== "North Stars Fleet" && panel !== "15,700 / IMAX 1570",
+      (panel) =>
+        panel !== "Odyssey Signal" &&
+        panel !== "North Stars Fleet" &&
+        panel !== "15,700 / IMAX 1570",
     );
   }, [state.activeSkinId, state.skinEnabled]);
   const [index, setIndex] = useState(0);
@@ -58,6 +62,8 @@ export function TvDashboard() {
   const activeEmployees = state.employees.filter(
     (employee) => employee.role === "employee" && employee.active !== false,
   ).length;
+  const activeSkin =
+    state.skins.find((skin) => skin.id === state.activeSkinId) ?? state.skins[0];
 
   function enterFullscreen() {
     document.documentElement.requestFullscreen?.();
@@ -78,9 +84,51 @@ export function TvDashboard() {
   }, [panels.length]);
 
   const panel = useMemo(() => {
+    if (activePanel === "Odyssey Signal") {
+      return (
+        <TvPanel
+          icon={Clapperboard}
+          eyebrow={state.chapter.subtitle}
+          title={activeSkin?.headline ?? "North Stars"}
+        >
+          <div className="grid max-w-6xl gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="projection-sweep odyssey-frame rounded-lg border border-journey-steel bg-journey-coal p-8">
+              <p className="text-xs font-black uppercase text-journey-red">
+                {state.chapter.themeLabel}
+              </p>
+              <p className="mt-5 text-4xl font-black leading-tight text-journey-white sm:text-6xl">
+                One team. One journey. Unforgettable guest experiences.
+              </p>
+              <p className="mt-6 max-w-3xl text-2xl font-bold leading-9 text-journey-line">
+                {activeSkin?.visualDirection ?? state.chapter.themeNote}
+              </p>
+            </div>
+            <div className="rounded-lg border border-journey-steel bg-journey-black p-8">
+              <p className="text-xs font-black uppercase text-journey-red">
+                Journey Signal
+              </p>
+              <p className="mt-6 text-8xl font-black text-journey-white">
+                15/70
+              </p>
+              <p className="mt-4 text-2xl font-black text-journey-red">
+                {formatMiles(state.chapter.communityGoalMiles)} Miles
+              </p>
+              <p className="mt-5 text-lg font-bold leading-8 text-journey-line">
+                {activeSkin?.texture ?? "Film grain, frame marks, and projection light."}
+              </p>
+            </div>
+          </div>
+        </TvPanel>
+      );
+    }
+
     if (activePanel === "Community Progress") {
       return (
-        <TvPanel icon={Route} eyebrow="Community Progress" title={state.chapter.phrase}>
+        <TvPanel
+          icon={Route}
+          eyebrow={activeSkin?.headline ?? "Community Progress"}
+          title={state.chapter.phrase}
+        >
           <ChapterProgress inverse />
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <TvStat label="Miles Today" value={`+${formatMiles(chapterStats.todayMiles)}`} />
@@ -147,15 +195,18 @@ export function TvDashboard() {
 
     if (activePanel === "North Stars Fleet") {
       return (
-        <TvPanel icon={Route} eyebrow="North Stars Fleet" title="Crew Competition">
+        <TvPanel icon={Route} eyebrow="North Stars Fleet" title="Fleet Progress">
           <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
-            <div className="fleet-ocean rounded-lg p-6">
+            <div className="fleet-ocean odyssey-frame rounded-lg p-6">
               <div className="relative z-10 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-black uppercase text-journey-red">
-                    Animated Fleet Race
+                  <p className="text-xs font-black uppercase text-journey-red tracking-normal">
+                    Animated North Stars Course
                   </p>
-                  <p className="mt-2 max-w-xl text-xl font-bold text-journey-line">
+                  <p className="mt-2 max-w-xl text-2xl font-black text-journey-white">
+                    Every crew moves the whole building toward port.
+                  </p>
+                  <p className="mt-2 max-w-xl text-lg font-bold text-journey-line">
                     Crews sail by shared recognition miles, with the whole building
                     moving toward 15,700.
                   </p>
@@ -175,6 +226,7 @@ export function TvDashboard() {
                 const boatStyle = {
                   "--boat-progress": `${standing.progress}`,
                   "--boat-top": `${boatTop}%`,
+                  "--boat-delay": `${index * 0.22}s`,
                 } as CSSProperties;
                 const laneStyle = {
                   "--lane-top": `${boatTop + 4}%`,
@@ -193,6 +245,7 @@ export function TvDashboard() {
                   </div>
                 );
               })}
+              <div className="fleet-horizon" />
             </div>
 
             <div className="grid gap-3">
@@ -322,6 +375,9 @@ export function TvDashboard() {
   }, [
     activeEmployees,
     activePanel,
+    activeSkin?.headline,
+    activeSkin?.texture,
+    activeSkin?.visualDirection,
     communityMiles,
     journeyMoments,
     journeySpotlight,
@@ -334,6 +390,8 @@ export function TvDashboard() {
 
   return (
     <main className="cinema-surface film-grain relative min-h-screen overflow-hidden text-journey-white">
+      <SkinRuntimeClass />
+      <div className="tv-signal-beam pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-y-0 left-0 w-8 film-perf opacity-40" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-8 film-perf opacity-40" />
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-4 border-b border-journey-steel bg-journey-black/95 px-8 py-5">
@@ -351,9 +409,11 @@ export function TvDashboard() {
           </button>
           <div className="text-right">
             <p className="text-xs font-black uppercase text-journey-red">
-              {state.chapter.subtitle}
+              {activeSkin?.headline ?? state.chapter.subtitle}
             </p>
-            <p className="font-bold text-journey-line">{activePanel}</p>
+            <p className="font-bold text-journey-line">
+              {activePanel} / {activeSkin?.motionStyle ?? "Standard loop"}
+            </p>
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ const categoryOptions: RecognitionCategory[] = [
 
 const typeOptions: RecognitionTypeKind[] = [
   "recognition",
+  "journey_card_task",
   "excellence_check",
   "reliability",
   "teamwork",
@@ -29,7 +30,7 @@ const typeOptions: RecognitionTypeKind[] = [
 export function RecognitionLibraryManager() {
   const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
-  const [filter, setFilter] = useState<"all" | "excellence" | "recognition">("all");
+  const [filter, setFilter] = useState<"all" | "excellence" | "recognition" | "card">("all");
   const types = state.recognitionTypes;
   const visibleTypes = types.filter((type) => {
     if (filter === "excellence") {
@@ -37,7 +38,11 @@ export function RecognitionLibraryManager() {
     }
 
     if (filter === "recognition") {
-      return type.type !== "excellence_check";
+      return type.type !== "excellence_check" && type.type !== "journey_card_task";
+    }
+
+    if (filter === "card") {
+      return type.journeyCardEligible || type.type === "journey_card_task";
     }
 
     return true;
@@ -59,7 +64,11 @@ export function RecognitionLibraryManager() {
       const nextOrder =
         Math.max(0, ...current.recognitionTypes.map((type) => type.sortOrder)) + 10;
       const name =
-        kind === "excellence_check" ? "New Excellence Check" : "New Recognition Moment";
+        kind === "excellence_check"
+          ? "New Excellence Check"
+          : kind === "journey_card_task"
+            ? "New Journey Card Task"
+            : "New Recognition Moment";
       const id = `${makeSlugId(name, "recognition_type")}-${Date.now()}`;
       const nextType: RecognitionType = {
         id,
@@ -74,6 +83,12 @@ export function RecognitionLibraryManager() {
         requiresManagerVerification: true,
         sortOrder: nextOrder,
         type: kind,
+        creditScope: kind === "excellence_check" ? "department" : "employee",
+        journeyCardEligible: kind === "journey_card_task",
+        journeyCardAreaIds:
+          kind === "journey_card_task"
+            ? [current.journeyCardAreas.find((area) => area.enabled)?.id ?? "floor_lobby"]
+            : [],
       };
 
       return {
@@ -121,11 +136,26 @@ export function RecognitionLibraryManager() {
           </Button>
           <Button
             type="button"
+            variant={filter === "card" ? "dark" : "secondary"}
+            onClick={() => setFilter("card")}
+          >
+            Card Tasks
+          </Button>
+          <Button
+            type="button"
             variant="secondary"
             icon={Plus}
             onClick={() => addRecognitionType("excellence_check")}
           >
             Add Check
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            icon={Plus}
+            onClick={() => addRecognitionType("journey_card_task")}
+          >
+            Add Card Task
           </Button>
           <Button
             type="button"
@@ -144,7 +174,7 @@ export function RecognitionLibraryManager() {
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1320px] border-collapse text-left">
+        <table className="w-full min-w-[1520px] border-collapse text-left">
           <thead>
             <tr className="border-b border-journey-line text-xs font-black uppercase text-journey-steel">
               <th className="py-3 pr-4">Status</th>
@@ -154,6 +184,8 @@ export function RecognitionLibraryManager() {
               <th className="py-3 pr-4">Category</th>
               <th className="py-3 pr-4">Standard</th>
               <th className="py-3 pr-4">Miles</th>
+              <th className="py-3 pr-4">Scope</th>
+              <th className="py-3 pr-4">Journey Card</th>
               <th className="py-3 pr-4">Icon</th>
               <th className="py-3 pr-4">Verification</th>
               <th className="py-3 pr-4">Sort</th>
@@ -258,6 +290,40 @@ export function RecognitionLibraryManager() {
                         }
                         className="focus-ring min-h-10 w-24 rounded-md border border-journey-line px-3 text-lg font-black"
                       />
+                    </td>
+                    <td className="py-3 pr-4">
+                      <select
+                        value={type.creditScope ?? (type.type === "excellence_check" ? "department" : "employee")}
+                        onChange={(event) =>
+                          updateRecognitionType(type.id, {
+                            creditScope: event.target.value as RecognitionType["creditScope"],
+                          })
+                        }
+                        className="focus-ring min-h-10 rounded-md border border-journey-line px-3 text-sm font-bold"
+                      >
+                        <option value="employee">employee</option>
+                        <option value="department">department</option>
+                        <option value="community">community</option>
+                      </select>
+                    </td>
+                    <td className="py-3 pr-4">
+                      <label className="flex items-center gap-2 text-sm font-bold text-journey-steel">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(type.journeyCardEligible)}
+                          onChange={(event) =>
+                            updateRecognitionType(type.id, {
+                              journeyCardEligible: event.target.checked,
+                              type: event.target.checked ? "journey_card_task" : type.type,
+                            })
+                          }
+                          className="h-5 w-5 accent-journey-red"
+                        />
+                        Card task
+                      </label>
+                      <p className="mt-2 text-xs font-bold text-journey-steel">
+                        Assign areas in Admin / Journey Cards.
+                      </p>
                     </td>
                     <td className="py-3 pr-4">
                       <select

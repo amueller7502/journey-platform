@@ -4,7 +4,7 @@ import { QrCode } from "lucide-react";
 import { PassportEntryForm } from "@/components/forms/PassportEntryForm";
 import { LinkButton } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Panel";
-import { useJourneyState } from "@/lib/journey-state";
+import { getJourneyCardAreaForEmployee, useJourneyState } from "@/lib/journey-state";
 
 export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
   const { state } = useJourneyState();
@@ -14,6 +14,9 @@ export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
   const department = state.departments.find(
     (item) => item.id === employee?.department,
   );
+  const cardArea = employee
+    ? getJourneyCardAreaForEmployee(employee, state.journeyCardAreas)
+    : undefined;
 
   if (!employee || employee.active === false) {
     return (
@@ -51,6 +54,9 @@ export function JourneyCardEntryClient({ passportId }: { passportId: string }) {
             <h2 className="mt-2 text-3xl font-black">{employee.name}</h2>
             <p className="mt-2 font-bold text-journey-line">
               {employee.title} - {department?.name}
+            </p>
+            <p className="mt-1 text-sm font-black text-journey-red">
+              {cardArea?.name ?? "Unassigned Journey Card"}
             </p>
           </div>
           <div className="rounded-md border border-journey-steel px-4 py-3 text-right">
