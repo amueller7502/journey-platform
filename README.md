@@ -64,10 +64,12 @@ Supabase variables:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+EXPERIENCE_APP_URL=https://your-vercel-domain.vercel.app
 NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=false
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
+`EXPERIENCE_APP_URL` should be the deployed Vercel URL with no trailing slash. Password reset emails use this value so links do not point at localhost.
 Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after at least one Experience Builder account exists and has been tested.
 
 ## Supabase Setup
@@ -139,6 +141,14 @@ In Supabase, add your deployed URL to Auth redirect URLs, including:
 ```text
 https://your-vercel-domain.vercel.app/reset-password
 ```
+
+In Supabase Auth URL Configuration, set **Site URL** to:
+
+```text
+https://your-vercel-domain.vercel.app
+```
+
+In Vercel, set `EXPERIENCE_APP_URL` to the same deployed URL. If this is missing while testing from a local browser, reset emails can fall back to localhost.
 
 Experience Builders can also reset a staff member's temporary password from **Employees**. The builder must be signed in, the employee needs an email address, and the employee must already have a Supabase Auth login.
 

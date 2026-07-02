@@ -1,5 +1,11 @@
 # Experience Release Notes
 
+## V1.9 Production Reset Links
+
+- Password reset emails now use a server route instead of the browser origin.
+- Added `EXPERIENCE_APP_URL` so reset links point to the deployed network/Vercel instance instead of localhost.
+- Documented the matching Supabase Auth Site URL and redirect URL settings.
+
 ## V1.8 Password Recovery
 
 - Added **Forgot password?** to the Welcome sign-in flow.

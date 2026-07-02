@@ -90,18 +90,27 @@ export function SupabaseAuthPanel() {
       }
 
       setLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const resetResponse = await fetch("/api/auth/request-password-reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: cleanEmail }),
       });
+      const resetPayload = (await resetResponse.json()) as {
+        error?: string;
+        message?: string;
+      };
       setLoading(false);
 
-      if (error) {
-        setMessage(error.message);
+      if (!resetResponse.ok) {
+        setMessage(resetPayload.error ?? "Unable to send a reset link.");
         return;
       }
 
       setMessage(
-        "If an Experience account exists for that email, a reset link is on the way.",
+        resetPayload.message ??
+          "If an Experience account exists for that email, a reset link is on the way.",
       );
       return;
     }
