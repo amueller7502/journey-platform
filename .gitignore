@@ -10,4 +10,4 @@ dist
 coverage
 *.log
 *.tsbuildinfo
-experience-platform.zip
+experience-platform*.zip
