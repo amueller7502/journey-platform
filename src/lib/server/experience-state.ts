@@ -38,6 +38,7 @@ import type {
   LaunchReadinessItem,
   LeadershipPointRule,
   LeadershipReward,
+  PlatformRole,
   RecognitionStandard,
   RecognitionType,
   Redemption,
@@ -82,6 +83,43 @@ export type ExperienceOperatingState = {
 type SyncIssue = {
   table: string;
   message: string;
+};
+
+type SupabaseEmployeeRow = {
+  id: string;
+  app_id: string | null;
+  auth_user_id: string | null;
+  full_name: string;
+  initials: string | null;
+  title: string | null;
+  role: Employee["role"];
+  passport_id: string | null;
+  passport_qr_url: string | null;
+  journey_card_area_id: string | null;
+  email: string | null;
+  access_code: string | null;
+  account_status: Employee["accountStatus"] | null;
+  profile_photo_url: string | null;
+  pending_profile_photo_url: string | null;
+  profile_photo_status: Employee["profilePhotoStatus"] | null;
+  active: boolean | null;
+  department_slug: Employee["department"] | null;
+  current_xp: number | null;
+  weekly_xp: number | null;
+};
+
+type SupabaseProfileRow = {
+  id: string;
+  auth_user_id: string | null;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  status: "invited" | "active" | "disabled";
+};
+
+type SupabaseUserRoleRow = {
+  profile_id: string;
+  role: PlatformRole;
 };
 
 export type WriteStateResult = {
@@ -133,6 +171,11 @@ function mergeById<T extends { id: string }>(defaults: T[], stored?: T[]) {
     ...stored,
     ...defaults.filter((defaultItem) => !storedIds.has(defaultItem.id)),
   ];
+}
+
+function mergePreferFirstById<T extends { id: string }>(primary: T[], secondary: T[]) {
+  const primaryIds = new Set(primary.map((item) => item.id));
+  return [...primary, ...secondary.filter((item) => !primaryIds.has(item.id))];
 }
 
 export function getDefaultExperienceState() {
@@ -198,6 +241,182 @@ export function normalizeExperienceState(
   return next;
 }
 
+function fallbackInitials(name: string) {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
+  return initials || "CC";
+}
+
+function mapEmployeeRow(row: SupabaseEmployeeRow): Employee {
+  const id = row.app_id ?? row.id;
+  const name = row.full_name || "Experience Account";
+  const passportId = row.passport_id ?? id;
+
+  return {
+    id,
+    name,
+    role: row.role,
+    department: row.department_slug ?? "leadership",
+    title:
+      row.title ??
+      (row.role === "admin"
+        ? "Experience Builder"
+        : row.role === "manager"
+          ? "Manager"
+          : "Employee"),
+    initials: row.initials ?? fallbackInitials(name),
+    passportId,
+    passportQrUrl: row.passport_qr_url ?? `/manager/passport/${passportId}`,
+    journeyCardAreaId: row.journey_card_area_id ?? undefined,
+    email: row.email ?? undefined,
+    accessCode: row.access_code ?? undefined,
+    accountStatus: row.account_status ?? "active",
+    profilePhotoUrl: row.profile_photo_url ?? undefined,
+    pendingProfilePhotoUrl: row.pending_profile_photo_url ?? undefined,
+    profilePhotoStatus: row.profile_photo_status ?? "none",
+    active: row.active ?? true,
+    miles: row.current_xp ?? 0,
+    weeklyMiles: row.weekly_xp ?? 0,
+    reliabilityStreak: 0,
+    shift: row.role === "employee" ? "Unassigned" : "Leadership",
+  };
+}
+
+function platformRoleRank(role: PlatformRole) {
+  if (role === "experience_designer") {
+    return 3;
+  }
+
+  if (role === "leader") {
+    return 2;
+  }
+
+  return 1;
+}
+
+function appRoleForPlatformRole(role: PlatformRole): Employee["role"] {
+  if (role === "experience_designer") {
+    return "admin";
+  }
+
+  if (role === "leader") {
+    return "manager";
+  }
+
+  return "employee";
+}
+
+function mapProfileRow(row: SupabaseProfileRow, platformRole: PlatformRole): Employee {
+  const role = appRoleForPlatformRole(platformRole);
+  const name = row.full_name || row.email || "Experience Account";
+  const prefix = role === "admin" ? "BUILDER" : role === "manager" ? "LEADER" : "EMP";
+  const passportId = `${prefix}-${row.id.slice(0, 8).toUpperCase()}`;
+
+  return {
+    id: `profile-${row.id}`,
+    name,
+    role,
+    department: "leadership",
+    title:
+      role === "admin"
+        ? "Experience Builder"
+        : role === "manager"
+          ? "Manager"
+          : "Employee",
+    initials: fallbackInitials(name),
+    passportId,
+    passportQrUrl: `/manager/passport/${passportId}`,
+    journeyCardAreaId: role === "employee" ? "floor_lobby" : undefined,
+    email: row.email,
+    accountStatus: row.status,
+    profilePhotoUrl: row.avatar_url ?? undefined,
+    profilePhotoStatus: row.avatar_url ? "approved" : "none",
+    active: row.status !== "disabled",
+    miles: 0,
+    weeklyMiles: 0,
+    reliabilityStreak: 0,
+    shift: role === "employee" ? "Unassigned" : "Leadership",
+  };
+}
+
+async function readNormalizedEmployees() {
+  if (!hasSupabaseAdminEnv()) {
+    return [];
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("employees")
+    .select(
+      "id, app_id, auth_user_id, full_name, initials, title, role, passport_id, passport_qr_url, journey_card_area_id, email, access_code, account_status, profile_photo_url, pending_profile_photo_url, profile_photo_status, active, department_slug, current_xp, weekly_xp",
+    )
+    .order("full_name", { ascending: true });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return (data as SupabaseEmployeeRow[]).map(mapEmployeeRow);
+}
+
+async function readProfilePeople(existingPeople: Employee[]) {
+  if (!hasSupabaseAdminEnv()) {
+    return [];
+  }
+
+  const supabase = createAdminClient();
+  const { data: roles, error: rolesError } = await supabase
+    .from("user_roles")
+    .select("profile_id, role")
+    .eq("enabled", true);
+
+  if (rolesError || !roles?.length) {
+    return [];
+  }
+
+  const roleRows = roles as SupabaseUserRoleRow[];
+  const rolesByProfile = new Map<string, PlatformRole[]>();
+  roleRows.forEach((row) => {
+    rolesByProfile.set(row.profile_id, [
+      ...(rolesByProfile.get(row.profile_id) ?? []),
+      row.role,
+    ]);
+  });
+
+  const profileIds = Array.from(rolesByProfile.keys());
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, auth_user_id, full_name, email, avatar_url, status")
+    .in("id", profileIds)
+    .neq("status", "disabled");
+
+  if (profilesError || !profiles?.length) {
+    return [];
+  }
+
+  const existingEmails = new Set(
+    existingPeople
+      .map((person) => person.email?.toLowerCase())
+      .filter(Boolean) as string[],
+  );
+
+  return (profiles as SupabaseProfileRow[])
+    .filter((profile) => !existingEmails.has(profile.email.toLowerCase()))
+    .map((profile) => {
+      const highestRole = (rolesByProfile.get(profile.id) ?? ["employee"]).sort(
+        (a, b) => platformRoleRank(b) - platformRoleRank(a),
+      )[0];
+
+      return mapProfileRow(profile, highestRole);
+    });
+}
+
 export async function readExperienceState() {
   if (!hasSupabaseAdminEnv()) {
     return { state: getDefaultExperienceState(), mode: "local" as const };
@@ -214,10 +433,21 @@ export async function readExperienceState() {
     throw new Error(error.message);
   }
 
+  const normalized = normalizeExperienceState(
+    (data?.state as Partial<ExperienceOperatingState> | null) ?? null,
+  );
+  const normalizedEmployees = await readNormalizedEmployees();
+  const profilePeople = await readProfilePeople(normalizedEmployees);
+
+  if (normalizedEmployees.length || profilePeople.length) {
+    normalized.employees = mergePreferFirstById(
+      [...normalizedEmployees, ...profilePeople],
+      normalized.employees,
+    );
+  }
+
   return {
-    state: normalizeExperienceState(
-      (data?.state as Partial<ExperienceOperatingState> | null) ?? null,
-    ),
+    state: normalized,
     mode: "supabase" as const,
   };
 }

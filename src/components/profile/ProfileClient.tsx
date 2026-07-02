@@ -15,8 +15,11 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { useJourneyState } from "@/lib/journey-state";
 import { journalEvents } from "@/lib/data";
+import { createClient, hasSupabaseBrowserEnv } from "@/lib/supabase/client";
+import type { Role } from "@/lib/types";
 
 const ACTIVE_ACCOUNT_KEY = "journey-active-account-id";
+const ACTIVE_ROLE_KEY = "experience-active-role";
 
 function readImageAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -30,26 +33,69 @@ function readImageAsDataUrl(file: File) {
 export function ProfileClient() {
   const { state, updateState } = useJourneyState();
   const [accountId, setAccountId] = useState("");
+  const [activeRole, setActiveRole] = useState<Role | null>(null);
+  const [authEmail, setAuthEmail] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const load = () =>
+    const load = () => {
       setAccountId(window.localStorage.getItem(ACTIVE_ACCOUNT_KEY) ?? "");
+      const storedRole = window.localStorage.getItem(ACTIVE_ROLE_KEY);
+      setActiveRole(
+        storedRole === "admin" || storedRole === "manager" || storedRole === "employee"
+          ? storedRole
+          : null,
+      );
+    };
     load();
     window.addEventListener("storage", load);
     return () => window.removeEventListener("storage", load);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadSignedInEmail() {
+      if (!hasSupabaseBrowserEnv()) {
+        return;
+      }
+
+      const { data } = await createClient().auth.getUser();
+      if (mounted) {
+        setAuthEmail(data.user?.email?.toLowerCase() ?? "");
+      }
+    }
+
+    void loadSignedInEmail();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const currentEmployee = useMemo(
     () =>
       state.employees.find((employee) => employee.id === accountId) ??
-      state.employees.find((employee) => employee.role === "employee") ??
+      state.employees.find(
+        (employee) => employee.email?.toLowerCase() === authEmail,
+      ) ??
+      state.employees.find(
+        (employee) => activeRole && employee.role === activeRole && employee.active !== false,
+      ) ??
+      state.employees.find((employee) => employee.active !== false) ??
       state.employees[0],
-    [accountId, state.employees],
+    [accountId, activeRole, authEmail, state.employees],
   );
   const department = state.departments.find(
     (item) => item.id === currentEmployee.department,
   );
+  const isEmployeeProfile = currentEmployee.role === "employee";
+  const roleLabel =
+    currentEmployee.role === "admin"
+      ? "Experience Builder"
+      : currentEmployee.role === "manager"
+        ? "Manager"
+        : "Employee";
   const photoUrl =
     currentEmployee.profilePhotoStatus === "approved"
       ? currentEmployee.profilePhotoUrl
@@ -112,20 +158,20 @@ export function ProfileClient() {
         </Panel>
         <div className="grid gap-5 sm:grid-cols-3">
           <MetricCard
-            label="XP"
-            value={`${currentEmployee.miles}`}
-            detail="Experience total"
+            label={isEmployeeProfile ? "XP" : "Employee XP"}
+            value={isEmployeeProfile ? `${currentEmployee.miles}` : "Not used"}
+            detail={isEmployeeProfile ? "Experience total" : "Leaders do not earn employee XP"}
             icon={BadgeCheck}
           />
           <MetricCard
-            label="Streak"
-            value={`${currentEmployee.reliabilityStreak}`}
-            detail="Reliable weeks"
+            label={isEmployeeProfile ? "Streak" : "Access"}
+            value={isEmployeeProfile ? `${currentEmployee.reliabilityStreak}` : "Active"}
+            detail={isEmployeeProfile ? "Reliable weeks" : "Account is in the people list"}
             icon={CalendarDays}
           />
           <MetricCard
             label="Role"
-            value={currentEmployee.role === "employee" ? "Crew" : currentEmployee.role}
+            value={roleLabel}
             detail="Account access"
             icon={UserRound}
           />
@@ -177,50 +223,65 @@ export function ProfileClient() {
         </div>
       </Panel>
 
-      <Panel className="mt-5">
-        <PanelHeader title="Recognition Profile" eyebrow="Standards" />
-        <div className="grid gap-3 md:grid-cols-2">
-          {[
-            ["Guest Welcome", "3 recognitions"],
-            ["Presentation", "6 recognitions"],
-            ["Teamwork", "2 recognitions"],
-            ["Reliability", "4 recognitions"],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="flex items-center justify-between gap-4 rounded-lg border border-journey-line p-4"
-            >
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="h-5 w-5 text-journey-red" aria-hidden="true" />
-                <span className="font-black text-journey-black">{label}</span>
-              </div>
-              <span className="text-sm font-bold text-journey-steel">{value}</span>
-            </div>
-          ))}
-        </div>
-      </Panel>
-
-      <FeatureVisible featureId="moment_history">
+      {isEmployeeProfile ? (
         <Panel className="mt-5">
-          <PanelHeader title="Experience Journal" eyebrow="Timeline" />
-          <div className="grid gap-3">
-            {journalEvents.map((event) => (
+          <PanelHeader title="Recognition Profile" eyebrow="Standards" />
+          <div className="grid gap-3 md:grid-cols-2">
+            {[
+              ["Guest Welcome", "3 recognitions"],
+              ["Presentation", "6 recognitions"],
+              ["Teamwork", "2 recognitions"],
+              ["Reliability", "4 recognitions"],
+            ].map(([label, value]) => (
               <div
-                key={`${event.date}-${event.title}`}
-                className="grid gap-3 rounded-lg border border-journey-line p-4 sm:grid-cols-[90px_1fr]"
+                key={label}
+                className="flex items-center justify-between gap-4 rounded-lg border border-journey-line p-4"
               >
-                <p className="text-sm font-black uppercase text-journey-red">{event.date}</p>
-                <div>
-                  <p className="font-black text-journey-black">{event.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-journey-steel">
-                    {event.detail}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 text-journey-red" aria-hidden="true" />
+                  <span className="font-black text-journey-black">{label}</span>
                 </div>
+                <span className="text-sm font-bold text-journey-steel">{value}</span>
               </div>
             ))}
           </div>
         </Panel>
-      </FeatureVisible>
+      ) : (
+        <Panel className="mt-5">
+          <PanelHeader title="Account Profile" eyebrow={roleLabel} />
+          <div className="rounded-lg border border-journey-line p-4">
+            <p className="font-black text-journey-black">{currentEmployee.name}</p>
+            <p className="mt-2 text-sm font-bold leading-6 text-journey-steel">
+              {roleLabel} accounts can use their available Experience tools, but they
+              do not receive employee XP or employee recognition history.
+            </p>
+          </div>
+        </Panel>
+      )}
+
+      {isEmployeeProfile ? (
+        <FeatureVisible featureId="moment_history">
+          <Panel className="mt-5">
+            <PanelHeader title="Experience Journal" eyebrow="Timeline" />
+            <div className="grid gap-3">
+              {journalEvents.map((event) => (
+                <div
+                  key={`${event.date}-${event.title}`}
+                  className="grid gap-3 rounded-lg border border-journey-line p-4 sm:grid-cols-[90px_1fr]"
+                >
+                  <p className="text-sm font-black uppercase text-journey-red">{event.date}</p>
+                  <div>
+                    <p className="font-black text-journey-black">{event.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-journey-steel">
+                      {event.detail}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Panel>
+        </FeatureVisible>
+      ) : null}
     </>
   );
 }

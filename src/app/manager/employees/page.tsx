@@ -13,17 +13,30 @@ import {
 } from "@/lib/demo-moments";
 import { recognitions } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
+import type { Employee } from "@/lib/types";
 import { formatShortDateTime, formatXp } from "@/lib/utils";
+
+function getRoleLabel(role: Employee["role"]) {
+  if (role === "admin") {
+    return "Experience Builder";
+  }
+
+  if (role === "manager") {
+    return "Manager";
+  }
+
+  return "Employee";
+}
 
 export default function ManagerEmployeeLookupPage() {
   const { state } = useJourneyState();
   const [search, setSearch] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [moments, setMoments] = useState<JourneyMoment[]>([]);
-  const crew = useMemo(
+  const people = useMemo(
     () =>
       state.employees
-        .filter((employee) => employee.role === "employee" && employee.active !== false)
+        .filter((employee) => employee.active !== false)
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name)),
     [state.employees],
@@ -35,18 +48,20 @@ export default function ManagerEmployeeLookupPage() {
     return subscribeToJourneyMoments(load);
   }, []);
 
-  const filteredCrew = crew.filter((employee) =>
-    `${employee.name} ${employee.title} ${employee.department} ${employee.passportId}`
+  const filteredPeople = people.filter((employee) =>
+    `${employee.name} ${employee.title} ${employee.department} ${employee.passportId} ${employee.email ?? ""} ${getRoleLabel(employee.role)}`
       .toLowerCase()
       .includes(search.toLowerCase()),
   );
   const selectedEmployee =
-    crew.find((employee) => employee.id === selectedEmployeeId) ??
-    filteredCrew[0] ??
-    crew[0];
+    people.find((employee) => employee.id === selectedEmployeeId) ??
+    filteredPeople[0] ??
+    people[0];
   const department = state.departments.find(
     (item) => item.id === selectedEmployee?.department,
   );
+  const selectedIsEmployee = selectedEmployee?.role === "employee";
+  const roleLabel = selectedEmployee ? getRoleLabel(selectedEmployee.role) : "";
   const localMoments = moments.filter(
     (moment) => moment.employeeId === selectedEmployee?.id,
   );
@@ -64,7 +79,9 @@ export default function ManagerEmployeeLookupPage() {
         createdAt: recognition.createdAt,
       };
     });
-  const recentMoments = [...localMoments, ...seededMoments].slice(0, 5);
+  const recentMoments = selectedIsEmployee
+    ? [...localMoments, ...seededMoments].slice(0, 5)
+    : [];
 
   return (
     <AppShell role="manager" title="Employee Lookup" eyebrow="Fast crew view">
@@ -84,7 +101,7 @@ export default function ManagerEmployeeLookupPage() {
             />
           </label>
           <div className="mt-4 grid max-h-[620px] gap-2 overflow-y-auto pr-1">
-            {filteredCrew.map((employee) => (
+            {filteredPeople.map((employee) => (
               <button
                 key={employee.id}
                 type="button"
@@ -97,7 +114,7 @@ export default function ManagerEmployeeLookupPage() {
               >
                 <span className="block font-black text-journey-black">{employee.name}</span>
                 <span className="mt-1 block text-sm font-bold text-journey-steel">
-                  {employee.title} / {employee.passportId}
+                  {employee.title} / {getRoleLabel(employee.role)}
                 </span>
               </button>
             ))}
@@ -110,7 +127,7 @@ export default function ManagerEmployeeLookupPage() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-black uppercase text-journey-red">
-                    {department?.name ?? "Crew"}
+                    {roleLabel} / {department?.name ?? "Crew"}
                   </p>
                   <h2 className="mt-1 text-4xl font-black">{selectedEmployee.name}</h2>
                   <p className="mt-2 font-bold text-journey-line">
@@ -121,40 +138,47 @@ export default function ManagerEmployeeLookupPage() {
                   {selectedEmployee.passportId}
                 </div>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <LinkButton
-                  href={`/manager/recognize?employee=${selectedEmployee.id}`}
-                  icon={HandHeart}
-                >
-                  Capture Moment
-                </LinkButton>
-                <LinkButton
-                  href={`/manager/passport/${selectedEmployee.passportId}`}
-                  icon={ClipboardCheck}
-                  variant="secondary"
-                >
-                  Enter Card
-                </LinkButton>
-              </div>
+              {selectedIsEmployee ? (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <LinkButton
+                    href={`/manager/recognize?employee=${selectedEmployee.id}`}
+                    icon={HandHeart}
+                  >
+                    Capture Moment
+                  </LinkButton>
+                  <LinkButton
+                    href={`/manager/passport/${selectedEmployee.passportId}`}
+                    icon={ClipboardCheck}
+                    variant="secondary"
+                  >
+                    Enter Card
+                  </LinkButton>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-lg border border-journey-steel p-4 text-sm font-bold text-journey-line">
+                  {roleLabel} accounts can access their tools here, but they do not
+                  earn employee XP or receive employee Experience Moments.
+                </div>
+              )}
             </Panel>
 
             <div className="grid gap-5 md:grid-cols-3">
               <MetricCard
-                label="Current XP"
-                value={formatXp(selectedEmployee.miles)}
-                detail="Total employee XP"
+                label={selectedIsEmployee ? "Current XP" : "Employee XP"}
+                value={selectedIsEmployee ? formatXp(selectedEmployee.miles) : "Not used"}
+                detail={selectedIsEmployee ? "Total employee XP" : "Leader/builder account"}
                 icon={BadgeCheck}
               />
               <MetricCard
-                label="This Week"
-                value={formatXp(selectedEmployee.weeklyMiles)}
-                detail="Recognized this week"
+                label={selectedIsEmployee ? "This Week" : "Role"}
+                value={selectedIsEmployee ? formatXp(selectedEmployee.weeklyMiles) : roleLabel}
+                detail={selectedIsEmployee ? "Recognized this week" : "Account access"}
                 icon={Sparkles}
               />
               <MetricCard
-                label="Reliability"
-                value={`${selectedEmployee.reliabilityStreak} weeks`}
-                detail="Current streak"
+                label={selectedIsEmployee ? "Reliability" : "Status"}
+                value={selectedIsEmployee ? `${selectedEmployee.reliabilityStreak} weeks` : "Active"}
+                detail={selectedIsEmployee ? "Current streak" : "Visible in lookup"}
                 icon={ClipboardCheck}
               />
             </div>
@@ -162,7 +186,12 @@ export default function ManagerEmployeeLookupPage() {
             <Panel>
               <PanelHeader title="Recent Moments" eyebrow="Quick context" />
               <div className="grid gap-3">
-                {recentMoments.length ? (
+                {!selectedIsEmployee ? (
+                  <p className="rounded-lg border border-dashed border-journey-line p-4 text-sm font-bold text-journey-steel">
+                    This is a {roleLabel.toLowerCase()} account. Employee XP and
+                    Experience Moments are not tracked for this person.
+                  </p>
+                ) : recentMoments.length ? (
                   recentMoments.map((moment) => (
                     <article
                       key={moment.id}
