@@ -65,11 +65,13 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 EXPERIENCE_APP_URL=https://your-vercel-domain.vercel.app
+EXPERIENCE_SETUP_KEY=
 NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=false
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
 `EXPERIENCE_APP_URL` should be the deployed Vercel URL with no trailing slash. Password reset emails use this value so links do not point at localhost.
+`EXPERIENCE_SETUP_KEY` is optional but recommended after launch. It allows an owner to repair Builder access at `/setup/access` if a Builder login already exists.
 Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after at least one Experience Builder account exists and has been tested.
 
 ## Supabase Setup
@@ -131,6 +133,18 @@ Creating an account creates:
 - `employees` row linked by `auth_user_id`
 
 The preview access-code fallback has been removed from the Welcome screen.
+
+## Emergency Builder Access
+
+If nobody can sign in or account creation is blocked, open:
+
+```text
+/setup/access
+```
+
+That page creates or repairs one real Experience Builder login. If no connected Builder login exists yet, the Setup Key can be left blank. If a connected Builder login already exists, set `EXPERIENCE_SETUP_KEY` in Vercel, redeploy, and enter that same key on the setup page.
+
+After access is restored, sign in normally from the Welcome screen.
 
 ## Password Resets
 

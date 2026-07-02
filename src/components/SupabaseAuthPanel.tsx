@@ -446,6 +446,12 @@ export function SupabaseAuthPanel() {
             : "Supabase env vars are not present, so live account access is unavailable."}
         </p>
       )}
+      <a
+        href="/setup/access"
+        className="focus-ring justify-self-start rounded-md text-xs font-black uppercase text-journey-red"
+      >
+        Need Builder access?
+      </a>
     </div>
   );
 }

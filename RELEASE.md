@@ -1,5 +1,12 @@
 # Experience Release Notes
 
+## V1.10 Builder Access Recovery
+
+- Added `/setup/access` so an owner can create or repair the first Experience Builder login.
+- Added guarded bootstrap logic: it works without a key only when no connected Builder login exists yet.
+- Added optional `EXPERIENCE_SETUP_KEY` support for repairing access after a Builder login already exists.
+- Added a **Need Builder access?** link to the login panel.
+
 ## V1.9 Production Reset Links
 
 - Password reset emails now use a server route instead of the browser origin.
