@@ -113,7 +113,7 @@ export function ProfileClient() {
           <MetricCard
             label="Miles"
             value={`${currentEmployee.miles}`}
-            detail="Chapter total"
+            detail="Experience total"
             icon={BadgeCheck}
           />
           <MetricCard
@@ -156,7 +156,7 @@ export function ProfileClient() {
           </div>
           <div className="rounded-lg border border-journey-line p-4">
             <p className="text-sm font-bold leading-6 text-journey-steel">
-              Upload a square-ish photo for your Journey profile. It appears as
+              Upload a square-ish photo for your Experience profile. It appears as
               pending until a manager or admin approves it from the Employees page.
             </p>
             <label className="mt-4 inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-journey-red bg-journey-red px-4 py-2 text-sm font-bold text-journey-white transition hover:bg-journey-deepRed">
@@ -200,7 +200,7 @@ export function ProfileClient() {
       </Panel>
 
       <Panel className="mt-5">
-        <PanelHeader title="Journey Journal" eyebrow="Timeline" />
+        <PanelHeader title="Experience Journal" eyebrow="Timeline" />
         <div className="grid gap-3">
           {journalEvents.map((event) => (
             <div

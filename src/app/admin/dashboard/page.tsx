@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <Panel>
-          <PanelHeader title="Department Progress" eyebrow="Chapter miles" />
+          <PanelHeader title="Department Progress" eyebrow="Experience Miles" />
           <DepartmentProgress />
         </Panel>
         <Panel>

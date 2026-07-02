@@ -10,10 +10,11 @@ import {
 } from "lucide-react";
 import { LinkButton, Button } from "@/components/ui/Button";
 import { useJourneyState } from "@/lib/journey-state";
+import { productLanguage } from "@/lib/product-language";
 
 function routeForRole(role: string) {
   if (role === "manager") {
-    return "/manager/recognize";
+    return "/leadership/dashboard";
   }
 
   if (role === "admin") {
@@ -80,7 +81,7 @@ export function WorkspaceLoginPanel() {
           />
         </label>
         <Button type="button" icon={UserRound} onClick={signInWithCode}>
-          Enter Journey
+          Enter Experience
         </Button>
         {error ? (
           <p className="text-sm font-black text-journey-red">{error}</p>
@@ -93,15 +94,15 @@ export function WorkspaceLoginPanel() {
 
       <div className="mt-5 grid gap-3">
         <LinkButton href="/home" icon={UserRound} className="justify-start">
-          Employee Demo
+          Employee Experience
         </LinkButton>
         <LinkButton
-          href="/manager/recognize"
+          href="/leadership/dashboard"
           icon={ShieldCheck}
           variant="dark"
           className="justify-start"
         >
-          Manager Demo
+          {productLanguage.leadershipExperience}
         </LinkButton>
         <LinkButton
           href="/admin/dashboard"

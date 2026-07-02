@@ -1,34 +1,32 @@
-# Journey Roadmap
+# Experience Roadmap
 
-## Now: Sprint Alpha
+## Now: Platform Language And Leadership Experience
 
-Goal: management preview readiness for **July 9, 2026**.
+- Freeze product language around Experience.
+- Preserve the existing Employee Experience.
+- Add Leadership Experience for managers.
+- Keep managers out of employee XP/Miles earning.
+- Add leadership recognition, health, journal, achievements, rewards, coverage, coaching insights, and employees awaiting recognition.
 
-- Polish core screens.
-- Make manager recognition fast.
-- Prepare launch documentation.
-- Preserve Journey Card paper-to-digital workflow.
-- Confirm admin flexibility.
-- Keep TV recognition-focused.
-
-## Launch: Chapter One
+## Launch: First Seasonal Activation
 
 Employee launch is **July 16, 2026**.
 
 - Seed employees.
 - Seed rewards.
 - Seed recognition types and excellence checks.
-- Print Journey Cards.
+- Print Experience Cards.
 - Test TV dashboard.
-- Test manager recognition.
+- Test employee moment capture.
 - Test reward redemption.
-- Test Journey Card batch entry.
+- Test Experience Card batch entry.
+- Test Leadership Dashboard and recognition coverage.
 
 ## Next
 
-- Wire Supabase mutations for recognition, Journey Card batches, reward edits, and settings.
+- Wire normalized Supabase mutations for Experience Moments, Experience Card batches, leadership recognition, reward edits, and settings.
 - Add production authentication and role mapping.
-- Add CSV import/export for employees and Journey Cards.
+- Add CSV import/export for employees and Experience Cards.
 - Add reward fulfillment audit trail.
-- Add chapter cloning for future campaigns.
-- Expand skin system for future chapters, including a Dune 3 skin.
+- Add seasonal activation cloning for future skins.
+- Expand Skin Developer for future activations, including a Dune 3 skin.

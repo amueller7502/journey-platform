@@ -28,7 +28,7 @@ export default function EmployeeHomePage() {
             </p>
             <h2 className="mt-2 text-3xl font-black">{chapter.phrase}</h2>
             <p className="mt-2 max-w-2xl text-sm font-bold text-journey-line">
-              Journey makes recognizing great work easier than overlooking it.
+              Recognizing the people who create extraordinary movie experiences.
             </p>
           </div>
           <div className="text-left sm:text-right">
@@ -64,13 +64,13 @@ export default function EmployeeHomePage() {
           <DepartmentProgress />
         </Panel>
         <Panel>
-          <PanelHeader title="Recent Journey Moments" eyebrow="Feed" />
+          <PanelHeader title="Recent Experience Moments" eyebrow="Feed" />
           <RecentMomentsFeed initialRecognitions={recognitions} />
         </Panel>
       </div>
 
       <Panel className="mt-5">
-        <PanelHeader title="Moment of the Day" eyebrow="Chapter One" />
+        <PanelHeader title="Moment of the Day" eyebrow="First seasonal activation" />
         <p className="text-lg font-black text-journey-black">
           {recognitionOfTheDay.note}
         </p>

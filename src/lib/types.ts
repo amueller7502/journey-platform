@@ -224,6 +224,50 @@ export type ExcellenceLog = {
   communityMiles: number;
 };
 
+export type LeadershipRecognitionCategory =
+  | "Coaching"
+  | "Coverage"
+  | "Communication"
+  | "Guest Recovery"
+  | "Operational Leadership";
+
+export type LeadershipRecognition = {
+  id: string;
+  leaderId: string;
+  recognizedById: string;
+  category: LeadershipRecognitionCategory;
+  title: string;
+  note: string;
+  createdAt: string;
+  impact: string;
+};
+
+export type LeadershipAchievement = {
+  id: string;
+  leaderId: string;
+  title: string;
+  description: string;
+  status: "earned" | "in_progress" | "locked";
+  earnedAt?: string;
+};
+
+export type LeadershipReward = {
+  id: string;
+  name: string;
+  description: string;
+  status: "available" | "earned" | "scheduled";
+  fulfillmentNotes: string;
+};
+
+export type CoachingInsight = {
+  id: string;
+  leaderId: string;
+  title: string;
+  detail: string;
+  action: string;
+  priority: "High" | "Medium" | "Low";
+};
+
 export type NavItem = {
   label: string;
   href: string;

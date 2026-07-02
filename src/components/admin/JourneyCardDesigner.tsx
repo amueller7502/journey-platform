@@ -56,7 +56,7 @@ export function JourneyCardDesigner() {
       const nextArea: JourneyCardArea = {
         id,
         name: "New Card Area",
-        description: "Describe which crew members should receive this Journey Card.",
+        description: "Describe which crew members should receive this Experience Card.",
         departmentIds: [],
         enabled: true,
         sortOrder: nextOrder,
@@ -159,9 +159,9 @@ export function JourneyCardDesigner() {
   if (!selectedArea) {
     return (
       <Panel>
-        <PanelHeader title="Journey Card Builder" eyebrow="Areas and Tasks" />
+        <PanelHeader title="Experience Card Builder" eyebrow="Areas and Tasks" />
         <Button type="button" icon={Plus} onClick={addArea}>
-          Add Journey Card Area
+          Add Experience Card Area
         </Button>
       </Panel>
     );
@@ -170,7 +170,7 @@ export function JourneyCardDesigner() {
   return (
     <Panel className="mt-5">
       <PanelHeader
-        title="Journey Card Builder"
+        title="Experience Card Builder"
         eyebrow="Card template design"
         action={<ClipboardList className="h-5 w-5 text-journey-red" aria-hidden="true" />}
       />
@@ -196,7 +196,7 @@ export function JourneyCardDesigner() {
 
       {saved ? (
         <div className="mb-4 rounded-lg border border-journey-red bg-journey-white p-4 text-sm font-black text-journey-black">
-          Journey Card configuration saved for this preview browser.
+          Experience Card configuration saved for this preview browser.
         </div>
       ) : null}
 

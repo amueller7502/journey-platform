@@ -76,7 +76,7 @@ export function TradingPostClient() {
         <MetricCard
           label="Available Miles"
           value={`${currentEmployee?.miles ?? 0}`}
-          detail="Redeemable chapter balance"
+          detail="Redeemable Experience balance"
           icon={Gift}
         />
         <Panel>
@@ -121,7 +121,7 @@ export function TradingPostClient() {
       <Panel>
         <PanelHeader
           title="Reward Catalog"
-          eyebrow="Chapter One"
+          eyebrow="First seasonal activation"
           action={<PackageCheck className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
         <div className="grid gap-4 md:grid-cols-2">

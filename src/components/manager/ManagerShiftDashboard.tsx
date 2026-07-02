@@ -83,7 +83,7 @@ export function ManagerShiftDashboard() {
             Capture Moment
           </LinkButton>
           <LinkButton href="/manager/passport" icon={ClipboardCheck} variant="secondary">
-            Enter Journey Cards
+            Enter Experience Cards
           </LinkButton>
           <LinkButton href="/manager/pending-rewards" icon={Gift} variant="secondary">
             Reward Requests

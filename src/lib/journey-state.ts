@@ -329,6 +329,10 @@ export function getJourneyCardAreaForEmployee(
 export function addMilesToEmployee(employeeId: string, miles: number) {
   updateJourneyState((current) => {
     const employee = current.employees.find((item) => item.id === employeeId);
+    if (!employee || employee.role !== "employee") {
+      return current;
+    }
+
     const now = new Date().toISOString();
 
     return {

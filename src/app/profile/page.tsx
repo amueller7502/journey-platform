@@ -3,7 +3,7 @@ import { ProfileClient } from "@/components/profile/ProfileClient";
 
 export default function ProfilePage() {
   return (
-    <AppShell role="employee" title="Profile" eyebrow="Journey account">
+    <AppShell role="employee" title="Profile" eyebrow="Experience account">
       <ProfileClient />
     </AppShell>
   );

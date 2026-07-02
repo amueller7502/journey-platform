@@ -5,6 +5,7 @@ import { BrandLockup } from "@/components/BrandLockup";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
 import { WorkspaceLoginPanel } from "@/components/WorkspaceLoginPanel";
 import { chapter, filmFacts } from "@/lib/data";
+import { productLanguage } from "@/lib/product-language";
 import { formatDate } from "@/lib/utils";
 
 export default function WelcomePage() {
@@ -26,17 +27,16 @@ export default function WelcomePage() {
         <section className="grid flex-1 items-center gap-8 py-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="text-sm font-black uppercase text-journey-red">
-              Experience The Journey only at North
+              {productLanguage.platformName}
             </p>
             <h1 className="mt-3 max-w-3xl text-5xl font-black leading-none text-journey-white sm:text-7xl">
-              North Stars
+              {productLanguage.productName}
             </h1>
             <p className="mt-5 text-2xl font-black text-journey-white">
-              The Odyssey Incentive Program
+              Celebration Cinema North
             </p>
             <p className="mt-3 max-w-2xl text-lg font-bold text-journey-line">
-              Journey makes recognizing great work easier than overlooking it.
-              One team. One journey. Unforgettable guest experiences.
+              {productLanguage.mission}
             </p>
             <p className="mt-4 max-w-xl text-lg font-bold text-journey-line">
               {formatDate(chapter.startDate)} - {formatDate(chapter.endDate)}
@@ -72,7 +72,7 @@ export default function WelcomePage() {
           <span>{chapter.imaxReference}</span>
           <span className="inline-flex items-center gap-2">
             <Clapperboard className="h-4 w-4 text-journey-red" aria-hidden="true" />
-            The Journey Incentive
+            {productLanguage.productName} Platform
           </span>
         </footer>
       </div>

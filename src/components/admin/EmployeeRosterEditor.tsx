@@ -188,7 +188,7 @@ export function EmployeeRosterEditor() {
         <div>
           <p className="text-sm font-bold text-journey-steel">
             Roster changes are saved to this configurable build immediately and are
-            used by manager search, Journey Card lookup, and recognition tools.
+            used by manager search, Experience Card lookup, and recognition tools.
           </p>
           <p className="mt-2 text-sm font-black text-journey-black">
             {activeCrewCount} active crew profiles
@@ -273,7 +273,7 @@ export function EmployeeRosterEditor() {
               Create Account
             </p>
             <h3 className="text-lg font-black text-journey-black">
-              Add a person, assign a role, and issue a Journey Card.
+              Add a person, assign a role, and issue a Experience Card.
             </h3>
           </div>
         </div>
@@ -355,7 +355,7 @@ export function EmployeeRosterEditor() {
             />
           </label>
           <label className="grid gap-2 text-sm font-bold text-journey-black">
-            Default Journey Card Area
+            Default Experience Card Area
             <select
               value={newEmployee.journeyCardAreaId}
               onChange={(event) =>
@@ -416,7 +416,7 @@ export function EmployeeRosterEditor() {
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3"
-        placeholder="Search name, role, title, or Journey Card ID"
+        placeholder="Search name, role, title, or Experience Card ID"
       />
 
       <div className="overflow-x-auto">
@@ -430,7 +430,7 @@ export function EmployeeRosterEditor() {
               <th className="py-3 pr-3">Department</th>
               <th className="py-3 pr-3">Default Card</th>
               <th className="py-3 pr-3">Title</th>
-              <th className="py-3 pr-3">Journey Card ID</th>
+              <th className="py-3 pr-3">Experience Card ID</th>
               <th className="py-3 pr-3">Shift</th>
               <th className="py-3 pr-3">Miles</th>
               <th className="py-3 pr-3">Weekly</th>
@@ -588,7 +588,7 @@ export function EmployeeRosterEditor() {
                       className="focus-ring min-h-10 w-full min-w-44 rounded-md border border-journey-line px-3 font-black"
                     />
                     <p className="mt-2 text-xs font-bold text-journey-steel">
-                      Used to look up turned-in Journey Cards.
+                      Used to look up turned-in Experience Cards.
                     </p>
                   </td>
                   <td className="py-3 pr-3">

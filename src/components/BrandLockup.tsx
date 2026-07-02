@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { productLanguage } from "@/lib/product-language";
 import { cn } from "@/lib/utils";
 
 type BrandLockupProps = {
@@ -58,7 +59,7 @@ export function BrandLockup({
             size === "lg" && "text-4xl",
           )}
         >
-          The Journey
+          {productLanguage.productName}
         </div>
         <div
           className={cn(
@@ -68,7 +69,7 @@ export function BrandLockup({
             size === "lg" && "text-sm",
           )}
         >
-          Incentive
+          Platform
         </div>
       </div>
     </div>

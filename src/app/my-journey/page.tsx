@@ -15,10 +15,10 @@ const nextReward = rewards[2];
 
 export default function MyJourneyPage() {
   return (
-    <AppShell role="employee" title="My Journey" eyebrow={currentEmployee.name}>
+    <AppShell role="employee" title="My Experience" eyebrow={currentEmployee.name}>
       <div className="grid gap-5 lg:grid-cols-3">
         <MetricCard
-          label="Chapter Miles"
+          label="Experience Miles"
           value={formatMiles(currentEmployee.miles)}
           detail="Manager-recognized miles"
           icon={BadgeCheck}
@@ -60,7 +60,7 @@ export default function MyJourneyPage() {
           </div>
         </Panel>
         <Panel>
-          <PanelHeader title="Recognition Timeline" eyebrow="This Chapter" />
+          <PanelHeader title="Recognition Timeline" eyebrow="This Activation" />
           <div className="grid gap-4">
             {personalRecognitions.map((recognition) => (
               <RecognitionCard key={recognition.id} recognition={recognition} />

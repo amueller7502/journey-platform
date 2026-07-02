@@ -125,7 +125,7 @@ export function TvDashboard() {
             </div>
             <div className="rounded-lg border border-journey-steel bg-journey-black p-8">
               <p className="text-xs font-black uppercase text-journey-red">
-                Journey Signal
+                Experience Signal
               </p>
               <p className="mt-6 text-8xl font-black text-journey-white">
                 15/70
@@ -190,7 +190,7 @@ export function TvDashboard() {
 
     if (activePanel === "15,700 / IMAX 1570") {
       return (
-        <TvPanel icon={Film} eyebrow="Chapter One Signal" title="15,700 Miles">
+        <TvPanel icon={Film} eyebrow="Activation Signal" title="15,700 Miles">
           <div className="grid max-w-5xl gap-5 lg:grid-cols-[1fr_0.7fr]">
             <div>
               <p className="text-3xl font-black text-journey-white sm:text-5xl">
@@ -205,7 +205,7 @@ export function TvDashboard() {
               <p className="text-xs font-black uppercase text-journey-red">15/70</p>
               <p className="mt-4 text-7xl font-black text-journey-white">1570</p>
               <p className="mt-4 text-lg font-bold text-journey-line">
-                Projection-inspired, community-focused, and built for Chapter One.
+                Projection-inspired, community-focused, and built for the first seasonal activation.
               </p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export function TvDashboard() {
 
     if (activePanel === "Recognition Wall") {
       return (
-        <TvPanel icon={Megaphone} eyebrow="Recognition Wall" title="Journey Moments">
+        <TvPanel icon={Megaphone} eyebrow="Recognition Wall" title="Experience Moments">
           <div className="grid gap-4 xl:grid-cols-3">
             {journeyMoments.slice(0, 3).map((moment) => (
               <article

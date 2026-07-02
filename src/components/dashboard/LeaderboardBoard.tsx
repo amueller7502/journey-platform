@@ -80,7 +80,7 @@ export function LeaderboardBoard({ mode = "app" }: { mode?: LeaderboardMode }) {
       return {
         id: recognition.id,
         employeeName: employee?.name ?? "Crew Member",
-        title: type?.name ?? "Journey Moment",
+        title: type?.name ?? "Experience Moment",
         miles: recognition.miles,
         note: recognition.note,
       };

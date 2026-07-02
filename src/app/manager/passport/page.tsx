@@ -3,7 +3,7 @@ import { JourneyCardLookupClient } from "@/components/forms/JourneyCardLookupCli
 
 export default function PassportLookupPage() {
   return (
-    <AppShell role="manager" title="Journey Card Entry" eyebrow="Fast shift verification">
+    <AppShell role="manager" title="Experience Card Entry" eyebrow="Fast shift verification">
       <JourneyCardLookupClient />
     </AppShell>
   );

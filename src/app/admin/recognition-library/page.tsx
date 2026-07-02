@@ -12,7 +12,7 @@ export default function RecognitionLibraryPage() {
         <MetricCard
           label="Recognition Types"
           value={`${recognitionTypes.length}`}
-          detail="Chapter-scoped rules"
+          detail="Activation-scoped rules"
           icon={Library}
         />
         <MetricCard

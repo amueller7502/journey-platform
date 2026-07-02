@@ -58,7 +58,7 @@ export function ChapterManagementClient() {
 
       <Panel className="mt-5">
         <PanelHeader
-          title="Manage Current Chapter"
+          title="Manage Current Activation"
           eyebrow={state.chapter.chapterNumber}
           action={<Save className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
@@ -66,7 +66,7 @@ export function ChapterManagementClient() {
       </Panel>
 
       <Panel className="mt-5">
-        <PanelHeader title="Chapter Operations" eyebrow="Preview controls" />
+        <PanelHeader title="Activation Operations" eyebrow="Preview controls" />
         <div className="grid gap-4 md:grid-cols-3">
           <label className="grid gap-2 rounded-lg border border-journey-line p-4 text-sm font-bold text-journey-black">
             Active Status
@@ -94,7 +94,7 @@ export function ChapterManagementClient() {
             </p>
           </div>
           <div className="rounded-lg border border-journey-line p-4">
-            <p className="text-xs font-black uppercase text-journey-red">Fresh Chapter</p>
+            <p className="text-xs font-black uppercase text-journey-red">Fresh Activation</p>
             <Button
               type="button"
               variant="secondary"

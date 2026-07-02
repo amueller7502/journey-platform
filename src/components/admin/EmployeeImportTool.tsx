@@ -235,7 +235,7 @@ export function EmployeeImportTool() {
         <Info className="mt-0.5 h-4 w-4 text-journey-red" aria-hidden="true" />
         <p className="text-xs font-bold leading-5 text-journey-steel">
           Excel files should use the same first-row headers. Only named rows are imported,
-          and Journey Card IDs are generated automatically.
+          and Experience Card IDs are generated automatically.
         </p>
       </div>
       {message ? (

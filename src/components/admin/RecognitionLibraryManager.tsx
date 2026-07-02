@@ -67,7 +67,7 @@ export function RecognitionLibraryManager() {
         kind === "excellence_check"
           ? "New Excellence Check"
           : kind === "journey_card_task"
-            ? "New Journey Card Task"
+            ? "New Experience Card Task"
             : "New Recognition Moment";
       const id = `${makeSlugId(name, "recognition_type")}-${Date.now()}`;
       const nextType: RecognitionType = {
@@ -111,7 +111,7 @@ export function RecognitionLibraryManager() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-journey-steel">
-            Admin-managed rules. Changes update manager recognition, Journey Card
+            Admin-managed rules. Changes update manager recognition, Experience Card
             batch entry, and excellence checks in this browser.
           </p>
           {saved ? (
@@ -193,7 +193,7 @@ export function RecognitionLibraryManager() {
               <th className="py-3 pr-4">Standard</th>
               <th className="py-3 pr-4">Miles</th>
               <th className="py-3 pr-4">Scope</th>
-              <th className="py-3 pr-4">Journey Card</th>
+              <th className="py-3 pr-4">Experience Card</th>
               <th className="py-3 pr-4">Icon</th>
               <th className="py-3 pr-4">Verification</th>
               <th className="py-3 pr-4">Sort</th>
@@ -331,7 +331,7 @@ export function RecognitionLibraryManager() {
                         Card task
                       </label>
                       <p className="mt-2 text-xs font-bold text-journey-steel">
-                        Assign areas in Admin / Journey Cards.
+                        Assign areas in Admin / Experience Cards.
                       </p>
                     </td>
                     <td className="py-3 pr-4">

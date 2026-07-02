@@ -20,7 +20,7 @@ const actions = [
   {
     label: "Active Skin",
     value: "Skin Developer",
-    detail: "Edit chapter visuals",
+    detail: "Edit activation visuals",
     href: "#skin-developer",
     icon: Palette,
   },

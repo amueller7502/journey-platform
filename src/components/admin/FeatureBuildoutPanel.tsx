@@ -4,7 +4,7 @@ const featureRows = [
   {
     area: "Employee roster",
     status: "Configurable",
-    detail: "Add, edit, disable, and change Journey Card IDs.",
+    detail: "Add, edit, disable, and change Experience Card IDs.",
     icon: CheckCircle2,
   },
   {

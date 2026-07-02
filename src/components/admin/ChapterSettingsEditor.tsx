@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { useJourneyState } from "@/lib/journey-state";
 
 const editableFields = [
-  ["Chapter name", "name"],
-  ["Chapter subtitle", "subtitle"],
+  ["Activation name", "name"],
+  ["Activation subtitle", "subtitle"],
   ["Start date", "startDate"],
   ["End date", "endDate"],
   ["Community goal", "communityGoalMiles"],
@@ -98,11 +98,11 @@ export function ChapterSettingsEditor({
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" icon={Save}>
-          Save Chapter Settings
+          Save Activation Settings
         </Button>
         {saved ? (
           <p className="text-sm font-black text-journey-red">
-            Chapter settings saved.
+            Activation settings saved.
           </p>
         ) : null}
       </div>

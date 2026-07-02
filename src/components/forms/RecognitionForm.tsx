@@ -13,6 +13,17 @@ const quickTypeIds = [
   "manager_above_beyond",
 ];
 
+function initialEmployeeFromUrl(crew: Array<{ id: string }>) {
+  if (typeof window === "undefined") {
+    return crew[0]?.id ?? "";
+  }
+
+  const requestedEmployeeId = new URLSearchParams(window.location.search).get("employee");
+  return requestedEmployeeId && crew.some((employee) => employee.id === requestedEmployeeId)
+    ? requestedEmployeeId
+    : crew[0]?.id ?? "";
+}
+
 export function RecognitionForm() {
   const formId = useId();
   const { state } = useJourneyState();
@@ -36,7 +47,7 @@ export function RecognitionForm() {
     [state.recognitionTypes],
   );
   const [search, setSearch] = useState("");
-  const [employeeId, setEmployeeId] = useState(crew[0]?.id ?? "");
+  const [employeeId, setEmployeeId] = useState(() => initialEmployeeFromUrl(crew));
   const [recognitionTypeId, setRecognitionTypeId] = useState(
     recognitionOptions[0]?.id ?? "",
   );
@@ -102,7 +113,7 @@ export function RecognitionForm() {
           miles: effectiveMiles,
           note:
             note.trim() ||
-            `${employee.name} created a Journey Moment through ${recognitionType.name.toLowerCase()}.`,
+            `${employee.name} created a Experience Moment through ${recognitionType.name.toLowerCase()}.`,
           createdAt: new Date().toISOString(),
           managerName: "Jordan Ellis",
         });
@@ -138,7 +149,7 @@ export function RecognitionForm() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="focus-ring min-h-11 w-full rounded-md border border-journey-line bg-journey-white pl-10 pr-3"
-              placeholder="Name, role, or Journey Card ID"
+              placeholder="Name, role, or Experience Card ID"
             />
           </div>
           <select
@@ -241,7 +252,7 @@ export function RecognitionForm() {
             {employee?.name ?? "Employee"} receives {effectiveMiles} Miles Earned
           </p>
           <p className="mt-1 text-sm font-bold text-journey-steel">
-            {recognitionType?.name} becomes a Journey Moment.
+            {recognitionType?.name} becomes a Experience Moment.
           </p>
         </div>
         <Button icon={Send} type="submit">
@@ -253,9 +264,9 @@ export function RecognitionForm() {
         <div className="flex items-start gap-3 rounded-lg border border-journey-red bg-journey-white p-4">
           <Sparkles className="mt-0.5 h-5 w-5 text-journey-red" aria-hidden="true" />
           <div>
-            <p className="font-black text-journey-black">Journey Moment captured</p>
+            <p className="font-black text-journey-black">Experience Moment captured</p>
             <p className="mt-1 text-sm text-journey-steel">
-              Journey Moment created for {employee?.name}. It now appears in Recent
+              Experience Moment created for {employee?.name}. It now appears in Recent
               Moments and the TV Recognition Wall.
             </p>
           </div>

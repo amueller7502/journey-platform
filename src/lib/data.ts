@@ -33,6 +33,10 @@ import type {
   ExcellenceLog,
   JourneyCardArea,
   JourneySkin,
+  LeadershipAchievement,
+  LeadershipRecognition,
+  LeadershipReward,
+  CoachingInsight,
   MenuConfiguration,
   NavItem,
   Recognition,
@@ -45,14 +49,15 @@ import type {
   Role,
   TvPanelSetting,
 } from "./types";
+import { productLanguage } from "./product-language";
 
 export const chapter = {
   id: "chapter-one-odyssey",
-  name: "The Journey",
-  subtitle: "Chapter One: The Odyssey",
-  chapterNumber: "Chapter One",
+  name: productLanguage.productName,
+  subtitle: productLanguage.platformName,
+  chapterNumber: "Seasonal Activation",
   chapterTitle: "The Odyssey",
-  phrase: "Every Mile Matters",
+  phrase: productLanguage.mission,
   visualTagline: "Every Mile Matters",
   location: "Celebration Cinema North",
   communityGoalMiles: 15700,
@@ -72,14 +77,14 @@ export const journeySkins: JourneySkin[] = [
     name: "Cinema Standard",
     status: "available",
     description:
-      "The clean black, white, gray, and Celebration red base system with minimal chapter styling.",
+      "The clean black, white, gray, and Celebration red base system with minimal activation styling.",
     canDisable: false,
     tvTreatment: "Standard recognition loop",
     headline: "Every Mile Matters",
-    visualDirection: "Premium cinema UI, sharp contrast, red status accents, no chapter texture.",
+    visualDirection: "Premium cinema UI, sharp contrast, red status accents, no activation texture.",
     motionStyle: "Clean fades and projection sweeps only.",
     texture: "Subtle film grain",
-    builderNotes: "Use this when Journey needs to feel reusable outside Chapter One.",
+    builderNotes: "Use this when Experience needs to feel reusable outside the Odyssey activation.",
     patternStyle: "film",
     backgroundMode: "clean",
     animationIntensity: 30,
@@ -107,7 +112,7 @@ export const journeySkins: JourneySkin[] = [
     description:
       "A premium North Stars skin with storm-dark cinema, recognition leaderboard energy, IMAX 15/70 projection cues, and restrained signal accents.",
     canDisable: true,
-    tvTreatment: "Opening signal card, recognition leaderboard, wave floor, projection sweep, 15/70 chapter card, and cinematic recognition wall",
+    tvTreatment: "Opening signal card, recognition leaderboard, wave floor, projection sweep, 15/70 activation card, and cinematic recognition wall",
     headline: "North Stars",
     visualDirection:
       "Clean cinematic Odyssey without mythology clip art: naval silhouettes, waves, film perforations, premium typography, and Celebration red as the action color.",
@@ -140,14 +145,14 @@ export const journeySkins: JourneySkin[] = [
     name: "Dune 3",
     status: "draft",
     description:
-      "Future chapter skin slot for desert, spice-route, and premium event theming.",
+      "Future activation skin slot for desert, spice-route, and premium event theming.",
     canDisable: true,
     tvTreatment: "Draft concept",
     headline: "Dune 3",
-    visualDirection: "Draft future skin concept. Disabled until a later chapter.",
+    visualDirection: "Draft future skin concept. Disabled until a later activation.",
     motionStyle: "Draft",
     texture: "Draft",
-    builderNotes: "Placeholder for future chapter development.",
+    builderNotes: "Placeholder for future activation development.",
     patternStyle: "doodles",
     backgroundMode: "playful",
     animationIntensity: 55,
@@ -879,7 +884,7 @@ export const recognitionBatches: RecognitionBatch[] = [
     employeeId: "emp-alex",
     managerId: "mgr-jordan",
     createdAt: "2026-07-24T18:35:00",
-    note: "Journey Card verified after closing rush.",
+    note: "Experience Card verified after closing rush.",
     source: "passport",
     itemCount: 4,
     totalMiles: 40,
@@ -984,6 +989,122 @@ export const recognitions: Recognition[] = [
   },
 ];
 
+export const leadershipRecognitions: LeadershipRecognition[] = [
+  {
+    id: "lead-rec-1001",
+    leaderId: "mgr-jordan",
+    recognizedById: "admin-sam",
+    category: "Coaching",
+    title: "Calm rush coaching",
+    note: "Kept the concessions handoff calm during the evening rush and coached two newer crew members without slowing the line.",
+    createdAt: "2026-07-24T21:20:00",
+    impact: "Improved crew confidence and protected guest pace.",
+  },
+  {
+    id: "lead-rec-1002",
+    leaderId: "mgr-jordan",
+    recognizedById: "admin-sam",
+    category: "Coverage",
+    title: "Recognition coverage follow-through",
+    note: "Closed the loop on employees who had not been recognized this week and made the next shift plan clearer.",
+    createdAt: "2026-07-23T18:15:00",
+    impact: "Reduced recognition gaps before the weekend.",
+  },
+  {
+    id: "lead-rec-1003",
+    leaderId: "mgr-jordan",
+    recognizedById: "admin-sam",
+    category: "Communication",
+    title: "Clean manager handoff",
+    note: "Left a concise handoff on theater readiness, pending rewards, and Experience Card follow-up.",
+    createdAt: "2026-07-22T22:05:00",
+    impact: "Helped the next leader start with less guesswork.",
+  },
+];
+
+export const leadershipAchievements: LeadershipAchievement[] = [
+  {
+    id: "lead-ach-coverage",
+    leaderId: "mgr-jordan",
+    title: "Coverage Builder",
+    description: "Kept recognition coverage visible across departments for a full week.",
+    status: "earned",
+    earnedAt: "2026-07-24T21:30:00",
+  },
+  {
+    id: "lead-ach-coach",
+    leaderId: "mgr-jordan",
+    title: "Coach on Floor",
+    description: "Logged three leadership recognitions tied to coaching or calm communication.",
+    status: "in_progress",
+  },
+  {
+    id: "lead-ach-handoff",
+    leaderId: "mgr-jordan",
+    title: "Handoff Standard",
+    description: "Build a consistent manager handoff rhythm for reward, recognition, and presentation work.",
+    status: "in_progress",
+  },
+];
+
+export const leadershipRewards: LeadershipReward[] = [
+  {
+    id: "lead-reward-development",
+    name: "Leadership Development Pick",
+    description: "Choose a leadership skill focus for the next one-on-one with the GM.",
+    status: "available",
+    fulfillmentNotes: "Scheduled through the GM, not purchased with employee Miles.",
+  },
+  {
+    id: "lead-reward-screening",
+    name: "Manager Movie Night Host",
+    description: "Host a small crew recognition moment before a manager-approved screening.",
+    status: "scheduled",
+    fulfillmentNotes: "Requires GM approval and staffing coverage.",
+  },
+  {
+    id: "lead-reward-handoff",
+    name: "Premium Handoff Badge",
+    description: "Recognition for clean shift communication and follow-through.",
+    status: "earned",
+    fulfillmentNotes: "Shown in Leadership Achievements instead of the employee Trading Post.",
+  },
+];
+
+export const coachingInsights: CoachingInsight[] = [
+  {
+    id: "coach-coverage-floor",
+    leaderId: "mgr-jordan",
+    title: "Recognition gap on Facilities",
+    detail: "Facilities has fewer recent employee moments than Floor and Concessions.",
+    action: "Ask the closing lead what presentation detail deserved recognition tonight.",
+    priority: "High",
+  },
+  {
+    id: "coach-reward-queue",
+    leaderId: "mgr-jordan",
+    title: "Reward queue needs a handoff",
+    detail: "Two requests are still awaiting manager review.",
+    action: "Approve, fulfill, or leave a clear note before the end-of-shift handoff.",
+    priority: "Medium",
+  },
+  {
+    id: "coach-card-entry",
+    leaderId: "mgr-jordan",
+    title: "Experience Card timing",
+    detail: "Batch entry works best when completed before the final manager walk.",
+    action: "Collect turned-in cards before the last auditorium reset.",
+    priority: "Low",
+  },
+];
+
+export const leadershipHealth = {
+  recognitionCoverage: 83,
+  employeesAwaitingRecognition: 1,
+  coachingActionsOpen: coachingInsights.filter((insight) => insight.priority !== "Low").length,
+  leadershipRecognitionsThisWeek: leadershipRecognitions.length,
+};
+
 export const rewards: Reward[] = [
   {
     id: "reward-popcorn",
@@ -1003,7 +1124,7 @@ export const rewards: Reward[] = [
     id: "reward-ticket",
     chapterId: chapter.id,
     name: "Movie Pass",
-    description: "One employee movie pass for a Journey mile marker.",
+    description: "One employee movie pass for an Experience milestone.",
     milesCost: 220,
     inventoryCount: 12,
     imageUrl: "/brand/celebration-c-frame.png",
@@ -1018,7 +1139,7 @@ export const rewards: Reward[] = [
     id: "reward-hoodie",
     chapterId: chapter.id,
     name: "Crew Hoodie",
-    description: "Limited Chapter One apparel with premium red detail.",
+    description: "Limited Odyssey activation apparel with premium red detail.",
     milesCost: 500,
     inventoryCount: 6,
     imageUrl: "/brand/celebration-c-frame.png",
@@ -1046,7 +1167,7 @@ export const rewards: Reward[] = [
     id: "reward-poster",
     chapterId: chapter.id,
     name: "1570 Poster Print",
-    description: "Chapter One desk print inspired by IMAX 1570 film.",
+    description: "Odyssey activation desk print inspired by IMAX 1570 film.",
     milesCost: 180,
     inventoryCount: 0,
     imageUrl: "/brand/celebration-c-frame.png",
@@ -1083,7 +1204,7 @@ export const redemptions: Redemption[] = [
 
 export const employeeNav: NavItem[] = [
   { label: "Home", href: "/home", icon: Home },
-  { label: "My Journey", href: "/my-journey", icon: Route },
+  { label: "My Experience", href: "/my-journey", icon: Route },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Trading Post", href: "/trading-post", icon: Store },
   { label: "Community", href: "/community", icon: Users },
@@ -1091,14 +1212,15 @@ export const employeeNav: NavItem[] = [
 ];
 
 export const managerNav: NavItem[] = [
-  { label: "Shift Dashboard", href: "/manager/dashboard", icon: LayoutDashboard },
-  { label: "Capture Moment", href: "/manager/recognize", icon: HandHeart },
-  { label: "Journey Card Entry", href: "/manager/passport", icon: ClipboardCheck },
-  { label: "Excellence Checks", href: "/manager/excellence-checks", icon: ClipboardCheck },
-  { label: "Leaderboard", href: "/manager/leaderboard", icon: Trophy },
-  { label: "Pending Rewards", href: "/manager/pending-rewards", icon: Gift },
-  { label: "Daily Spotlight", href: "/manager/daily-spotlight", icon: Sparkles },
-  { label: "Moment Feed", href: "/manager/recognition-feed", icon: Megaphone },
+  { label: "Leadership Dashboard", href: "/leadership/dashboard", icon: LayoutDashboard },
+  { label: "Leadership Health", href: "/leadership/health", icon: Gauge },
+  { label: "Leadership Journal", href: "/leadership/journal", icon: BookOpen },
+  { label: "Achievements", href: "/leadership/achievements", icon: Award },
+  { label: "Leadership Recognition", href: "/leadership/recognition", icon: HandHeart },
+  { label: "Leadership Rewards", href: "/leadership/rewards", icon: Gift },
+  { label: "Recognition Coverage", href: "/leadership/coverage", icon: BarChart3 },
+  { label: "Coaching Insights", href: "/leadership/coaching", icon: Megaphone },
+  { label: "Awaiting Recognition", href: "/leadership/awaiting-recognition", icon: Users },
 ];
 
 export const adminNav: NavItem[] = [
@@ -1108,10 +1230,10 @@ export const adminNav: NavItem[] = [
   { label: "Leaderboard", href: "/admin/leaderboard", icon: Trophy },
   { label: "Recognition Library", href: "/admin/recognition-library", icon: Library },
   { label: "Rewards / Inventory", href: "/admin/rewards", icon: Package },
-  { label: "Journey Cards", href: "/admin/passports", icon: ClipboardCheck },
+  { label: "Experience Cards", href: "/admin/passports", icon: ClipboardCheck },
   { label: "Recognition Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Settings", href: "/admin/settings", icon: Settings },
-  { label: "Chapter Management", href: "/admin/chapters", icon: CalendarDays },
+  { label: "Activation Management", href: "/admin/chapters", icon: CalendarDays },
 ];
 
 export const utilityNav: NavItem[] = [
@@ -1125,7 +1247,7 @@ export const menuConfigurations: MenuConfiguration[] = [
     area: "Employee" as const,
     label: item.label,
     href: item.href,
-    purpose: "Employee-facing chapter experience",
+    purpose: "Employee Experience navigation",
     enabled: true,
     reusable: true,
   })),
@@ -1134,7 +1256,7 @@ export const menuConfigurations: MenuConfiguration[] = [
     area: "Manager" as const,
     label: item.label,
     href: item.href,
-    purpose: "Manager tools and recognition entry",
+    purpose: "Leadership Experience navigation",
     enabled: true,
     reusable: true,
   })),
@@ -1159,8 +1281,8 @@ export const menuConfigurations: MenuConfiguration[] = [
 ];
 
 export const roleLabels: Record<Role, string> = {
-  employee: "Employee",
-  manager: "Manager",
+  employee: "Employee Experience",
+  manager: "Leadership Experience",
   admin: "Admin/GM",
 };
 
@@ -1263,8 +1385,8 @@ export const passportCsvPreview = employees
   }));
 
 export const chapterSettings = [
-  ["Chapter name", chapter.name],
-  ["Chapter subtitle", chapter.subtitle],
+  ["Activation name", chapter.name],
+  ["Activation subtitle", chapter.subtitle],
   ["Start date", chapter.startDate],
   ["End date", chapter.endDate],
   ["Community goal", `${chapter.communityGoalMiles}`],
@@ -1278,11 +1400,11 @@ export const launchReadinessChecklist = [
   { label: "Seed employees", status: "Ready" },
   { label: "Seed rewards", status: "Ready" },
   { label: "Seed recognition types", status: "Ready" },
-  { label: "Print Journey Cards", status: "Needs print run" },
+  { label: "Print Experience Cards", status: "Needs print run" },
   { label: "Test TV dashboard", status: "Ready" },
   { label: "Test manager recognition", status: "Ready" },
   { label: "Test reward redemption", status: "Configurable" },
-  { label: "Test Journey Card batch entry", status: "Ready" },
+  { label: "Test Experience Card batch entry", status: "Ready" },
 ];
 
 export const filmFacts = [
@@ -1295,8 +1417,8 @@ export const filmFacts = [
 export const journalEvents = [
   {
     date: "Jul 24",
-    title: "Journey Card verified",
-    detail: "4 checked items became 40 Journey Miles after manager review.",
+    title: "Experience Card verified",
+    detail: "4 checked items became 40 Experience Miles after manager review.",
   },
   {
     date: "Jul 22",
@@ -1305,7 +1427,7 @@ export const journalEvents = [
   },
   {
     date: "Jul 16",
-    title: "Chapter opened",
+    title: "Activation opened",
     detail: "The Odyssey began with every mile counting toward 15,700.",
   },
 ];
@@ -1351,6 +1473,6 @@ export const iconNames = [
 
 export const adminQuickLinks = [
   { label: "Add Recognition Type", href: "/admin/recognition-library/new", icon: Library },
-  { label: "Journey Cards", href: "/admin/passports", icon: BookOpen },
+  { label: "Experience Cards", href: "/admin/passports", icon: BookOpen },
   { label: "Reward Inventory", href: "/admin/rewards", icon: Coins },
 ];

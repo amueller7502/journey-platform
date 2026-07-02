@@ -23,7 +23,7 @@ export function JourneyCardLookupClient() {
   return (
     <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
       <Panel>
-        <PanelHeader title="Enter Turned-In Journey Card" eyebrow="End-of-shift entry" />
+        <PanelHeader title="Enter Turned-In Experience Card" eyebrow="End-of-shift entry" />
         <div className="rounded-lg border border-journey-line bg-journey-mist p-4">
           <div className="flex items-center gap-3">
             <ClipboardCheck className="h-8 w-8 text-journey-red" aria-hidden="true" />
@@ -46,7 +46,7 @@ export function JourneyCardLookupClient() {
           }}
         >
           <label className="grid gap-2 text-sm font-bold text-journey-black">
-            Journey Card ID
+            Experience Card ID
             <input
               value={passportId}
               onChange={(event) => setPassportId(event.target.value)}
@@ -55,7 +55,7 @@ export function JourneyCardLookupClient() {
             />
           </label>
           <label className="grid gap-2 text-sm font-bold text-journey-black">
-            Journey Card Type Worked
+            Experience Card Type Worked
             <select
               value={areaId}
               onChange={(event) => setAreaId(event.target.value)}

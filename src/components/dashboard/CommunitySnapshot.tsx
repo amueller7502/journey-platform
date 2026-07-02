@@ -37,7 +37,7 @@ export function CommunitySnapshot() {
       return {
         id: recognition.id,
         employeeName: employee?.name ?? "Crew Member",
-        title: type?.name ?? "Journey Moment",
+        title: type?.name ?? "Experience Moment",
         note: recognition.note,
         miles: recognition.miles,
       };
@@ -77,7 +77,7 @@ export function CommunitySnapshot() {
         <MetricCard
           label="Active Crew"
           value={`${activeCrew}`}
-          detail="employees in Journey"
+          detail="employees in Experience"
           icon={Users}
         />
         <MetricCard
@@ -87,7 +87,7 @@ export function CommunitySnapshot() {
           icon={Trophy}
         />
         <MetricCard
-          label="Chapter"
+          label="Activation"
           value={state.chapter.chapterNumber}
           detail={state.chapter.chapterTitle}
           icon={ArrowRight}
@@ -96,7 +96,7 @@ export function CommunitySnapshot() {
 
       <Panel className="mt-5">
         <PanelHeader
-          title="Recent Journey Moments"
+          title="Recent Experience Moments"
           eyebrow="Simple community view"
           action={<Sparkles className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />

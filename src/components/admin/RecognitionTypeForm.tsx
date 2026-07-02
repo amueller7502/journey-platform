@@ -60,7 +60,7 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
           ...form,
           id,
           name: form.name.trim() || "Untitled Recognition Type",
-          description: form.description.trim() || "Manager verified Journey Moment.",
+          description: form.description.trim() || "Manager verified Experience Moment.",
           milesValue: Math.max(1, Number(form.milesValue)),
         };
 
@@ -241,7 +241,7 @@ export function RecognitionTypeForm({ typeId }: { typeId?: string }) {
               })
             }
           />
-          Available on Journey Cards
+          Available on Experience Cards
         </label>
       </div>
 

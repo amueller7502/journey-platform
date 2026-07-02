@@ -12,7 +12,7 @@ export default async function PassportEntryPage({
   const { area } = await searchParams;
 
   return (
-    <AppShell role="manager" title="Journey Card Entry" eyebrow={passport_id}>
+    <AppShell role="manager" title="Experience Card Entry" eyebrow={passport_id}>
       <JourneyCardEntryClient passportId={passport_id} areaId={area} />
     </AppShell>
   );

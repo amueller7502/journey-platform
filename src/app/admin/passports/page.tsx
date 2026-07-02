@@ -8,7 +8,7 @@ export default function AdminPassportsPage() {
   return (
     <AppShell
       role="admin"
-      title="Journey Cards"
+      title="Experience Cards"
       eyebrow="Printable shift checklists"
       actions={
         <LinkButton href="/manager/passport" icon={ClipboardCheck}>

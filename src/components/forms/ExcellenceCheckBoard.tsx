@@ -52,7 +52,7 @@ export function ExcellenceCheckBoard() {
             <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-journey-steel">
               Use this screen for verified spaces and operational standards. To reward
               a specific person for the work behind the check, capture a separate
-              Journey Moment.
+              Experience Moment.
             </p>
           </div>
           <div className="rounded-md border border-journey-line bg-journey-white p-3">

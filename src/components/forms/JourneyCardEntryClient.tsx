@@ -15,7 +15,9 @@ export function JourneyCardEntryClient({
 }) {
   const { state } = useJourneyState();
   const employee = state.employees.find(
-    (item) => item.passportId.toLowerCase() === passportId.toLowerCase(),
+    (item) =>
+      item.role === "employee" &&
+      item.passportId.toLowerCase() === passportId.toLowerCase(),
   );
   const department = state.departments.find(
     (item) => item.id === employee?.department,
@@ -33,14 +35,14 @@ export function JourneyCardEntryClient({
           </div>
           <div>
             <p className="text-xs font-black uppercase text-journey-red">
-              Journey Card Not Found
+              Experience Card Not Found
             </p>
             <h2 className="mt-2 text-2xl font-black text-journey-black">
               {passportId}
             </h2>
             <p className="mt-2 max-w-2xl text-sm font-bold leading-6 text-journey-steel">
               Add or re-enable this employee in Admin / Employees, then return to this
-              Journey Card entry screen.
+              Experience Card entry screen.
             </p>
             <LinkButton href="/admin/employees" icon={ClipboardCheck} className="mt-4">
               Manage Employees
@@ -62,12 +64,12 @@ export function JourneyCardEntryClient({
               {employee.title} - {department?.name}
             </p>
             <p className="mt-1 text-sm font-black text-journey-red">
-              {cardArea?.name ?? "Unassigned Journey Card"}
+              {cardArea?.name ?? "Unassigned Experience Card"}
             </p>
           </div>
           <div className="rounded-md border border-journey-steel px-4 py-3 text-right">
             <p className="text-xs font-black uppercase text-journey-line">
-              Journey Card ID
+              Experience Card ID
             </p>
             <p className="mt-1 text-xl font-black text-journey-white">
               {employee.passportId}

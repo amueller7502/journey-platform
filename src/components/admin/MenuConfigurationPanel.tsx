@@ -25,7 +25,7 @@ export function MenuConfigurationPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-bold text-journey-steel">
           Menu labels and purposes are modeled as configurable records so future
-          chapters can reuse the same app with different language.
+          activations can reuse the same app with different language.
         </p>
         <Button type="button" icon={Save} onClick={() => setSaved(true)}>
           Save Menu Draft

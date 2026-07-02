@@ -29,7 +29,7 @@ export default function SettingsPage() {
             {[
               ["Employee", "View miles, community progress, rewards, profile"],
               ["Manager", "Create recognitions, log checks, review rewards"],
-              ["Admin/GM", "Manage chapters, inventory, analytics, settings"],
+              ["Admin/GM", "Manage activations, inventory, analytics, settings"],
             ].map(([label, value]) => (
               <div
                 key={label}
@@ -53,7 +53,7 @@ export default function SettingsPage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
         <Panel id="skin-developer">
-          <PanelHeader title="Skin Developer" eyebrow="Chapter visuals" />
+          <PanelHeader title="Skin Developer" eyebrow="Activation visuals" />
           <SkinSettingsPanel skins={journeySkins} activeSkinId={activeSkin.id} />
         </Panel>
         <Panel>
@@ -67,7 +67,7 @@ export default function SettingsPage() {
       </div>
 
       <Panel className="mt-5">
-        <PanelHeader title="Chapter Settings" eyebrow="Editable fields" />
+        <PanelHeader title="Activation Settings" eyebrow="Editable fields" />
         <ChapterSettingsEditor settings={chapterSettings} />
       </Panel>
 

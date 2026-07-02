@@ -6,11 +6,11 @@ import { getEmployee, recognitionBatches, recognitions } from "@/lib/data";
 
 export default function RecognitionFeedPage() {
   return (
-    <AppShell role="manager" title="Journey Moment Feed" eyebrow="All Moments">
+    <AppShell role="manager" title="Experience Moment Feed" eyebrow="All Moments">
       <Panel>
         <PanelHeader
-          title="Recent Journey Moments"
-          eyebrow="Chapter One"
+          title="Recent Experience Moments"
+          eyebrow="First seasonal activation"
           action={<Megaphone className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />
         <div className="mb-5 grid gap-4">
@@ -20,11 +20,11 @@ export default function RecognitionFeedPage() {
               className="rounded-lg border border-journey-red bg-journey-mist p-4"
             >
               <p className="text-xs font-black uppercase text-journey-red">
-                Journey Card Batch
+                Experience Card Batch
               </p>
               <h3 className="mt-2 text-xl font-black text-journey-black">
                 {getEmployee(batch.employeeId)?.name} earned {batch.totalMiles} Miles
-                from {batch.itemCount} verified Journey Card items.
+                from {batch.itemCount} verified Experience Card items.
               </h3>
               <p className="mt-2 text-sm font-bold text-journey-steel">{batch.note}</p>
             </article>

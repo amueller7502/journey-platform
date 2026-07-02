@@ -66,7 +66,7 @@ export function JourneyCardPrintList() {
   function assignmentLabel(assignment: JourneyCardShiftAssignment) {
     const employee = state.employees.find((item) => item.id === assignment.employeeId);
     const area = areas.find((item) => item.id === assignment.journeyCardAreaId);
-    return `${employee?.name ?? "Crew Member"} - ${area?.name ?? "Journey Card"}`;
+    return `${employee?.name ?? "Crew Member"} - ${area?.name ?? "Experience Card"}`;
   }
 
   function toggleEmployee(employeeId: string) {
@@ -158,7 +158,7 @@ export function JourneyCardPrintList() {
     <>
       <Panel className="mt-5">
         <PanelHeader
-          title="Daily Journey Card Print Run"
+          title="Daily Experience Card Print Run"
           eyebrow="Shift checklist planner"
           action={
             <Button
@@ -185,7 +185,7 @@ export function JourneyCardPrintList() {
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold text-journey-black">
-                Journey Card Type
+                Experience Card Type
                 <select
                   value={areaId}
                   onChange={(event) => setAreaId(event.target.value)}
@@ -329,7 +329,7 @@ export function JourneyCardPrintList() {
               >
                 <div className="border-b-4 border-journey-red bg-journey-black p-4 text-journey-white">
                   <p className="text-xs font-black uppercase text-journey-red">
-                    The Journey / Shift Card
+                    Experience / Shift Card
                   </p>
                   <h3 className="mt-1 text-2xl font-black">Every Mile Matters</h3>
                   <p className="mt-1 text-sm font-bold text-journey-line">
@@ -354,7 +354,7 @@ export function JourneyCardPrintList() {
                         Card Type
                       </p>
                       <h4 className="mt-1 text-xl font-black text-journey-black">
-                        {area?.name ?? "Journey Card"}
+                        {area?.name ?? "Experience Card"}
                       </h4>
                       <p className="mt-1 text-sm font-bold text-journey-steel">
                         {assignment.shiftDate} / {formatMiles(totalMiles)} possible
@@ -387,7 +387,7 @@ export function JourneyCardPrintList() {
                   <div className="grid gap-3 text-xs font-bold text-journey-black sm:grid-cols-3">
                     <div className="border-b border-journey-black pb-1">Employee initials</div>
                     <div className="border-b border-journey-black pb-1">Manager initials</div>
-                    <div className="border-b border-journey-black pb-1">Entered in Journey</div>
+                    <div className="border-b border-journey-black pb-1">Entered in Experience</div>
                   </div>
                 </div>
               </article>

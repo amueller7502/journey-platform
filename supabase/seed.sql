@@ -21,8 +21,8 @@ insert into public.skins (
   sort_order
 ) values
   ('standard', 'Cinema Standard', 'available', 'Clean black, white, gray, and Celebration red base system.', false, 'Standard recognition loop', 'film', 'clean', 30, 20, 10, 35, 45, 20, 0, 'clean', 'flat', 'standard', '{"primary":"#050505","secondary":"#ffffff","accent":"#d71920"}', 1),
-  ('odyssey', 'Odyssey / North Stars', 'active', 'Odyssey skin with IMAX 15/70 film cues, projection texture, and recognition leaderboard energy.', true, 'Opening signal card, recognition leaderboard, film grain, projection sweep, and 15/70 chapter card', 'waves', 'immersive', 78, 64, 28, 58, 82, 68, 18, 'blockbuster', 'poster', 'filmstrip', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
-  ('dune_3', 'Dune 3', 'draft', 'Future chapter skin slot for desert and premium event theming.', true, 'Draft concept', 'doodles', 'playful', 55, 80, 70, 72, 40, 48, 70, 'handbill', 'ticket', 'ticket-stub', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
+  ('odyssey', 'Odyssey / North Stars', 'active', 'Odyssey skin with IMAX 15/70 film cues, projection texture, and recognition leaderboard energy.', true, 'Opening signal card, recognition leaderboard, film grain, projection sweep, and 15/70 activation card', 'waves', 'immersive', 78, 64, 28, 58, 82, 68, 18, 'blockbuster', 'poster', 'filmstrip', '{"primary":"#050505","secondary":"#d8d8d8","accent":"#d71920"}', 2),
+  ('dune_3', 'Dune 3', 'draft', 'Future activation skin slot for desert and premium event theming.', true, 'Draft concept', 'doodles', 'playful', 55, 80, 70, 72, 40, 48, 70, 'handbill', 'ticket', 'ticket-stub', '{"primary":"#050505","secondary":"#f4f4f4","accent":"#d71920"}', 3);
 
 insert into public.chapters (
   id,
@@ -37,8 +37,8 @@ insert into public.chapters (
   status
 ) values (
   '11111111-1111-4111-8111-111111111111',
-  'The Journey',
-  'Chapter One: The Odyssey',
+  'Experience',
+  'Employee Experience Platform',
   '2026-07-16',
   '2026-08-12',
   15700,
@@ -94,6 +94,57 @@ insert into public.employees (
   ('33333333-3333-4333-8333-333333333306', '22222222-2222-4222-8222-222222222206', 'Jordan Ellis', 'JE', 'Shift Manager', 'manager', 'MGR-1570-001', 'http://127.0.0.1:3000/manager/passport/MGR-1570-001', true),
   ('33333333-3333-4333-8333-333333333307', '22222222-2222-4222-8222-222222222206', 'Sam Carter', 'SC', 'General Manager', 'admin', 'GM-1570-001', 'http://127.0.0.1:3000/manager/passport/GM-1570-001', true);
 
+insert into public.leadership_recognitions (
+  id,
+  leader_id,
+  recognized_by,
+  category,
+  title,
+  note,
+  impact,
+  created_at
+) values
+  ('77777777-7777-4777-8777-777777777701', '33333333-3333-4333-8333-333333333306', '33333333-3333-4333-8333-333333333307', 'Coaching', 'Calm rush coaching', 'Kept the concessions handoff calm during the evening rush and coached two newer crew members without slowing the line.', 'Improved crew confidence and protected guest pace.', '2026-07-24T21:20:00-04:00'),
+  ('77777777-7777-4777-8777-777777777702', '33333333-3333-4333-8333-333333333306', '33333333-3333-4333-8333-333333333307', 'Coverage', 'Recognition coverage follow-through', 'Closed the loop on employees who had not been recognized this week and made the next shift plan clearer.', 'Reduced recognition gaps before the weekend.', '2026-07-23T18:15:00-04:00'),
+  ('77777777-7777-4777-8777-777777777703', '33333333-3333-4333-8333-333333333306', '33333333-3333-4333-8333-333333333307', 'Communication', 'Clean manager handoff', 'Left a concise handoff on theater readiness, pending rewards, and Experience Card follow-up.', 'Helped the next leader start with less guesswork.', '2026-07-22T22:05:00-04:00');
+
+insert into public.leadership_achievements (
+  id,
+  leader_id,
+  title,
+  description,
+  status,
+  earned_at
+) values
+  ('77777777-7777-4777-8777-777777777711', '33333333-3333-4333-8333-333333333306', 'Coverage Builder', 'Kept recognition coverage visible across departments for a full week.', 'earned', '2026-07-24T21:30:00-04:00'),
+  ('77777777-7777-4777-8777-777777777712', '33333333-3333-4333-8333-333333333306', 'Coach on Floor', 'Logged three leadership recognitions tied to coaching or calm communication.', 'in_progress', null),
+  ('77777777-7777-4777-8777-777777777713', '33333333-3333-4333-8333-333333333306', 'Handoff Standard', 'Build a consistent manager handoff rhythm for reward, recognition, and presentation work.', 'in_progress', null);
+
+insert into public.leadership_rewards (
+  id,
+  name,
+  description,
+  status,
+  fulfillment_notes,
+  enabled,
+  sort_order
+) values
+  ('77777777-7777-4777-8777-777777777721', 'Leadership Development Pick', 'Choose a leadership skill focus for the next one-on-one with the GM.', 'available', 'Scheduled through the GM, not purchased with employee Miles.', true, 10),
+  ('77777777-7777-4777-8777-777777777722', 'Manager Movie Night Host', 'Host a small crew recognition moment before a manager-approved screening.', 'scheduled', 'Requires GM approval and staffing coverage.', true, 20),
+  ('77777777-7777-4777-8777-777777777723', 'Premium Handoff Badge', 'Recognition for clean shift communication and follow-through.', 'earned', 'Shown in Leadership Achievements instead of the employee Trading Post.', true, 30);
+
+insert into public.coaching_insights (
+  id,
+  leader_id,
+  title,
+  detail,
+  action,
+  priority
+) values
+  ('77777777-7777-4777-8777-777777777731', '33333333-3333-4333-8333-333333333306', 'Recognition gap on Facilities', 'Facilities has fewer recent employee moments than Floor and Concessions.', 'Ask the closing lead what presentation detail deserved recognition tonight.', 'High'),
+  ('77777777-7777-4777-8777-777777777732', '33333333-3333-4333-8333-333333333306', 'Reward queue needs a handoff', 'Two requests are still awaiting manager review.', 'Approve, fulfill, or leave a clear note before the end-of-shift handoff.', 'Medium'),
+  ('77777777-7777-4777-8777-777777777733', '33333333-3333-4333-8333-333333333306', 'Experience Card timing', 'Batch entry works best when completed before the final manager walk.', 'Collect turned-in cards before the last auditorium reset.', 'Low');
+
 insert into public.menu_items (
   role,
   area,
@@ -104,25 +155,28 @@ insert into public.menu_items (
   reusable,
   sort_order
 ) values
-  ('employee', 'Employee', 'Home', '/home', 'Employee-facing chapter experience', true, true, 10),
-  ('employee', 'Employee', 'My Journey', '/my-journey', 'Employee progress and history', true, true, 20),
+  ('employee', 'Employee', 'Home', '/home', 'Employee Experience home', true, true, 10),
+  ('employee', 'Employee', 'My Experience', '/my-journey', 'Employee progress and history', true, true, 20),
   ('employee', 'Employee', 'Trading Post', '/trading-post', 'Rewards marketplace', true, true, 30),
   ('employee', 'Employee', 'Community', '/community', 'Community progress and recognition', true, true, 40),
-  ('employee', 'Employee', 'Profile', '/profile', 'Employee profile and journey journal', true, true, 50),
-  ('manager', 'Manager', 'Recognize Employee', '/manager/recognize', 'Manager recognition entry', true, true, 10),
-  ('manager', 'Manager', 'Passport Entry', '/manager/passport', 'Crew passport batch entry', true, true, 20),
-  ('manager', 'Manager', 'Excellence Checks', '/manager/excellence-checks', 'Presentation verification', true, true, 30),
-  ('manager', 'Manager', 'Pending Rewards', '/manager/pending-rewards', 'Reward review queue', true, true, 40),
-  ('manager', 'Manager', 'Daily Spotlight', '/manager/daily-spotlight', 'Recognition spotlight control', true, true, 50),
-  ('manager', 'Manager', 'Recognition Feed', '/manager/recognition-feed', 'Manager feed review', true, true, 60),
+  ('employee', 'Employee', 'Profile', '/profile', 'Employee profile and Experience Journal', true, true, 50),
+  ('manager', 'Manager', 'Leadership Dashboard', '/leadership/dashboard', 'Leadership Experience home', true, true, 10),
+  ('manager', 'Manager', 'Leadership Health', '/leadership/health', 'Leadership health snapshot', true, true, 20),
+  ('manager', 'Manager', 'Leadership Journal', '/leadership/journal', 'Leadership recognition history', true, true, 30),
+  ('manager', 'Manager', 'Achievements', '/leadership/achievements', 'Leadership achievement tracking', true, true, 40),
+  ('manager', 'Manager', 'Leadership Recognition', '/leadership/recognition', 'Manager recognition without employee XP', true, true, 50),
+  ('manager', 'Manager', 'Leadership Rewards', '/leadership/rewards', 'Leadership rewards without employee Miles', true, true, 60),
+  ('manager', 'Manager', 'Recognition Coverage', '/leadership/coverage', 'Employee recognition coverage', true, true, 70),
+  ('manager', 'Manager', 'Coaching Insights', '/leadership/coaching', 'Coaching action guidance', true, true, 80),
+  ('manager', 'Manager', 'Awaiting Recognition', '/leadership/awaiting-recognition', 'Employees awaiting recognition', true, true, 90),
   ('admin', 'Admin/GM', 'Dashboard', '/admin/dashboard', 'GM overview', true, true, 10),
   ('admin', 'Admin/GM', 'Employees', '/admin/employees', 'Employee roster', true, true, 20),
   ('admin', 'Admin/GM', 'Recognition Library', '/admin/recognition-library', 'Recognition type management', true, true, 30),
   ('admin', 'Admin/GM', 'Rewards / Inventory', '/admin/rewards', 'Trading Post editor', true, true, 40),
-  ('admin', 'Admin/GM', 'Passports', '/admin/passports', 'Passport card management', true, true, 50),
+  ('admin', 'Admin/GM', 'Experience Cards', '/admin/passports', 'Experience Card management', true, true, 50),
   ('admin', 'Admin/GM', 'Recognition Analytics', '/admin/analytics', 'Recognition reporting', true, true, 60),
   ('admin', 'Admin/GM', 'Settings', '/admin/settings', 'Skins, menus, and display settings', true, true, 70),
-  ('admin', 'Admin/GM', 'Chapter Management', '/admin/chapters', 'Chapter setup and scheduling', true, true, 80),
+  ('admin', 'Admin/GM', 'Activation Management', '/admin/chapters', 'Activation setup and scheduling', true, true, 80),
   (null, 'Utility', 'TV Display', '/tv', 'Shared display mode', true, true, 10),
   (null, 'Utility', 'Welcome', '/', 'Role selection and launch', true, true, 20);
 
@@ -180,8 +234,8 @@ insert into public.rewards (
   spotlight
 ) values
   ('55555555-5555-4555-8555-555555555501', '11111111-1111-4111-8111-111111111111', 'Popcorn Combo', 'A classic break-room favorite for a strong shift.', 120, 18, '/brand/celebration-c-frame.png', 'Food', true, 10, 2, 'Manager hands off at end of shift.', false),
-  ('55555555-5555-4555-8555-555555555502', '11111111-1111-4111-8111-111111111111', 'Movie Pass', 'One employee movie pass for a Journey mile marker.', 220, 12, '/brand/celebration-c-frame.png', 'Cinema', true, 20, 2, 'Issue as employee pass voucher.', true),
-  ('55555555-5555-4555-8555-555555555503', '11111111-1111-4111-8111-111111111111', 'Crew Hoodie', 'Limited Chapter One apparel with premium red detail.', 500, 6, '/brand/celebration-c-frame.png', 'Gear', true, 30, 1, 'Confirm size before fulfillment.', false),
+  ('55555555-5555-4555-8555-555555555502', '11111111-1111-4111-8111-111111111111', 'Movie Pass', 'One employee movie pass for an Experience milestone.', 220, 12, '/brand/celebration-c-frame.png', 'Cinema', true, 20, 2, 'Issue as employee pass voucher.', true),
+  ('55555555-5555-4555-8555-555555555503', '11111111-1111-4111-8111-111111111111', 'Crew Hoodie', 'Limited Odyssey activation apparel with premium red detail.', 500, 6, '/brand/celebration-c-frame.png', 'Gear', true, 30, 1, 'Confirm size before fulfillment.', false),
   ('55555555-5555-4555-8555-555555555504', '11111111-1111-4111-8111-111111111111', 'VIP Seat Package', 'Premium seat experience for two after an exceptional run.', 750, 3, '/brand/celebration-c-frame.png', 'Experience', true, 40, 1, 'GM approval before scheduling.', false);
 
 insert into public.recognition_batches (

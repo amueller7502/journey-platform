@@ -8,7 +8,7 @@ export default function EmployeeLeaderboardPage() {
     <AppShell role="employee" title="Leaderboard" eyebrow="Recognition Standings">
       <Panel>
         <PanelHeader
-          title="Journey Leaderboard"
+          title="Experience Leaderboard"
           eyebrow="Weekly recognition"
           action={<Trophy className="h-5 w-5 text-journey-red" aria-hidden="true" />}
         />

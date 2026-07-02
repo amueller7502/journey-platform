@@ -73,11 +73,11 @@ export function PassportEntryForm({
       <div className="rounded-lg border border-journey-red bg-journey-white p-6 shadow-line">
         <CheckCircle2 className="h-10 w-10 text-journey-red" aria-hidden="true" />
         <h2 className="mt-4 text-3xl font-black text-journey-black">
-          Journey Card Batch Submitted
+          Experience Card Batch Submitted
         </h2>
         <p className="mt-3 text-lg font-bold text-journey-steel">
           {currentEmployee.name} earned {totalMiles} Miles from {selectedTypes.length} verified{" "}
-          {cardArea?.name ?? "Journey Card"} items.
+          {cardArea?.name ?? "Experience Card"} items.
         </p>
         <p className="mt-4 text-sm font-bold text-journey-steel">
           Batch: card-{currentEmployee.passportId.toLowerCase()}-today
@@ -110,7 +110,7 @@ export function PassportEntryForm({
               miles: type.milesValue,
               note:
                 note.trim() ||
-                `${currentEmployee.name} had ${type.name.toLowerCase()} verified from a Journey Card.`,
+                `${currentEmployee.name} had ${type.name.toLowerCase()} verified from a Experience Card.`,
               createdAt,
               managerName: "Jordan Ellis",
             });
@@ -122,17 +122,17 @@ export function PassportEntryForm({
       <div className="grid gap-5">
         <section className="rounded-lg border border-journey-line bg-journey-mist p-4">
           <p className="text-xs font-black uppercase text-journey-red">
-            {cardArea?.name ?? "Unassigned Journey Card"}
+            {cardArea?.name ?? "Unassigned Experience Card"}
           </p>
           <h3 className="mt-1 text-xl font-black text-journey-black">
             Enter turned-in shift checklist
           </h3>
           <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-journey-steel">
-            Choose the Journey Card type the employee worked today, then select
+            Choose the Experience Card type the employee worked today, then select
             the items that were verified from the paper card they turned in.
           </p>
           <label className="mt-4 grid max-w-xl gap-2 text-sm font-bold text-journey-black">
-            Journey Card Type Worked Today
+            Experience Card Type Worked Today
             <select
               value={cardArea?.id ?? ""}
               onChange={(event) => {
@@ -153,8 +153,8 @@ export function PassportEntryForm({
 
         {!enabledRecognitionTypes.length ? (
           <section className="rounded-lg border border-journey-line bg-journey-white p-4 text-sm font-bold text-journey-steel">
-            No enabled Journey Card tasks match this employee&apos;s card area. Add tasks
-            in Admin / Journey Cards.
+            No enabled Experience Card tasks match this employee&apos;s card area. Add tasks
+            in Admin / Experience Cards.
           </section>
         ) : null}
 
@@ -218,7 +218,7 @@ export function PassportEntryForm({
           onChange={(event) => setNote(event.target.value)}
           rows={4}
           className="focus-ring resize-none rounded-md border border-journey-line px-3 py-3"
-          placeholder="Anything to remember about this Journey Card?"
+          placeholder="Anything to remember about this Experience Card?"
         />
       </label>
 
@@ -231,7 +231,7 @@ export function PassportEntryForm({
             </p>
           </div>
           <Button type="submit" icon={Send} disabled={!selectedTypes.length}>
-            Submit Journey Card Batch
+            Submit Experience Card Batch
           </Button>
         </div>
       </div>

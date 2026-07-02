@@ -3,6 +3,10 @@ create extension if not exists pgcrypto;
 drop table if exists public.daily_spotlights cascade;
 drop table if exists public.journey_operating_state cascade;
 drop table if exists public.tv_display_settings cascade;
+drop table if exists public.coaching_insights cascade;
+drop table if exists public.leadership_rewards cascade;
+drop table if exists public.leadership_achievements cascade;
+drop table if exists public.leadership_recognitions cascade;
 drop table if exists public.reward_redemptions cascade;
 drop table if exists public.rewards cascade;
 drop table if exists public.recognition_records cascade;
@@ -242,6 +246,50 @@ create table public.reward_redemptions (
   reviewed_at timestamptz
 );
 
+create table public.leadership_recognitions (
+  id uuid primary key default gen_random_uuid(),
+  leader_id uuid not null references public.employees (id),
+  recognized_by uuid not null references public.employees (id),
+  category text not null check (category in ('Coaching', 'Coverage', 'Communication', 'Guest Recovery', 'Operational Leadership')),
+  title text not null,
+  note text not null,
+  impact text not null,
+  created_at timestamptz not null default now(),
+  check (leader_id <> recognized_by)
+);
+
+create table public.leadership_achievements (
+  id uuid primary key default gen_random_uuid(),
+  leader_id uuid not null references public.employees (id),
+  title text not null,
+  description text not null,
+  status text not null default 'in_progress' check (status in ('earned', 'in_progress', 'locked')),
+  earned_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table public.leadership_rewards (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  description text not null,
+  status text not null default 'available' check (status in ('available', 'earned', 'scheduled')),
+  fulfillment_notes text not null,
+  enabled boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table public.coaching_insights (
+  id uuid primary key default gen_random_uuid(),
+  leader_id uuid not null references public.employees (id),
+  title text not null,
+  detail text not null,
+  action text not null,
+  priority text not null default 'Medium' check (priority in ('High', 'Medium', 'Low')),
+  resolved boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 create table public.daily_spotlights (
   id uuid primary key default gen_random_uuid(),
   chapter_id uuid not null references public.chapters (id) on delete cascade,
@@ -287,6 +335,9 @@ create index recognition_records_employee_idx on public.recognition_records (emp
 create index recognition_batches_employee_idx on public.recognition_batches (employee_id);
 create index rewards_chapter_idx on public.rewards (chapter_id, enabled, sort_order);
 create index reward_redemptions_status_idx on public.reward_redemptions (status);
+create index leadership_recognitions_leader_idx on public.leadership_recognitions (leader_id, created_at desc);
+create index leadership_achievements_leader_idx on public.leadership_achievements (leader_id);
+create index coaching_insights_leader_idx on public.coaching_insights (leader_id, resolved, priority);
 create index employees_passport_idx on public.employees (passport_id);
 create index employees_access_code_idx on public.employees (access_code);
 create index menu_items_role_idx on public.menu_items (role, enabled, sort_order);
@@ -335,6 +386,10 @@ alter table public.recognition_batches enable row level security;
 alter table public.recognition_records enable row level security;
 alter table public.rewards enable row level security;
 alter table public.reward_redemptions enable row level security;
+alter table public.leadership_recognitions enable row level security;
+alter table public.leadership_achievements enable row level security;
+alter table public.leadership_rewards enable row level security;
+alter table public.coaching_insights enable row level security;
 alter table public.daily_spotlights enable row level security;
 alter table public.tv_display_settings enable row level security;
 alter table public.journey_operating_state enable row level security;
@@ -450,6 +505,50 @@ create policy "managers update redemptions"
   on public.reward_redemptions for update to authenticated
   using (public.is_manager_or_admin())
   with check (public.is_manager_or_admin());
+
+create policy "managers read leadership recognitions"
+  on public.leadership_recognitions for select to authenticated
+  using (public.is_manager_or_admin());
+
+create policy "managers create leadership recognitions"
+  on public.leadership_recognitions for insert to authenticated
+  with check (
+    public.is_manager_or_admin()
+    and recognized_by = public.current_employee_id()
+    and leader_id <> recognized_by
+  );
+
+create policy "admins manage leadership recognitions"
+  on public.leadership_recognitions for update to authenticated
+  using (public.current_journey_role() = 'admin')
+  with check (public.current_journey_role() = 'admin');
+
+create policy "managers read leadership achievements"
+  on public.leadership_achievements for select to authenticated
+  using (public.is_manager_or_admin());
+
+create policy "admins manage leadership achievements"
+  on public.leadership_achievements for all to authenticated
+  using (public.current_journey_role() = 'admin')
+  with check (public.current_journey_role() = 'admin');
+
+create policy "managers read leadership rewards"
+  on public.leadership_rewards for select to authenticated
+  using (public.is_manager_or_admin() and enabled);
+
+create policy "admins manage leadership rewards"
+  on public.leadership_rewards for all to authenticated
+  using (public.current_journey_role() = 'admin')
+  with check (public.current_journey_role() = 'admin');
+
+create policy "managers read coaching insights"
+  on public.coaching_insights for select to authenticated
+  using (public.is_manager_or_admin());
+
+create policy "admins manage coaching insights"
+  on public.coaching_insights for all to authenticated
+  using (public.current_journey_role() = 'admin')
+  with check (public.current_journey_role() = 'admin');
 
 create policy "authenticated users read daily spotlights"
   on public.daily_spotlights for select to authenticated using (true);
