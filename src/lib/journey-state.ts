@@ -23,6 +23,7 @@ import {
   seasons as defaultSeasons,
   tvPanelSettings as defaultTvPanelSettings,
 } from "@/lib/data";
+import { defaultFeatureFlags, mergeFeatureFlags } from "@/lib/features";
 import type {
   Department,
   Employee,
@@ -31,6 +32,8 @@ import type {
   ExperienceSeason,
   ExperienceEvent,
   ExcellenceLog,
+  FeatureFlag,
+  FeaturePresetId,
   JourneyCardArea,
   JourneyCardShiftAssignment,
   JourneySkin,
@@ -68,6 +71,8 @@ export type JourneyOperatingState = {
   leadershipRewards: LeadershipReward[];
   tvPanelSettings: TvPanelSetting[];
   skins: JourneySkin[];
+  featureFlags: FeatureFlag[];
+  featurePreset: FeaturePresetId;
   activeSkinId: string;
   skinEnabled: boolean;
   updatedAt: string;
@@ -97,6 +102,8 @@ const defaultState: JourneyOperatingState = {
   leadershipRewards: defaultLeadershipRewards,
   tvPanelSettings: defaultTvPanelSettings,
   skins: defaultSkins,
+  featureFlags: defaultFeatureFlags,
+  featurePreset: "experience_lite",
   activeSkinId: activeSkin.id,
   skinEnabled: activeSkin.id !== "standard",
   updatedAt: "seed",
@@ -169,6 +176,8 @@ function normalizeState(value: Partial<JourneyOperatingState> | null): JourneyOp
     leadershipRewards: mergeById(defaultState.leadershipRewards, value?.leadershipRewards),
     tvPanelSettings: mergeById(defaultState.tvPanelSettings, value?.tvPanelSettings),
     skins: mergeById(defaultState.skins, value?.skins),
+    featureFlags: mergeFeatureFlags(value?.featureFlags),
+    featurePreset: value?.featurePreset ?? defaultState.featurePreset,
   };
 
   const activeExists = next.skins.some((skin) => skin.id === next.activeSkinId);

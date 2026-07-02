@@ -1,10 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { ActiveAccountBadge } from "@/components/ActiveAccountBadge";
 import { BrandLockup } from "@/components/BrandLockup";
+import { FeatureComingSoon } from "@/components/FeatureComingSoon";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
 import { SkinRuntimeClass } from "@/components/SkinRuntimeClass";
 import { adminNav, employeeNav, managerNav, roleLabels, utilityNav } from "@/lib/data";
+import {
+  canRoleUseFeature,
+  featureForPath,
+  getFeature,
+  isFeatureEnabled,
+} from "@/lib/features";
+import { useJourneyState } from "@/lib/journey-state";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +38,36 @@ export function AppShell({
   children: ReactNode;
   actions?: ReactNode;
 }) {
-  const navItems = navByRole[role];
+  const pathname = usePathname();
+  const { state } = useJourneyState();
+  const flags = state.featureFlags;
+  const navItems = navByRole[role].filter((item) => {
+    const featureId = featureForPath(item.href);
+    if (!featureId) {
+      return true;
+    }
+
+    const feature = getFeature(flags, featureId);
+    return Boolean(
+      feature?.enabled &&
+        feature.visibleInNavigation &&
+        canRoleUseFeature(role, feature.minimumRole),
+    );
+  });
+  const visibleUtilityNav = utilityNav.filter((item) => {
+    const featureId = featureForPath(item.href);
+    if (!featureId) {
+      return true;
+    }
+
+    const feature = getFeature(flags, featureId);
+    return Boolean(feature?.enabled && feature.visibleInNavigation);
+  });
+  const disabledFeatureId = featureForPath(pathname);
+  const disabledFeature =
+    disabledFeatureId && !isFeatureEnabled(flags, disabledFeatureId)
+      ? getFeature(flags, disabledFeatureId)
+      : null;
 
   return (
     <div className="experience-shell min-h-screen bg-journey-mist">
@@ -58,7 +98,7 @@ export function AppShell({
           </nav>
           <div className="mt-6 border-t border-journey-steel pt-5">
             <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-              {utilityNav.map((item) => (
+              {visibleUtilityNav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -87,7 +127,9 @@ export function AppShell({
               <div className={cn("flex flex-wrap items-center gap-2")}>{actions}</div>
             </div>
           </header>
-          <div className="mx-auto w-full max-w-7xl px-5 py-6 sm:px-8">{children}</div>
+          <div className="mx-auto w-full max-w-7xl px-5 py-6 sm:px-8">
+            {disabledFeature ? <FeatureComingSoon feature={disabledFeature} /> : children}
+          </div>
         </main>
       </div>
     </div>

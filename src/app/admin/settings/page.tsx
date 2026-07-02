@@ -3,9 +3,11 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { FeatureVisible } from "@/components/FeatureVisible";
 import { ChapterSettingsEditor } from "@/components/admin/ChapterSettingsEditor";
 import { ExperienceStudioOverview } from "@/components/admin/ExperienceStudioOverview";
 import { FeatureBuildoutPanel } from "@/components/admin/FeatureBuildoutPanel";
+import { FeatureToggleManager } from "@/components/admin/FeatureToggleManager";
 import { MenuConfigurationPanel } from "@/components/admin/MenuConfigurationPanel";
 import { SettingsActionCards } from "@/components/admin/SettingsActionCards";
 import { SkinSettingsPanel } from "@/components/admin/SkinSettingsPanel";
@@ -21,11 +23,17 @@ import {
 export default function SettingsPage() {
   return (
     <AppShell role="admin" title="Experience Studio" eyebrow="Rules and Display">
-      <ExperienceStudioOverview />
+      <FeatureToggleManager />
 
+      <FeatureVisible featureId="experience_studio_advanced">
+      <ExperienceStudioOverview />
+      </FeatureVisible>
+
+      <FeatureVisible featureId="experience_studio_advanced">
       <div className="mt-5">
         <SettingsActionCards />
       </div>
+      </FeatureVisible>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Panel id="recognition-policy">
@@ -46,6 +54,7 @@ export default function SettingsPage() {
             ))}
           </div>
         </Panel>
+        <FeatureVisible featureId="tv_display">
         <Panel id="tv-dashboard-settings">
           <PanelHeader
             title="TV Dashboard"
@@ -54,8 +63,10 @@ export default function SettingsPage() {
           />
           <TvDisplaySettingsPanel />
         </Panel>
+        </FeatureVisible>
       </div>
 
+      <FeatureVisible featureId="experience_studio_advanced">
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
         <Panel id="skin-developer">
           <PanelHeader title="Skin Developer" eyebrow="Season visuals" />
@@ -70,16 +81,21 @@ export default function SettingsPage() {
           <MenuConfigurationPanel items={menuConfigurations} />
         </Panel>
       </div>
+      </FeatureVisible>
 
+      <FeatureVisible featureId="seasons">
       <Panel className="mt-5">
         <PanelHeader title="Season Settings" eyebrow="Editable fields" />
         <ChapterSettingsEditor settings={chapterSettings} />
       </Panel>
+      </FeatureVisible>
 
+      <FeatureVisible featureId="experience_studio_advanced">
       <Panel className="mt-5">
         <PanelHeader title="Feature Buildout" eyebrow="Launch readiness" />
         <FeatureBuildoutPanel />
       </Panel>
+      </FeatureVisible>
     </AppShell>
   );
 }

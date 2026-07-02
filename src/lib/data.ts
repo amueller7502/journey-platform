@@ -2039,7 +2039,7 @@ export const adminNav: NavItem[] = [
   { label: "Scoring", href: "/admin/scoring", icon: BarChart3 },
   { label: "Launch Readiness", href: "/admin/launch-readiness", icon: ClipboardCheck },
   { label: "Photo Approvals", href: "/admin/photo-approvals", icon: Camera },
-  { label: "Experience Studio", href: "/admin/settings", icon: Settings },
+  { label: "Basic Settings", href: "/admin/settings", icon: Settings },
   { label: "Reports", href: "/admin/analytics", icon: BarChart3 },
 ];
 

@@ -4,6 +4,62 @@ export type Role = "employee" | "manager" | "admin";
 
 export type PlatformRole = "employee" | "leader" | "experience_designer";
 
+export type FeatureFlagId =
+  | "capture_moment"
+  | "experience_cards"
+  | "card_printing_pdf"
+  | "employee_xp_totals"
+  | "rewards"
+  | "basic_settings"
+  | "community"
+  | "seasons"
+  | "season_planner"
+  | "events"
+  | "leadership"
+  | "leadership_points"
+  | "leadership_rewards"
+  | "tv_display"
+  | "experience_studio_advanced"
+  | "scoring"
+  | "achievements"
+  | "moment_history"
+  | "authentication"
+  | "supabase_persistence";
+
+export type FeatureLaunchPhase =
+  | "Launch"
+  | "Later Season One"
+  | "Season Two"
+  | "Future Platform";
+
+export type FeatureCategory =
+  | "Lite Launch"
+  | "Employee Experience"
+  | "Manager Operations"
+  | "Rewards"
+  | "Studio"
+  | "Leadership"
+  | "Displays"
+  | "Platform";
+
+export type FeaturePresetId =
+  | "experience_lite"
+  | "season_one_full"
+  | "advanced_platform"
+  | "custom";
+
+export type FeatureFlag = {
+  id: FeatureFlagId;
+  enabled: boolean;
+  label: string;
+  description: string;
+  category: FeatureCategory;
+  minimumRole: Role;
+  visibleInNavigation: boolean;
+  launchPhase: FeatureLaunchPhase;
+  sortOrder: number;
+};
+
 export type ConfigLifecycle = "draft" | "published" | "archived";
 
 export type ConfigurableMeta = {

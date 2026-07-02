@@ -1,5 +1,33 @@
 # Experience Release Notes
 
+## V1.4 Feature Toggles And Lite Launch Mode
+
+Added a feature-flag layer so Experience can launch in a simplified Lite mode while preserving advanced modules for later rollout.
+
+### Feature Flags
+
+- Added centralized feature configuration for labels, descriptions, categories, minimum roles, navigation visibility, launch phase, and sort order.
+- Added presets for Experience Lite, Season One Full, and Advanced Platform.
+- Added Feature Toggles to Basic Settings at `/admin/settings`.
+- App navigation now hides disabled features.
+- Direct links to disabled features show a friendly coming-soon message.
+
+### Experience Lite
+
+- Lite mode includes Capture Moment, Experience Card Entry, Print Experience Cards, Employee XP Totals, Rewards, and Basic Settings.
+- Moment History, Community, Seasons, Season Planner, Events, Leadership, TV Display, Advanced Experience Studio, Scoring, and Achievements are hidden in Lite mode.
+- Advanced code, routes, schema, and UI modules are preserved behind toggles.
+
+### Experience Cards
+
+- Removed visible QR code generation from printable Experience Cards.
+- Printed cards now use paper checklist flow with card ID, task checklist, XP values, and manager turn-in instructions.
+
+### Known Issues
+
+- Feature toggles control UI and route visibility; not every advanced backend mutation is feature-gated yet.
+- Supabase persistence remains available through shared state when environment variables are present.
+
 ## V1.3 Supabase Shared State Sprint
 
 Wired the highest-value operational workflows to Supabase while keeping local/demo data as a fallback.
@@ -53,7 +81,7 @@ shared-state architecture.
 
 - Replaced browser print behavior with a generated PDF print run.
 - PDF cards use consistent half-sheet sizing on standard 8.5x11 pages.
-- Cards include employee name, area, Experience Card ID, QR code, Season, today's focus area, checklist items, XP values, and cut lines.
+- Cards include employee name, area, Experience Card ID, Season, today's focus area, checklist items, XP values, manager turn-in instructions, and cut lines.
 
 ### Rewards And Visual Direction
 

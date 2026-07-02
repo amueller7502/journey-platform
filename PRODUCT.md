@@ -122,6 +122,25 @@ Experience Studio modules:
 
 Studio edits currently persist through the shared operating state and sync best-effort normalized config tables for Seasons, Recognition, Rewards, Standards, Displays, and Scoring.
 
+## Feature Flags
+
+Experience should be able to run in a focused Lite launch mode without deleting advanced platform work.
+
+Experience Lite includes:
+- Capture Moment
+- Experience Card Entry
+- Print Experience Cards
+- Employee XP Totals
+- Rewards
+- Basic Settings
+
+Experience Lite hides Moment History, Community, Seasons, Season Planner, Events, Leadership, TV Display, Advanced Experience Studio, Scoring, and Achievements until leadership chooses to enable those modules.
+
+Presets:
+- Experience Lite
+- Season One Full
+- Advanced Platform
+
 ## Season Planner
 
 A season should support:

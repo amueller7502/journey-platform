@@ -19,6 +19,14 @@
 - Added compatibility migration for stable app IDs and Experience-named tables.
 - Kept local/demo data as fallback when Supabase env vars are absent.
 
+## V1.4 Completed Lite Launch Mode
+
+- Added centralized feature flags.
+- Added Experience Lite, Season One Full, and Advanced Platform presets.
+- Hid Moment History and advanced modules in Lite mode.
+- Added disabled-route coming-soon messaging.
+- Removed QR code generation from printed Experience Cards.
+
 ## Next Operational Hardening
 
 - Create production Supabase Auth users and connect them to `profiles` and employee records.

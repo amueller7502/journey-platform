@@ -2,12 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import QRCode from "qrcode";
 import { CalendarDays, ClipboardCheck, FileDown, Trash2, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
-import { buildJourneyCardUrl, useJourneyState } from "@/lib/journey-state";
+import { useJourneyState } from "@/lib/journey-state";
 import type {
   Employee,
   ExperienceSeason,
@@ -71,7 +70,6 @@ function wrapText(text: string, maxWidth: number, font: { widthOfTextAtSize: (te
 }
 
 async function drawExperienceCard({
-  pdfDoc,
   page,
   x,
   y,
@@ -83,7 +81,6 @@ async function drawExperienceCard({
   shiftDate,
   fonts,
 }: {
-  pdfDoc: PDFDocument;
   page: ReturnType<PDFDocument["addPage"]>;
   x: number;
   y: number;
@@ -132,13 +129,6 @@ async function drawExperienceCard({
   const employeeName = employee?.name ?? "Crew Member";
   const areaName = area?.name ?? "Experience Card";
   const seasonTitle = season?.seasonTitle ?? "The Odyssey";
-  const cardUrl = `${buildJourneyCardUrl(employee?.passportId ?? assignment.employeeId)}?area=${encodeURIComponent(assignment.journeyCardAreaId)}`;
-  const qrData = await QRCode.toDataURL(cardUrl, {
-    margin: 1,
-    width: 96,
-    color: { dark: "#050505", light: "#ffffff" },
-  });
-  const qrPng = await pdfDoc.embedPng(qrData);
 
   page.drawText("EXPERIENCE CARD", {
     x: x + 18,
@@ -198,7 +188,7 @@ async function drawExperienceCard({
     font: fonts.bold,
     color: red,
   });
-  wrapText(area?.description ?? areaName, 138, fonts.regular, 8.2)
+  wrapText(area?.description ?? areaName, 96, fonts.regular, 8.2)
     .slice(0, 3)
     .forEach((line, index) => {
       page.drawText(line, {
@@ -209,11 +199,28 @@ async function drawExperienceCard({
         color: gray,
       });
     });
-  page.drawImage(qrPng, {
-    x: x + cardWidth - 58,
-    y: infoTop - 47,
-    width: 42,
+
+  page.drawRectangle({
+    x: x + cardWidth - 86,
+    y: infoTop - 52,
+    width: 70,
     height: 42,
+    borderColor: lightGray,
+    borderWidth: 0.8,
+  });
+  page.drawText("Turn in to", {
+    x: x + cardWidth - 78,
+    y: infoTop - 24,
+    size: 7.5,
+    font: fonts.bold,
+    color: red,
+  });
+  page.drawText("manager", {
+    x: x + cardWidth - 78,
+    y: infoTop - 36,
+    size: 9,
+    font: fonts.bold,
+    color: black,
   });
 
   const listTop = infoTop - 76;
@@ -406,7 +413,6 @@ export function JourneyCardPrintList() {
           : margin;
 
       await drawExperienceCard({
-        pdfDoc,
         page,
         x: margin,
         y: cardY,

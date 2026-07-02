@@ -14,6 +14,7 @@ import {
   Film,
 } from "lucide-react";
 import { BrandLockup } from "@/components/BrandLockup";
+import { FeatureComingSoon } from "@/components/FeatureComingSoon";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
 import { SkinRuntimeClass } from "@/components/SkinRuntimeClass";
 import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
@@ -28,11 +29,13 @@ import {
   chapterStats,
   recognitions,
 } from "@/lib/data";
+import { getFeature, isFeatureEnabled } from "@/lib/features";
 import { useJourneyState } from "@/lib/journey-state";
 import { daysRemaining, formatXp } from "@/lib/utils";
 
 export function TvDashboard() {
   const { state } = useJourneyState();
+  const tvFeature = getFeature(state.featureFlags, "tv_display");
   const panels = useMemo(() => {
     const configuredPanels = state.tvPanelSettings
       .filter((panel) => panel.enabled)
@@ -394,6 +397,21 @@ export function TvDashboard() {
     state.recognitionTypes,
     primaryFocus,
   ]);
+
+  if (!isFeatureEnabled(state.featureFlags, "tv_display") && tvFeature) {
+    return (
+      <div className="experience-shell min-h-screen bg-journey-mist p-6">
+        <SkinRuntimeClass />
+        <div className="relative z-10 mx-auto grid max-w-4xl gap-5">
+          <div className="flex items-center justify-between gap-3">
+            <BrandLockup size="sm" />
+            <PreviewModeBadge />
+          </div>
+          <FeatureComingSoon feature={tvFeature} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="cinema-surface film-grain relative min-h-screen overflow-y-auto text-journey-white xl:h-screen xl:overflow-hidden">

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Award, CalendarClock, Film, Gift, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { FeatureVisible } from "@/components/FeatureVisible";
 import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
 import { RecentMomentsFeed } from "@/components/dashboard/RecentMomentsFeed";
 import { LinkButton } from "@/components/ui/Button";
@@ -206,10 +207,12 @@ export default function EmployeeHomePage() {
         </Panel>
       </div>
 
-      <Panel className="mt-5">
-        <PanelHeader title="Recent Experience Moments" eyebrow="Experience Journal" />
-        <RecentMomentsFeed initialRecognitions={recognitions} />
-      </Panel>
+      <FeatureVisible featureId="moment_history">
+        <Panel className="mt-5">
+          <PanelHeader title="Recent Experience Moments" eyebrow="Experience Journal" />
+          <RecentMomentsFeed initialRecognitions={recognitions} />
+        </Panel>
+      </FeatureVisible>
     </AppShell>
   );
 }

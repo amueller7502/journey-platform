@@ -184,6 +184,39 @@ Utility:
 - `/tv` Digital signage loop
 - `/trading-post` Legacy redirect to `/rewards`
 
+## Feature Flags And Lite Mode
+
+Experience launches in **Experience Lite** by default. Lite mode keeps the app focused on the pieces managers and employees need immediately:
+
+- Capture Moment
+- Experience Card Entry
+- Print Experience Cards
+- Employee XP Totals
+- Rewards
+- Basic Settings
+
+Lite mode intentionally hides Moment History, Community, Seasons, Season Planner, Events, Leadership, TV Display, advanced Experience Studio, Scoring, and Achievements. Hidden features are not deleted; they are preserved behind feature flags and can be enabled later.
+
+Feature flags live in `src/lib/features.ts` and are editable in the app at `/admin/settings`.
+
+Each feature includes:
+
+- Enabled/disabled
+- Label and description
+- Category
+- Minimum role
+- Navigation visibility
+- Launch phase
+- Sort order
+
+Presets:
+
+- **Experience Lite**: recommended launch setting.
+- **Season One Full**: adds Community, TV Display, and Moment History when the team is ready.
+- **Advanced Platform**: enables all preserved modules.
+
+If a disabled feature is opened directly, Experience shows a friendly “coming soon” message instead of exposing an unfinished screen.
+
 ## Operational Workflows
 
 Capture Moment:
@@ -275,6 +308,7 @@ Browser preview state can also be reset by clearing localStorage for the local s
 - Experience Card PDFs are generated in the browser using preview/shared state, then downloaded locally.
 - Experience Moments for the live TV feed still use browser event storage plus the operating-state bridge.
 - Studio edits are shared through Supabase and sync best-effort normalized rows; a future hardening pass should move every Studio form to dedicated table-specific mutations.
+- Feature flags currently control UI and route visibility; advanced database objects remain installed for later rollout.
 - Uploaded reward/profile images are stored as browser data URLs in preview mode unless a storage provider is added.
 
 ## Screenshots

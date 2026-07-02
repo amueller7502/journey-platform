@@ -20,6 +20,7 @@ import {
   seasons as defaultSeasons,
   tvPanelSettings as defaultTvPanelSettings,
 } from "@/lib/data";
+import { defaultFeatureFlags, mergeFeatureFlags } from "@/lib/features";
 import { createAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 import type {
   Department,
@@ -29,6 +30,8 @@ import type {
   ExperienceEvent,
   ExperienceSeason,
   ExcellenceLog,
+  FeatureFlag,
+  FeaturePresetId,
   JourneyCardArea,
   JourneyCardShiftAssignment,
   JourneySkin,
@@ -69,6 +72,8 @@ export type ExperienceOperatingState = {
   leadershipRewards: LeadershipReward[];
   tvPanelSettings: TvPanelSetting[];
   skins: JourneySkin[];
+  featureFlags: FeatureFlag[];
+  featurePreset: FeaturePresetId;
   activeSkinId: string;
   skinEnabled: boolean;
   updatedAt: string;
@@ -107,6 +112,8 @@ const defaultState: ExperienceOperatingState = {
   leadershipRewards: defaultLeadershipRewards,
   tvPanelSettings: defaultTvPanelSettings,
   skins: defaultSkins,
+  featureFlags: defaultFeatureFlags,
+  featurePreset: "experience_lite",
   activeSkinId: activeSkin.id,
   skinEnabled: activeSkin.id !== "standard",
   updatedAt: "seed",
@@ -179,6 +186,8 @@ export function normalizeExperienceState(
     leadershipRewards: mergeById(defaultState.leadershipRewards, value?.leadershipRewards),
     tvPanelSettings: mergeById(defaultState.tvPanelSettings, value?.tvPanelSettings),
     skins: mergeById(defaultState.skins, value?.skins),
+    featureFlags: mergeFeatureFlags(value?.featureFlags),
+    featurePreset: value?.featurePreset ?? defaultState.featurePreset,
   };
 
   if (!next.skins.some((skin) => skin.id === next.activeSkinId)) {
