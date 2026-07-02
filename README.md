@@ -131,9 +131,9 @@ The app still supports the legacy `employees.role` values `employee`, `manager`,
 
 The Welcome screen includes Sign In / Create Account tabs and experience toggles:
 
-- Employee
-- Manager
-- Experience Builder
+- Sign In opens the correct tools automatically based on the account role.
+- Create Account creates a starter Employee account.
+- Experience Builder access can promote roles from Employees or be repaired at `/setup/access`.
 
 Creating an account creates:
 
@@ -142,7 +142,13 @@ Creating an account creates:
 - `user_roles` row
 - `employees` row linked by `auth_user_id`
 
-The preview access-code fallback has been removed from the Welcome screen.
+The preview access-code fallback and login role picker have been removed from the Welcome screen.
+
+Role access is hierarchical:
+
+- Employees see Employee Experience tools.
+- Managers see Manager tools and Employee Experience tools.
+- Experience Builders see Builder, Manager, and Employee Experience tools.
 
 ## Emergency Builder Access
 

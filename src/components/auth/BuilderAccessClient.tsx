@@ -68,6 +68,7 @@ export function BuilderAccessClient() {
     if (payload.employeeId) {
       window.localStorage.setItem("journey-active-account-id", payload.employeeId);
     }
+    window.localStorage.setItem("experience-active-role", "admin");
 
     const supabase = createClient();
     const authResult = await supabase.auth.signInWithPassword({

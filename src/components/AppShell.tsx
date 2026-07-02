@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ActiveAccountBadge } from "@/components/ActiveAccountBadge";
 import { BrandLockup } from "@/components/BrandLockup";
@@ -9,6 +10,7 @@ import { FeatureComingSoon } from "@/components/FeatureComingSoon";
 import { PreviewModeBadge } from "@/components/PreviewModeBadge";
 import { SkinRuntimeClass } from "@/components/SkinRuntimeClass";
 import { adminNav, employeeNav, managerNav, roleLabels, utilityNav } from "@/lib/data";
+import { roleCanAccess } from "@/lib/access-control";
 import {
   canRoleUseFeature,
   featureForPath,
@@ -24,6 +26,16 @@ const navByRole = {
   manager: managerNav,
   admin: adminNav,
 };
+
+const roleHierarchy: Role[] = ["admin", "manager", "employee"];
+
+function storedRole(value: string | null): Role | null {
+  if (value === "admin" || value === "manager" || value === "employee") {
+    return value;
+  }
+
+  return null;
+}
 
 export function AppShell({
   role,
@@ -41,7 +53,48 @@ export function AppShell({
   const pathname = usePathname();
   const { state } = useJourneyState();
   const flags = state.featureFlags;
-  const navItems = navByRole[role].filter((item) => {
+  const [activeRole, setActiveRole] = useState<Role | null>(null);
+  const effectiveRole =
+    activeRole && roleCanAccess(activeRole, role) ? activeRole : role;
+
+  useEffect(() => {
+    const load = () =>
+      setActiveRole(storedRole(window.localStorage.getItem("experience-active-role")));
+    load();
+    window.addEventListener("storage", load);
+    return () => window.removeEventListener("storage", load);
+  }, []);
+
+  const filterNavItems = (items: typeof employeeNav) =>
+    items.filter((item) => {
+      const featureId = featureForPath(item.href);
+      if (!featureId) {
+        return true;
+      }
+
+      const feature = getFeature(flags, featureId);
+      return Boolean(
+        feature?.enabled &&
+          feature.visibleInNavigation &&
+          canRoleUseFeature(effectiveRole, feature.minimumRole),
+      );
+    });
+
+  const navSections = roleHierarchy
+    .filter((sectionRole) => roleCanAccess(effectiveRole, sectionRole))
+    .map((sectionRole) => ({
+      role: sectionRole,
+      label:
+        sectionRole === "admin"
+          ? "Experience Builder"
+          : sectionRole === "manager"
+            ? "Manager Tools"
+            : "Employee Experience",
+      items: filterNavItems(navByRole[sectionRole]),
+    }))
+    .filter((section) => section.items.length);
+
+  const visibleUtilityNav = utilityNav.filter((item) => {
     const featureId = featureForPath(item.href);
     if (!featureId) {
       return true;
@@ -51,17 +104,8 @@ export function AppShell({
     return Boolean(
       feature?.enabled &&
         feature.visibleInNavigation &&
-        canRoleUseFeature(role, feature.minimumRole),
+        canRoleUseFeature(effectiveRole, feature.minimumRole),
     );
-  });
-  const visibleUtilityNav = utilityNav.filter((item) => {
-    const featureId = featureForPath(item.href);
-    if (!featureId) {
-      return true;
-    }
-
-    const feature = getFeature(flags, featureId);
-    return Boolean(feature?.enabled && feature.visibleInNavigation);
   });
   const disabledFeatureId = featureForPath(pathname);
   const disabledFeature =
@@ -78,24 +122,33 @@ export function AppShell({
             <BrandLockup size="sm" />
             <div className="flex flex-wrap items-center gap-2 lg:mt-6">
               <span className="rounded-sm bg-journey-red px-2 py-1 text-xs font-black uppercase text-journey-white">
-                {roleLabels[role]}
+                {roleLabels[effectiveRole]}
               </span>
               <PreviewModeBadge />
             </div>
           </div>
           <ActiveAccountBadge />
-          <nav className="mt-6 grid grid-cols-2 gap-2 lg:grid-cols-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="focus-ring flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
-              >
-                <item.icon className="h-4 w-4" aria-hidden="true" />
-                <span>{item.label}</span>
-              </Link>
+          <div className="mt-6 grid gap-5">
+            {navSections.map((section) => (
+              <div key={section.role}>
+                <p className="mb-2 text-[10px] font-black uppercase tracking-normal text-journey-red">
+                  {section.label}
+                </p>
+                <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+                  {section.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="focus-ring flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
+                    >
+                      <item.icon className="h-4 w-4" aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </div>
             ))}
-          </nav>
+          </div>
           {visibleUtilityNav.length ? (
             <div className="mt-6 border-t border-journey-steel pt-5">
               <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">

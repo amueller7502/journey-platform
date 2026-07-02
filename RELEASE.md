@@ -1,5 +1,13 @@
 # Experience Release Notes
 
+## V1.11 Role-Aware Login
+
+- Removed the front-door access-level picker from sign-in.
+- Sign-in now resolves the account role and opens the correct experience automatically.
+- Public account creation now creates a starter Employee account.
+- App navigation now follows the role hierarchy: Builder includes Manager and Employee tools; Manager includes Employee tools.
+- Builder/manager inherited navigation remains visible when moving across lower-role pages.
+
 ## V1.10 Builder Access Recovery
 
 - Added `/setup/access` so an owner can create or repair the first Experience Builder login.
