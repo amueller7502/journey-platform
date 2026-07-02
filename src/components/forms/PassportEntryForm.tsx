@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Send } from "lucide-react";
+import { CheckCircle2, ListChecks, RotateCcw, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { saveJourneyMoment, type JourneyMoment } from "@/lib/demo-moments";
 import { recognitionStandards } from "@/lib/data";
@@ -212,11 +212,39 @@ export function PassportEntryForm({
         {grouped.map(({ standard, items }) => (
           items.length ? (
           <section key={standard.id} className="rounded-lg border border-journey-line bg-journey-white p-4 shadow-line">
-            <div className="mb-4">
-              <p className="text-xs font-black uppercase text-journey-red">
-                {standard.shortLabel}
-              </p>
-              <h3 className="text-xl font-black text-journey-black">{standard.label}</h3>
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase text-journey-red">
+                  {standard.shortLabel}
+                </p>
+                <h3 className="text-xl font-black text-journey-black">{standard.label}</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  icon={ListChecks}
+                  onClick={() =>
+                    setSelected((current) =>
+                      Array.from(new Set([...current, ...items.map((item) => item.id)])),
+                    )
+                  }
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  icon={RotateCcw}
+                  onClick={() =>
+                    setSelected((current) =>
+                      current.filter((id) => !items.some((item) => item.id === id)),
+                    )
+                  }
+                >
+                  Clear
+                </Button>
+              </div>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {items.map((item) => {

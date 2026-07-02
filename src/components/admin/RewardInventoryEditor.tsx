@@ -1,6 +1,7 @@
 "use client";
 
-import { ImagePlus, Plus, Save, Trash2 } from "lucide-react";
+import { ImagePlus, Plus, Save, SlidersHorizontal, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { RewardCard } from "@/components/dashboard/RewardCard";
 import { Button } from "@/components/ui/Button";
@@ -17,6 +18,7 @@ const rewardCollections: NonNullable<Reward["collection"]>[] = [
   "Coming Soon",
 ];
 const rewardTiers: NonNullable<Reward["tier"]>[] = ["Tier 1", "Tier 2", "Tier 3"];
+const liteRewardCollections = new Set(["Everyday Rewards", "Featured Rewards"]);
 
 function readImageAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -30,11 +32,24 @@ function readImageAsDataUrl(file: File) {
 export function RewardInventoryEditor({ initialRewards }: { initialRewards: Reward[] }) {
   const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const catalog = state.rewards.length ? state.rewards : initialRewards;
+  const visibleCatalog = useMemo(
+    () =>
+      showAdvanced
+        ? catalog
+        : catalog.filter((reward) =>
+            liteRewardCollections.has(reward.collection ?? "Everyday Rewards"),
+          ),
+    [catalog, showAdvanced],
+  );
 
   const activeRewards = useMemo(
-    () => catalog.filter((reward) => reward.enabled).sort((a, b) => a.sortOrder - b.sortOrder),
-    [catalog],
+    () =>
+      visibleCatalog
+        .filter((reward) => reward.enabled)
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    [visibleCatalog],
   );
 
   function updateReward(id: string, patch: Partial<Reward>) {
@@ -86,8 +101,8 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-journey-steel">
-            Reward changes are saved to this configurable build and reflected in the
-            employee Rewards page in this workspace.
+            Keep Lite rewards simple and useful. Employees currently see Everyday
+            Rewards and Featured Rewards.
           </p>
           {saved ? (
             <p className="mt-2 text-sm font-black text-journey-red">
@@ -102,9 +117,159 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
           <Button type="button" icon={Save} onClick={() => setSaved(true)}>
             Save Catalog
           </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            icon={SlidersHorizontal}
+            onClick={() => setShowAdvanced((current) => !current)}
+          >
+            {showAdvanced ? "Hide Advanced" : "Advanced Inventory"}
+          </Button>
         </div>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-2">
+        {visibleCatalog.map((reward) => (
+          <article
+            key={reward.id}
+            className="cinema-doodle-card rounded-lg border border-journey-line bg-journey-white p-4 shadow-line"
+          >
+            <div className="grid gap-4 sm:grid-cols-[150px_1fr]">
+              <div className="relative aspect-square overflow-hidden rounded-lg border border-journey-line bg-journey-black">
+                <div className="cinema-doodle-overlay absolute inset-0 opacity-20" />
+                <Image
+                  src={reward.imageUrl}
+                  alt=""
+                  fill
+                  sizes="150px"
+                  className="object-cover opacity-90"
+                  unoptimized
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-journey-black to-transparent p-3">
+                  <p className="text-xs font-black uppercase text-journey-white">
+                    {reward.collection ?? reward.category}
+                  </p>
+                </div>
+              </div>
+              <div className="grid gap-3">
+                <label className="grid gap-2 text-sm font-bold text-journey-black">
+                  Reward Name
+                  <input
+                    value={reward.name}
+                    onChange={(event) => updateReward(reward.id, { name: event.target.value })}
+                    className="focus-ring min-h-11 rounded-md border border-journey-line px-3 text-lg font-black"
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-bold text-journey-black">
+                  Description
+                  <textarea
+                    value={reward.description}
+                    onChange={(event) =>
+                      updateReward(reward.id, { description: event.target.value })
+                    }
+                    className="focus-ring min-h-24 resize-none rounded-md border border-journey-line px-3 py-2 text-sm"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-4">
+              <label className="grid gap-2 text-sm font-bold text-journey-black">
+                XP
+                <input
+                  type="number"
+                  min="1"
+                  value={reward.milesCost}
+                  onChange={(event) =>
+                    updateReward(reward.id, {
+                      milesCost: Math.max(1, Number(event.target.value)),
+                    })
+                  }
+                  className="focus-ring min-h-11 rounded-md border border-journey-line px-3 font-black"
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold text-journey-black">
+                Stock
+                <input
+                  type="number"
+                  min="0"
+                  value={reward.inventoryCount}
+                  onChange={(event) =>
+                    updateReward(reward.id, {
+                      inventoryCount: Math.max(0, Number(event.target.value)),
+                    })
+                  }
+                  className="focus-ring min-h-11 rounded-md border border-journey-line px-3 font-black"
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold text-journey-black sm:col-span-2">
+                Collection
+                <select
+                  value={reward.collection ?? "Everyday Rewards"}
+                  onChange={(event) =>
+                    updateReward(reward.id, {
+                      collection: event.target.value as Reward["collection"],
+                    })
+                  }
+                  className="focus-ring min-h-11 rounded-md border border-journey-line px-3 font-bold"
+                >
+                  {(showAdvanced ? rewardCollections : ["Everyday Rewards", "Featured Rewards"]).map(
+                    (collection) => (
+                      <option key={collection}>{collection}</option>
+                    ),
+                  )}
+                </select>
+              </label>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md bg-journey-mist p-3">
+              <label className="flex items-center gap-2 text-sm font-black text-journey-black">
+                <input
+                  aria-label={`Enable ${reward.name}`}
+                  type="checkbox"
+                  checked={reward.enabled}
+                  onChange={(event) =>
+                    updateReward(reward.id, { enabled: event.currentTarget.checked })
+                  }
+                  className="h-5 w-5 accent-journey-red"
+                />
+                Available
+              </label>
+              <label className="focus-ring inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-journey-line bg-journey-white px-4 py-2 text-sm font-bold text-journey-black hover:bg-journey-mist">
+                <ImagePlus className="h-4 w-4 text-journey-red" aria-hidden="true" />
+                Upload Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) {
+                      return;
+                    }
+
+                    void readImageAsDataUrl(file).then((imageUrl) =>
+                      updateReward(reward.id, { imageUrl }),
+                    );
+                    event.currentTarget.value = "";
+                  }}
+                />
+              </label>
+              <Button
+                type="button"
+                variant="ghost"
+                icon={Trash2}
+                onClick={() => removeReward(reward.id)}
+                aria-label={`Remove ${reward.name}`}
+              >
+                Delete
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {showAdvanced ? (
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1500px] border-collapse text-left">
           <thead>
@@ -291,6 +456,7 @@ export function RewardInventoryEditor({ initialRewards }: { initialRewards: Rewa
           </tbody>
         </table>
       </div>
+      ) : null}
 
       <div>
         <p className="mb-3 text-xs font-black uppercase text-journey-red">

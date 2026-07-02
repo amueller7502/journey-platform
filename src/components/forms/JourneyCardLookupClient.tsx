@@ -11,6 +11,7 @@ export function JourneyCardLookupClient() {
   const router = useRouter();
   const { state } = useJourneyState();
   const [passportId, setPassportId] = useState("ODY-1570-001");
+  const [search, setSearch] = useState("");
   const areas = state.journeyCardAreas
     .filter((area) => area.enabled)
     .slice()
@@ -18,6 +19,11 @@ export function JourneyCardLookupClient() {
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
   const crew = state.employees.filter(
     (employee) => employee.role === "employee" && employee.active !== false,
+  );
+  const filteredCrew = crew.filter((employee) =>
+    `${employee.name} ${employee.title} ${employee.passportId}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
   );
 
   return (
@@ -80,8 +86,20 @@ export function JourneyCardLookupClient() {
 
       <Panel>
         <PanelHeader title="Crew Lookup" eyebrow="Current roster" />
+        <label className="relative mb-4 block">
+          <Search
+            className="pointer-events-none absolute left-3 top-3.5 h-5 w-5 text-journey-steel"
+            aria-hidden="true"
+          />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="focus-ring min-h-12 w-full rounded-md border border-journey-line bg-journey-white pl-11 pr-3 text-base font-bold"
+            placeholder="Search name, role, or card ID"
+          />
+        </label>
         <div className="grid gap-3">
-          {crew.map((employee) => (
+          {filteredCrew.map((employee) => (
             <div
               key={employee.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-journey-line p-4"

@@ -4,13 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Award, CalendarClock, Film, Gift, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { FeatureVisible } from "@/components/FeatureVisible";
-import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
 import { RecentMomentsFeed } from "@/components/dashboard/RecentMomentsFeed";
 import { LinkButton } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { chapter, recognitionOfTheDay, recognitions } from "@/lib/data";
+import { recognitionOfTheDay, recognitions } from "@/lib/data";
 import { useJourneyState } from "@/lib/journey-state";
 import { productLanguage } from "@/lib/product-language";
 import { daysRemaining, formatXp } from "@/lib/utils";
@@ -100,13 +99,13 @@ export default function EmployeeHomePage() {
           </div>
           <div className="rounded-lg border border-journey-steel bg-journey-coal p-5">
             <p className="text-xs font-black uppercase text-journey-red">
-              {productLanguage.communityGoal}
+              Your XP
             </p>
             <p className="mt-2 text-4xl font-black text-journey-white">
-              {formatXp(state.chapter.communityGoalMiles)} XP
+              {formatXp(currentEmployee?.miles ?? 0)} XP
             </p>
             <p className="mt-2 text-sm font-bold text-journey-line">
-              {daysRemaining(state.chapter.endDate)} days remaining
+              Manager-captured Moments unlock Rewards.
             </p>
           </div>
         </div>
@@ -177,7 +176,22 @@ export default function EmployeeHomePage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_0.85fr]">
         <Panel className="odyssey-frame bg-journey-black text-journey-white">
-          <ChapterProgress inverse />
+          <p className="text-xs font-black uppercase text-journey-red">
+            How Experience Lite works
+          </p>
+          <h2 className="mt-2 text-3xl font-black">Great shift moments become XP.</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {[
+              ["1", "A manager notices a Moment."],
+              ["2", "XP lands in your Experience."],
+              ["3", "Rewards become easier to claim."],
+            ].map(([step, copy]) => (
+              <div key={step} className="rounded-lg border border-journey-steel p-4">
+                <p className="text-2xl font-black text-journey-red">{step}</p>
+                <p className="mt-2 text-sm font-bold leading-6 text-journey-line">{copy}</p>
+              </div>
+            ))}
+          </div>
         </Panel>
         <Panel>
           <PanelHeader title="Upcoming Rewards" eyebrow="What your XP can unlock" />

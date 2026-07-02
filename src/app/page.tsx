@@ -43,7 +43,7 @@ export default function WelcomePage() {
             </p>
             <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
               <div className="projection-sweep rounded-lg border border-journey-steel bg-journey-coal p-5">
-                <p className="text-xs font-black uppercase text-journey-red">Community XP</p>
+                <p className="text-xs font-black uppercase text-journey-red">Season XP Goal</p>
                 <p className="mt-2 text-4xl font-black text-journey-white">15,700 XP</p>
               </div>
               <div className="rounded-lg border border-journey-steel bg-journey-coal p-5">

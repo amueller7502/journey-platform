@@ -3,16 +3,14 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  HandHeart,
   LayoutDashboard,
-  MonitorPlay,
-  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import { SupabaseAuthPanel } from "@/components/SupabaseAuthPanel";
 import { LinkButton, Button } from "@/components/ui/Button";
 import { routeForRole } from "@/lib/access-control";
 import { useJourneyState } from "@/lib/journey-state";
-import { productLanguage } from "@/lib/product-language";
 import type { Role } from "@/lib/types";
 
 export function WorkspaceLoginPanel() {
@@ -92,12 +90,12 @@ export function WorkspaceLoginPanel() {
           Employee Experience
         </LinkButton>
         <LinkButton
-          href="/leadership/dashboard"
-          icon={ShieldCheck}
+          href="/manager/recognize"
+          icon={HandHeart}
           variant="dark"
           className="justify-start"
         >
-          {productLanguage.leadershipExperience}
+          Manager Lite
         </LinkButton>
         <LinkButton
           href="/admin/dashboard"
@@ -105,15 +103,7 @@ export function WorkspaceLoginPanel() {
           variant="secondary"
           className="justify-start"
         >
-          Admin/GM Demo
-        </LinkButton>
-        <LinkButton
-          href="/tv"
-          icon={MonitorPlay}
-          variant="secondary"
-          className="justify-start"
-        >
-          TV Display
+          Experience Builder
         </LinkButton>
       </div>
     </div>

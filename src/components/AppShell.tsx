@@ -96,20 +96,22 @@ export function AppShell({
               </Link>
             ))}
           </nav>
-          <div className="mt-6 border-t border-journey-steel pt-5">
-            <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-              {visibleUtilityNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="focus-ring flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
-                >
-                  <item.icon className="h-4 w-4" aria-hidden="true" />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
+          {visibleUtilityNav.length ? (
+            <div className="mt-6 border-t border-journey-steel pt-5">
+              <nav className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+                {visibleUtilityNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="focus-ring flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-xs font-bold text-journey-line transition hover:bg-journey-white hover:text-journey-black sm:text-sm lg:gap-3"
+                  >
+                    <item.icon className="h-4 w-4" aria-hidden="true" />
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          ) : null}
         </aside>
         <main className="min-w-0">
           <header className="border-b border-journey-line bg-journey-white px-5 py-6 shadow-line sm:px-8">

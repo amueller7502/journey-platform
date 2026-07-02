@@ -7,18 +7,18 @@ import { excellenceCheckTypes, recognitionTypes } from "@/lib/data";
 
 export default function RecognitionLibraryPage() {
   return (
-    <AppShell role="admin" title="Recognition Studio" eyebrow="Admin configurable">
+    <AppShell role="admin" title="Recognition Builder" eyebrow="Experience Builder">
       <div className="grid gap-5 lg:grid-cols-3">
         <MetricCard
           label="Recognition Types"
           value={`${recognitionTypes.length}`}
-          detail="Season-scoped rules"
+          detail="Manager Moment rules"
           icon={Library}
         />
         <MetricCard
           label="Enabled"
           value={`${recognitionTypes.filter((type) => type.enabled).length}`}
-          detail="Available to managers"
+          detail="Ready for Lite"
           icon={Library}
         />
         <MetricCard
@@ -30,7 +30,7 @@ export default function RecognitionLibraryPage() {
       </div>
 
       <Panel className="mt-5">
-        <PanelHeader title="Experience Moment Types" eyebrow="Create, edit, enable, disable" />
+        <PanelHeader title="Experience Moment Types" eyebrow="Visual builder" />
         <RecognitionLibraryManager />
       </Panel>
     </AppShell>

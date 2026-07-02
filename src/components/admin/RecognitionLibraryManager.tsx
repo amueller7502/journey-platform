@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Pencil, Plus, Save, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
+import {
+  Pencil,
+  Plus,
+  Save,
+  SlidersHorizontal,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+} from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { chapter, iconNames, recognitionStandards } from "@/lib/data";
 import { makeSlugId, useJourneyState } from "@/lib/journey-state";
@@ -31,6 +39,7 @@ export function RecognitionLibraryManager() {
   const { state, updateState } = useJourneyState();
   const [saved, setSaved] = useState(false);
   const [filter, setFilter] = useState<"all" | "excellence" | "recognition" | "card">("all");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const types = state.recognitionTypes;
   const visibleTypes = types.filter((type) => {
     if (filter === "excellence") {
@@ -111,12 +120,12 @@ export function RecognitionLibraryManager() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-journey-steel">
-            Admin-managed rules. Changes update manager recognition, Experience Card
-            batch entry, and excellence checks in this browser.
+            Builder-managed rules. Changes update Capture Moment and Experience
+            Card entry in this workspace.
           </p>
           {saved ? (
             <p className="mt-2 text-sm font-black text-journey-red">
-              Recognition Studio saved.
+              Recognition Builder saved.
             </p>
           ) : null}
         </div>
@@ -174,13 +183,153 @@ export function RecognitionLibraryManager() {
             Add Moment
           </Button>
           <Button type="button" icon={Save} onClick={() => setSaved(true)}>
-            Save Studio
+            Save Builder
           </Button>
-          <LinkButton href="/admin/recognition-library/new" icon={Plus}>
-            Full Form
-          </LinkButton>
+          <Button
+            type="button"
+            variant="secondary"
+            icon={SlidersHorizontal}
+            onClick={() => setShowAdvanced((current) => !current)}
+          >
+            {showAdvanced ? "Hide Advanced" : "Advanced Fields"}
+          </Button>
+          {showAdvanced ? (
+            <LinkButton href="/admin/recognition-library/new" icon={Plus} variant="secondary">
+              Full Form
+            </LinkButton>
+          ) : null}
         </div>
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {visibleTypes
+          .slice()
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((type) => (
+            <article
+              key={type.id}
+              className="cinema-doodle-card rounded-lg border border-journey-line bg-journey-white p-4 shadow-line"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase text-journey-red">
+                    {type.category}
+                  </p>
+                  <input
+                    value={type.name}
+                    onChange={(event) =>
+                      updateRecognitionType(type.id, { name: event.target.value })
+                    }
+                    className="focus-ring mt-1 min-h-11 w-full rounded-md border border-journey-line px-3 text-xl font-black text-journey-black"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  icon={type.enabled ? ToggleRight : ToggleLeft}
+                  variant={type.enabled ? "dark" : "secondary"}
+                  onClick={() => updateRecognitionType(type.id, { enabled: !type.enabled })}
+                >
+                  {type.enabled ? "On" : "Off"}
+                </Button>
+              </div>
+
+              <label className="mt-4 grid gap-2 text-sm font-bold text-journey-black">
+                What managers should notice
+                <textarea
+                  value={type.description}
+                  onChange={(event) =>
+                    updateRecognitionType(type.id, { description: event.target.value })
+                  }
+                  className="focus-ring min-h-24 resize-none rounded-md border border-journey-line px-3 py-2 text-sm font-medium"
+                />
+              </label>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <label className="grid gap-2 text-sm font-bold text-journey-black">
+                  XP
+                  <input
+                    type="number"
+                    min="1"
+                    value={type.milesValue}
+                    onChange={(event) =>
+                      updateRecognitionType(type.id, {
+                        milesValue: Math.max(1, Number(event.target.value)),
+                      })
+                    }
+                    className="focus-ring min-h-11 rounded-md border border-journey-line px-3 text-lg font-black"
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-bold text-journey-black">
+                  Standard
+                  <select
+                    value={type.standardId}
+                    onChange={(event) =>
+                      updateRecognitionType(type.id, {
+                        standardId: event.target.value as RecognitionType["standardId"],
+                      })
+                    }
+                    className="focus-ring min-h-11 rounded-md border border-journey-line px-3 text-sm font-bold"
+                  >
+                    {recognitionStandards.map((standard) => (
+                      <option key={standard.id} value={standard.id}>
+                        {standard.shortLabel}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="grid gap-2 text-sm font-bold text-journey-black">
+                  Use
+                  <select
+                    value={type.type}
+                    onChange={(event) =>
+                      updateRecognitionType(type.id, {
+                        type: event.target.value as RecognitionTypeKind,
+                      })
+                    }
+                    className="focus-ring min-h-11 rounded-md border border-journey-line px-3 text-sm font-bold"
+                  >
+                    {typeOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option === "journey_card_task"
+                          ? "Card Task"
+                          : option === "excellence_check"
+                            ? "Check"
+                            : "Moment"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md bg-journey-mist p-3">
+                <label className="flex items-center gap-2 text-sm font-black text-journey-black">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(type.journeyCardEligible)}
+                    onChange={(event) =>
+                      updateRecognitionType(type.id, {
+                        journeyCardEligible: event.target.checked,
+                        type: event.target.checked ? "journey_card_task" : type.type,
+                      })
+                    }
+                    className="h-5 w-5 accent-journey-red"
+                  />
+                  Available on Experience Cards
+                </label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  icon={Trash2}
+                  onClick={() => removeRecognitionType(type.id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </article>
+          ))}
+      </div>
+
+      {showAdvanced ? (
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1600px] border-collapse text-left">
           <thead>
@@ -401,6 +550,7 @@ export function RecognitionLibraryManager() {
           </tbody>
         </table>
       </div>
+      ) : null}
     </div>
   );
 }

@@ -1,5 +1,46 @@
 # Experience Release Notes
 
+## V1.5 Experience Lite First
+
+Experience is now focused on the Lite launch: help managers consistently capture Experience Moments during real shifts.
+
+### Lite Navigation
+
+- Employee navigation is reduced to Today, My Experience, Rewards, and Profile.
+- Manager navigation is reduced to Capture Moment, Experience Card Entry, Print Daily Experience Cards, Employee Lookup, and Reward Approvals.
+- Experience Builder navigation is reduced to Recognition Builder, Rewards Builder, Employees, and Settings.
+- Community, Leadership, Events, Season Planner, Displays, Analytics, Experience Stories, Achievements, Scoring, and other future modules remain preserved behind feature toggles.
+
+### Manager Workflows
+
+- Added a fast Employee Lookup page with search, current XP, weekly XP, recent moments, and quick links back to Capture Moment and Experience Card Entry.
+- Improved Experience Card batch entry with crew search plus select-all and clear controls by standard.
+- Kept printed Experience Cards as the paper-to-digital shift workflow with no visible QR code requirement.
+
+### Employee Experience
+
+- Reworked My Experience so employees can quickly see current XP, this week, level, Experience Card ID, reward requests, and next reward progress.
+- Hid deeper Moment History / Experience Journal details in Lite mode.
+- Simplified Rewards to Everyday Rewards and Featured Rewards, with C Cash replacing low-value snack prizes.
+
+### Experience Builder
+
+- Reframed the builder home around the four Lite controls: Recognition, Rewards, Employees, and Settings.
+- Made Recognition Builder visual by default while preserving the advanced table.
+- Made Rewards Builder visual by default with square reward images and Lite catalog focus.
+
+### Build Verification
+
+- `npm run typecheck` passed.
+- `npm run lint` passed.
+- `npm run build` passed.
+
+### Known Issues
+
+- Lite feature flags control navigation and direct-route access; some future backend tables and routes remain installed for later rollout.
+- Supabase writes are available through the shared-state layer when environment variables are present, but live production account setup still needs a final smoke test.
+- Reward and profile photo uploads still use preview/browser image data unless Supabase Storage is added.
+
 ## V1.4 Feature Toggles And Lite Launch Mode
 
 Added a feature-flag layer so Experience can launch in a simplified Lite mode while preserving advanced modules for later rollout.

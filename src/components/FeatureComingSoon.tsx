@@ -17,7 +17,8 @@ export function FeatureComingSoon({ feature }: { feature: FeatureFlag }) {
       </h2>
       <p className="mt-3 max-w-2xl text-sm font-bold leading-6 text-journey-steel">
         Experience is currently running in a simplified launch mode. This feature is
-        preserved for a later rollout and can be turned on by an Admin/GM in Feature Toggles.
+        preserved for a later rollout and can be turned on by an Experience Builder
+        in Feature Toggles.
       </p>
       <p className="mt-4 inline-flex rounded-sm bg-journey-mist px-2 py-1 text-xs font-black uppercase text-journey-black">
         Launch phase: {feature.launchPhase}

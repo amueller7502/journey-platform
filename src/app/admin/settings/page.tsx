@@ -22,7 +22,7 @@ import {
 
 export default function SettingsPage() {
   return (
-    <AppShell role="admin" title="Experience Studio" eyebrow="Rules and Display">
+    <AppShell role="admin" title="Settings" eyebrow="Experience Builder">
       <FeatureToggleManager />
 
       <FeatureVisible featureId="experience_studio_advanced">
@@ -37,12 +37,12 @@ export default function SettingsPage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Panel id="recognition-policy">
-          <PanelHeader title="Recognition Policy" eyebrow="Access" />
+          <PanelHeader title="Lite Rules" eyebrow="Launch guardrails" />
           <div className="grid gap-3">
             {[
-              ["Employee", "View XP, community progress, rewards, profile"],
-              ["Manager", "Capture moments, log checks, review rewards"],
-              ["Admin/GM", "Manage seasons, inventory, analytics, settings"],
+              ["Employee", "View XP, Rewards, My Experience, and Profile"],
+              ["Manager", "Capture Moments, enter cards, print cards, approve rewards"],
+              ["Experience Builder", "Configure recognitions, rewards, employees, and settings"],
             ].map(([label, value]) => (
               <div
                 key={label}

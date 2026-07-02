@@ -13,6 +13,14 @@ import {
 } from "@/lib/journey-state";
 import { formatShortDateTime, formatXp } from "@/lib/utils";
 
+const liteRewardIds = new Set([
+  "reward-c-cash-5",
+  "reward-c-cash-10",
+  "reward-c-cash-20",
+  "reward-movie-ticket",
+  "reward-imax-upgrade",
+]);
+
 export function TradingPostClient() {
   const { state, updateState } = useJourneyState();
   const [accountId, setAccountId] = useState("");
@@ -119,23 +127,15 @@ export function TradingPostClient() {
   }
 
   const enabledRewards = state.rewards
-    .filter((reward) => reward.enabled)
+    .filter((reward) => reward.enabled && liteRewardIds.has(reward.id))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const collections = [
     "Featured Rewards",
     "Everyday Rewards",
-    "Season Exclusives",
-    "Experience Rewards",
-    "Collector's Vault",
-    "Coming Soon",
   ];
   const collectionCopy: Record<string, string> = {
-    "Featured Rewards": "The prizes leaders want the team to notice first.",
-    "Everyday Rewards": "C Cash and steady wins for great shifts.",
-    "Season Exclusives": "Limited rewards connected to the current season.",
-    "Experience Rewards": "Bigger moments worth saving XP for.",
-    "Collector's Vault": "Special items for employees who like the rare stuff.",
-    "Coming Soon": "A preview of what is headed to Rewards next.",
+    "Featured Rewards": "A few rewards worth noticing first.",
+    "Everyday Rewards": "C Cash and simple wins for great shifts.",
   };
 
   return (
@@ -197,11 +197,11 @@ export function TradingPostClient() {
             More Than A Movie energy
           </p>
           <h3 className="mt-1 text-xl font-black text-journey-black">
-            Pick the reward worth your next great shift.
+            Pick a reward you actually want.
           </h3>
           <p className="mt-2 text-sm font-bold leading-6 text-journey-steel">
-            C Cash handles the quick wins. Collector, season, and Experience rewards
-            give employees something bigger to chase.
+            C Cash handles quick wins. Tickets and IMAX upgrades make the next
+            movie night feel a little more special.
           </p>
         </div>
         <div className="grid gap-6">

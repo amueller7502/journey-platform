@@ -46,6 +46,7 @@ export function BrandLockup({
         alt="Celebration Cinema C frame"
         width={markDimensions.width}
         height={markDimensions.height}
+        priority
         unoptimized
         className={cn("shrink-0 object-contain", markClass)}
         onError={() => setAssetMissing(true)}

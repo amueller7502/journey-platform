@@ -19,7 +19,7 @@ The community goal is **15,700 XP**.
 - Employees do not self-submit XP.
 - Leaders capture and verify Experience Moments.
 - Leaders do not earn employee XP.
-- Leaders earn LP and receive Leadership Recognition for coaching, communication, coverage, and operational impact.
+- Leadership recognition is separate from employee XP and can roll out later when the core manager habit is working.
 - Recognition matters more than competition.
 - Every XP entry represents a Moment That Mattered.
 
@@ -29,6 +29,8 @@ Employees feel seen.
 
 Leaders notice great work while it is happening.
 
-Admin/GM leaders can configure seasons, rewards, recognition types, Experience Cards, displays, scoring, launch readiness, and TV signage without code.
+Experience Builder leaders can configure rewards, recognition types, employees, settings, and later season tools without code.
 
 The building becomes more intentional about guest experience, presentation, teamwork, reliability, and attention to detail.
+
+During Experience Lite, success is intentionally smaller and sharper: managers capture moments every shift, employees see their XP grow, and rewards feel worth checking on break.

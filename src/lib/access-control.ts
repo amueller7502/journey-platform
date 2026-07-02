@@ -39,7 +39,7 @@ export function routeForRole(role: Role) {
   }
 
   if (role === "manager") {
-    return "/leadership/dashboard";
+    return "/manager/recognize";
   }
 
   return "/home";

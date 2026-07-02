@@ -6,7 +6,6 @@ import {
   Camera,
   CalendarDays,
   ClipboardCheck,
-  Clapperboard,
   Coins,
   Film,
   Gauge,
@@ -19,6 +18,7 @@ import {
   MonitorPlay,
   Package,
   Route,
+  Search,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -1272,6 +1272,24 @@ export const rewards: Reward[] = [
     almostGoneThreshold: 4,
   },
   {
+    id: "reward-c-cash-20",
+    chapterId: chapter.id,
+    name: "$20 C Cash",
+    description: "A bigger C Cash win for employees stacking great shifts.",
+    milesCost: 425,
+    inventoryCount: 10,
+    imageUrl: "/brand/celebration-c-frame.png",
+    category: "Cinema",
+    collection: "Everyday Rewards",
+    tier: "Tier 2",
+    enabled: true,
+    sortOrder: 35,
+    redemptionLimitPerEmployee: 1,
+    fulfillmentNotes: "Manager confirms employee and issues C Cash voucher.",
+    featured: true,
+    almostGoneThreshold: 3,
+  },
+  {
     id: "reward-imax-upgrade",
     chapterId: chapter.id,
     name: "IMAX Upgrade",
@@ -1280,7 +1298,7 @@ export const rewards: Reward[] = [
     inventoryCount: 12,
     imageUrl: "/brand/celebration-c-frame.png",
     category: "Cinema",
-    collection: "Season Exclusives",
+    collection: "Featured Rewards",
     tier: "Tier 1",
     enabled: true,
     sortOrder: 40,
@@ -1299,7 +1317,7 @@ export const rewards: Reward[] = [
     inventoryCount: 15,
     imageUrl: "/brand/celebration-c-frame.png",
     category: "Food",
-    collection: "Everyday Rewards",
+    collection: "Experience Rewards",
     tier: "Tier 1",
     enabled: true,
     sortOrder: 50,
@@ -2008,44 +2026,27 @@ export const studioModules: StudioModule[] = [
 export const employeeNav: NavItem[] = [
   { label: "Today", href: "/home", icon: Home },
   { label: "My Experience", href: "/my-journey", icon: Route },
-  { label: "Community", href: "/community", icon: Users },
   { label: "Rewards", href: "/rewards", icon: Gift },
   { label: "Profile", href: "/profile", icon: User },
 ];
 
 export const managerNav: NavItem[] = [
-  { label: "Leadership", href: "/leadership/dashboard", icon: LayoutDashboard },
   { label: "Capture Moment", href: "/manager/recognize", icon: HandHeart },
   { label: "Experience Card Entry", href: "/manager/passport", icon: ClipboardCheck },
-  { label: "Experience Cards", href: "/manager/cards", icon: BookOpen },
-  { label: "Excellence Checks", href: "/manager/excellence-checks", icon: BadgeCheck },
-  { label: "Rewards Approvals", href: "/manager/pending-rewards", icon: Gift },
-  { label: "Today's Focus", href: "/manager/todays-focus", icon: Sparkles },
-  { label: "Recent Moments", href: "/manager/recognition-feed", icon: Megaphone },
+  { label: "Print Daily Experience Cards", href: "/manager/cards", icon: BookOpen },
+  { label: "Employee Lookup", href: "/manager/employees", icon: Search },
+  { label: "Reward Approvals", href: "/manager/pending-rewards", icon: Gift },
 ];
 
 export const adminNav: NavItem[] = [
-  { label: "Command Center", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Recognition Builder", href: "/admin/recognition-library", icon: Library },
+  { label: "Rewards Builder", href: "/admin/rewards", icon: Package },
   { label: "Employees", href: "/admin/employees", icon: Users },
-  { label: "Seasons", href: "/admin/seasons", icon: CalendarDays },
-  { label: "Season Planner", href: "/admin/season-planner", icon: Clapperboard },
-  { label: "Recognition", href: "/admin/recognition-library", icon: Library },
-  { label: "Rewards", href: "/admin/rewards", icon: Package },
-  { label: "Events", href: "/admin/events", icon: Megaphone },
-  { label: "Standards", href: "/admin/standards", icon: BadgeCheck },
-  { label: "Leadership", href: "/admin/leadership", icon: ShieldCheck },
-  { label: "Achievements", href: "/admin/achievements", icon: Trophy },
-  { label: "Displays", href: "/admin/displays", icon: MonitorPlay },
-  { label: "Scoring", href: "/admin/scoring", icon: BarChart3 },
-  { label: "Launch Readiness", href: "/admin/launch-readiness", icon: ClipboardCheck },
-  { label: "Photo Approvals", href: "/admin/photo-approvals", icon: Camera },
-  { label: "Basic Settings", href: "/admin/settings", icon: Settings },
-  { label: "Reports", href: "/admin/analytics", icon: BarChart3 },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export const utilityNav: NavItem[] = [
   { label: "TV Display", href: "/tv", icon: MonitorPlay },
-  { label: "Welcome", href: "/", icon: Clapperboard },
 ];
 
 export const menuConfigurations: MenuConfiguration[] = [
@@ -2063,7 +2064,7 @@ export const menuConfigurations: MenuConfiguration[] = [
     area: "Manager" as const,
     label: item.label,
     href: item.href,
-    purpose: "Leadership Experience navigation",
+    purpose: "Manager Lite navigation",
     enabled: true,
     reusable: true,
   })),
@@ -2072,7 +2073,7 @@ export const menuConfigurations: MenuConfiguration[] = [
     area: "Admin/GM" as const,
     label: item.label,
     href: item.href,
-    purpose: "Admin configuration and reporting",
+    purpose: "Experience Builder navigation",
     enabled: true,
     reusable: true,
   })),
@@ -2089,8 +2090,8 @@ export const menuConfigurations: MenuConfiguration[] = [
 
 export const roleLabels: Record<Role, string> = {
   employee: "Employee Experience",
-  manager: "Leadership Experience",
-  admin: "Admin/GM",
+  manager: "Manager",
+  admin: "Experience Builder",
 };
 
 export const categoryIcons: Record<RecognitionCategory, typeof BadgeCheck> = {

@@ -10,6 +10,7 @@ import {
   Upload,
   UserRound,
 } from "lucide-react";
+import { FeatureVisible } from "@/components/FeatureVisible";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
 import { useJourneyState } from "@/lib/journey-state";
@@ -199,25 +200,27 @@ export function ProfileClient() {
         </div>
       </Panel>
 
-      <Panel className="mt-5">
-        <PanelHeader title="Experience Journal" eyebrow="Timeline" />
-        <div className="grid gap-3">
-          {journalEvents.map((event) => (
-            <div
-              key={`${event.date}-${event.title}`}
-              className="grid gap-3 rounded-lg border border-journey-line p-4 sm:grid-cols-[90px_1fr]"
-            >
-              <p className="text-sm font-black uppercase text-journey-red">{event.date}</p>
-              <div>
-                <p className="font-black text-journey-black">{event.title}</p>
-                <p className="mt-1 text-sm leading-6 text-journey-steel">
-                  {event.detail}
-                </p>
+      <FeatureVisible featureId="moment_history">
+        <Panel className="mt-5">
+          <PanelHeader title="Experience Journal" eyebrow="Timeline" />
+          <div className="grid gap-3">
+            {journalEvents.map((event) => (
+              <div
+                key={`${event.date}-${event.title}`}
+                className="grid gap-3 rounded-lg border border-journey-line p-4 sm:grid-cols-[90px_1fr]"
+              >
+                <p className="text-sm font-black uppercase text-journey-red">{event.date}</p>
+                <div>
+                  <p className="font-black text-journey-black">{event.title}</p>
+                  <p className="mt-1 text-sm leading-6 text-journey-steel">
+                    {event.detail}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Panel>
+            ))}
+          </div>
+        </Panel>
+      </FeatureVisible>
     </>
   );
 }

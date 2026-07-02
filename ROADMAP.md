@@ -27,16 +27,26 @@
 - Added disabled-route coming-soon messaging.
 - Removed QR code generation from printed Experience Cards.
 
+## V1.5 Completed Experience Lite First
+
+- Reduced default navigation to the Lite launch workflows.
+- Added Manager Employee Lookup for fast search, XP totals, recent moments, and quick actions.
+- Reworked My Experience around XP, reward progress, card ID, and requests while hiding deeper Moment History.
+- Simplified Rewards to Everyday Rewards and Featured Rewards for launch.
+- Reframed Experience Builder around Recognition, Rewards, Employees, and Settings only.
+- Made Recognition Builder and Rewards Builder visual by default while preserving advanced controls.
+- Improved Experience Card batch entry with crew search and faster checklist controls.
+
 ## Next Operational Hardening
 
 - Create production Supabase Auth users and connect them to `profiles` and employee records.
 - Turn on `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED` after account setup.
-- Move the remaining Studio forms from shared-state sync to dedicated table-specific mutations.
-- Add audit history for admin changes.
-- Add image storage for reward photos and profile photo approvals.
-- Add manager handoff notes and shift summaries.
-- Add budget tracking for Rewards.
-- Add downloadable CSV exports for reports and reward liability.
+- Run a real-shift pilot with managers using only Capture Moment, Experience Card Entry, Card Printing, Employee Lookup, and Reward Approvals.
+- Add Supabase Storage for reward and profile photos.
+- Add audit history for Builder changes.
+- Move remaining Builder forms from shared-state sync to dedicated table-specific mutations.
+- Add duplicate-submission protection and shift handoff notes around Experience Card batches.
+- Add reward budget and inventory liability reporting after Lite adoption is steady.
 
 ## Platform Expansion
 

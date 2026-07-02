@@ -57,8 +57,8 @@ export function FeatureToggleManager() {
         />
         <p className="max-w-4xl text-sm font-bold leading-6 text-journey-steel">
           Experience Lite keeps launch simple: Capture Moment, Experience Card Entry,
-          Print Experience Cards, Employee XP Totals, Rewards, and Basic Settings.
-          Advanced work stays preserved and can be enabled later.
+          Print Daily Experience Cards, Employee Lookup, Employee XP Totals,
+          Rewards, and Settings. Advanced work stays preserved and can be enabled later.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {featurePresets.map((preset) => (
@@ -121,7 +121,7 @@ export function FeatureToggleManager() {
                   >
                     <option value="employee">Employee</option>
                     <option value="manager">Leader</option>
-                    <option value="admin">Admin/GM</option>
+                    <option value="admin">Experience Builder</option>
                   </select>
                 </td>
                 <td className="px-4 py-4">

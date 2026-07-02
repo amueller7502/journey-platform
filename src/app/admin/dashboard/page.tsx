@@ -1,150 +1,78 @@
-import { BarChart3, CalendarDays, CheckCircle2, Gift, Goal, Users } from "lucide-react";
+import { Gift, Library, Settings, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { ChapterProgress } from "@/components/dashboard/ChapterProgress";
-import { DepartmentProgress } from "@/components/dashboard/DepartmentProgress";
-import { MetricCard } from "@/components/ui/MetricCard";
+import { LinkButton } from "@/components/ui/Button";
 import { Panel, PanelHeader } from "@/components/ui/Panel";
-import {
-  COMMUNITY_GOAL_MILES,
-  chapterStats,
-  employeesNotRecognizedThisWeek,
-  recognitionOfTheDay,
-  getEmployee,
-  getRecognitionType,
-  launchReadinessChecklist,
-} from "@/lib/data";
-import { productLanguage } from "@/lib/product-language";
-import { daysRemaining, formatXp } from "@/lib/utils";
 
-export default function AdminDashboardPage() {
-  const experienceScore = 86;
-  const presentationScore = 91;
-  const managerLeadershipHealth = 83;
-  const inventoryWarnings = 3;
+const builderModules = [
+  {
+    title: "Recognition Builder",
+    eyebrow: "What managers can capture",
+    description:
+      "Create, tune, enable, and disable the Experience Moments managers use every shift.",
+    href: "/admin/recognition-library",
+    icon: Library,
+  },
+  {
+    title: "Rewards Builder",
+    eyebrow: "What employees can earn",
+    description:
+      "Keep the Lite reward catalog useful, simple, and exciting enough to care about.",
+    href: "/admin/rewards",
+    icon: Gift,
+  },
+  {
+    title: "Employees",
+    eyebrow: "Who can participate",
+    description:
+      "Add employees, update access, import roster files, and manage card IDs.",
+    href: "/admin/employees",
+    icon: Users,
+  },
+  {
+    title: "Settings",
+    eyebrow: "Lite launch controls",
+    description:
+      "Control feature toggles, presets, and the few launch settings leaders need now.",
+    href: "/admin/settings",
+    icon: Settings,
+  },
+];
 
+export default function BuilderHomePage() {
   return (
-    <AppShell role="admin" title="Command Center" eyebrow="Admin/GM">
-      <div className="grid gap-5 lg:grid-cols-4">
-        <div className="lg:col-span-2">
-          <Panel className="odyssey-frame h-full bg-journey-black text-journey-white">
-            <ChapterProgress inverse />
-          </Panel>
-        </div>
-        <MetricCard
-          label={productLanguage.experienceScore}
-          value={`${experienceScore}`}
-          detail="Composite recognition, coverage, presentation"
-          icon={Goal}
-        />
-        <MetricCard
-          label="Days Left"
-          value={`${daysRemaining("2026-08-12")}`}
-          detail="The Odyssey"
-          icon={CalendarDays}
-        />
-      </div>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-4">
-        <MetricCard
-          label={productLanguage.communityGoal}
-          value={formatXp(chapterStats.communityMiles)}
-          detail={`${formatXp(COMMUNITY_GOAL_MILES - chapterStats.communityMiles)} XP remaining`}
-          icon={Users}
-        />
-        <MetricCard
-          label="Presentation Score"
-          value={`${presentationScore}`}
-          detail="Readiness checks and space standards"
-          icon={BarChart3}
-        />
-        <MetricCard
-          label="Pending Rewards"
-          value={`${chapterStats.pendingRedemptions}`}
-          detail="Needs manager review"
-          icon={Gift}
-        />
-        <MetricCard
-          label={productLanguage.leadershipHealth}
-          value={`${managerLeadershipHealth}%`}
-          detail="Coverage, coaching, handoffs"
-          icon={Goal}
-        />
-      </div>
-
-      <div className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <Panel>
-          <PanelHeader title="Department Progress" eyebrow="Community XP" />
-          <DepartmentProgress />
-        </Panel>
-        <Panel>
-          <PanelHeader title="Pace Snapshot" eyebrow="GM View" />
-          <div className="grid gap-3">
-            {[
-              ["Goal pace", "560 XP per day"],
-              ["Current pace", `${formatXp(chapterStats.averageDailyMiles)} XP per day`],
-              ["Recognition density", "4.6 entries per active crew member"],
-              ["Reward liability", "2,190 XP in pending and ready rewards"],
-              ["Inventory warnings", `${inventoryWarnings} rewards near threshold`],
-            ].map(([label, value]) => (
-              <div
-                key={label}
-                className="flex items-center justify-between gap-4 rounded-lg border border-journey-line p-4"
-              >
-                <span className="font-black text-journey-black">{label}</span>
-                <span className="text-sm font-bold text-journey-steel">{value}</span>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </div>
-
-      <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <Panel>
-          <PanelHeader title="Moment of the Day" eyebrow="Spotlight" />
-          <p className="text-lg font-black text-journey-black">
-            {getEmployee(recognitionOfTheDay.employeeId)?.name}
-          </p>
-          <p className="mt-2 text-sm font-bold text-journey-red">
-            {getRecognitionType(recognitionOfTheDay.recognitionTypeId)?.name} +{recognitionOfTheDay.miles} XP
-          </p>
-          <p className="mt-3 border-l-4 border-journey-red pl-3 text-sm leading-6 text-journey-steel">
-            {recognitionOfTheDay.note}
-          </p>
-        </Panel>
-        <Panel>
-          <PanelHeader title="Employees Not Recognized This Week" eyebrow="GM follow-up" />
-          <div className="grid gap-3">
-            {employeesNotRecognizedThisWeek.map((employee) => (
-              <div
-                key={employee.id}
-                className="flex items-center justify-between gap-4 rounded-lg border border-journey-line p-4"
-              >
-                <span className="font-black text-journey-black">{employee.name}</span>
-                <span className="text-sm font-bold text-journey-steel">{employee.title}</span>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </div>
-
-      <Panel className="mt-5">
-        <PanelHeader
-          title="Launch Readiness Checklist"
-          eyebrow="July 9 Management Preview"
-          action={<CheckCircle2 className="h-5 w-5 text-journey-red" aria-hidden="true" />}
-        />
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {launchReadinessChecklist.map((item) => (
-            <div
-              key={item.label}
-              className="rounded-lg border border-journey-line bg-journey-white p-4"
-            >
-              <p className="font-black text-journey-black">{item.label}</p>
-              <p className="mt-2 text-sm font-bold text-journey-red">{item.status}</p>
-            </div>
-          ))}
-        </div>
+    <AppShell role="admin" title="Experience Builder" eyebrow="Lite launch setup">
+      <Panel className="cinema-doodle-card bg-journey-black text-journey-white">
+        <p className="text-xs font-black uppercase text-journey-red">
+          Experience Lite First
+        </p>
+        <h2 className="mt-2 max-w-4xl text-4xl font-black leading-tight">
+          Build the simple version managers will actually use every shift.
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm font-bold leading-6 text-journey-line">
+          The goal is one new habit: managers consistently capture Experience
+          Moments. Advanced modules stay hidden until Lite proves itself.
+        </p>
       </Panel>
+
+      <div className="mt-5 grid gap-5 md:grid-cols-2">
+        {builderModules.map((module) => (
+          <Panel key={module.href} className="cinema-doodle-card">
+            <PanelHeader
+              title={module.title}
+              eyebrow={module.eyebrow}
+              action={<module.icon className="h-5 w-5 text-journey-red" aria-hidden="true" />}
+            />
+            <p className="min-h-16 text-sm font-bold leading-6 text-journey-steel">
+              {module.description}
+            </p>
+            <div className="mt-5">
+              <LinkButton href={module.href} icon={module.icon}>
+                Open {module.title}
+              </LinkButton>
+            </div>
+          </Panel>
+        ))}
+      </div>
     </AppShell>
   );
 }

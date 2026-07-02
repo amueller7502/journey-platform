@@ -8,6 +8,7 @@ export type FeatureFlagId =
   | "capture_moment"
   | "experience_cards"
   | "card_printing_pdf"
+  | "employee_lookup"
   | "employee_xp_totals"
   | "rewards"
   | "basic_settings"
@@ -22,6 +23,8 @@ export type FeatureFlagId =
   | "experience_studio_advanced"
   | "scoring"
   | "achievements"
+  | "analytics"
+  | "experience_stories"
   | "moment_history"
   | "authentication"
   | "supabase_persistence";

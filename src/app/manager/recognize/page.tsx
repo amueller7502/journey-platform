@@ -17,7 +17,7 @@ export default function RecognizeEmployeePage() {
           <MetricCard
             label="Enabled Types"
             value={`${enabledRecognitionTypes.length}`}
-            detail="Admin-managed library"
+            detail="Builder-managed library"
             icon={HandHeart}
           />
           <MetricCard

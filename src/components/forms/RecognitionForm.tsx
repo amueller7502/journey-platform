@@ -254,8 +254,8 @@ export function RecognitionForm() {
 
       {!recognitionOptions.length ? (
         <div className="rounded-lg border border-journey-line bg-journey-white p-4 text-sm font-bold text-journey-steel">
-          No enabled recognition moments are available. Add or enable one in Admin /
-          Recognition Library.
+          No enabled recognition moments are available. Add or enable one in
+          Recognition Builder.
         </div>
       ) : null}
 
@@ -299,7 +299,7 @@ export function RecognitionForm() {
             </div>
           ) : null}
           <p className="text-xs font-bold text-journey-steel">
-            Admins change XP values in Recognition Studio.
+            Builders change XP values in Recognition Builder.
           </p>
         </div>
       </div>

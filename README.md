@@ -15,7 +15,7 @@ Campaign phrase: **More Than A Movie Starts With Us.**
 - Employees do not self-submit XP.
 - Leaders capture and verify Experience Moments.
 - Leaders do not earn employee XP.
-- Leaders receive Leadership Recognition and LP.
+- Leadership recognition is separate from employee XP and remains hidden during Lite launch.
 - Recognition matters more than competition.
 - Every XP entry represents a Moment That Mattered.
 
@@ -128,60 +128,57 @@ Use the Welcome screen access code field:
 
 - Employee: `AR1570`
 - Leader: `JE1570`
-- Admin/GM: `SC1570`
+- Experience Builder: `SC1570`
 
 Demo buttons:
 
 - Employee Experience -> `/home`
-- Leadership Experience -> `/leadership/dashboard`
-- Admin/GM -> `/admin/dashboard`
-- TV Display -> `/tv`
+- Manager Lite -> `/manager/recognize`
+- Experience Builder -> `/admin/dashboard`
 
 ## Main Routes
+
+Visible in Experience Lite:
 
 Employee:
 
 - `/home` Today
 - `/my-journey` My Experience
-- `/community` Community
 - `/rewards` Rewards
 - `/profile` Profile
-- `/leaderboard` Experience Leaderboard
 
-Leadership:
+Manager:
 
-- `/leadership/dashboard` Leadership Dashboard
 - `/manager/recognize` Capture Moment
 - `/manager/passport` Experience Card Entry
-- `/manager/cards` Experience Cards
-- `/manager/excellence-checks` Excellence Checks
+- `/manager/cards` Print Daily Experience Cards
+- `/manager/employees` Employee Lookup
 - `/manager/pending-rewards` Rewards Approvals
-- `/manager/todays-focus` Today's Focus
-- `/manager/recognition-feed` Recent Moments
 
-Admin/GM:
+Experience Builder:
 
-- `/admin/dashboard` Command Center
+- `/admin/dashboard` Builder Home
+- `/admin/recognition-library` Recognition Builder
+- `/admin/rewards` Rewards Builder
 - `/admin/employees` Employees
-- `/admin/photo-approvals` Photo Approvals
-- `/admin/seasons` Seasons
-- `/admin/season-planner` Season Planner
-- `/admin/recognition-library` Recognition
-- `/admin/rewards` Rewards
-- `/admin/events` Events
-- `/admin/standards` Standards
-- `/admin/leadership` Leadership
-- `/admin/achievements` Achievements
-- `/admin/displays` Displays
-- `/admin/scoring` Scoring
-- `/admin/launch-readiness` Launch Readiness
-- `/admin/settings` Experience Studio / Skin Developer
-- `/admin/studio` Experience Studio overview
-- `/admin/analytics` Reports
+- `/admin/settings` Settings and Feature Toggles
 
-Utility:
+Hidden behind feature toggles for later:
 
-- `/tv` Digital signage loop
+- Community
+- Moment History
+- Seasons and Season Planner
+- Events
+- Leadership
+- Displays / TV Display
+- Analytics
+- Experience Stories
+- Achievements
+- Scoring
+- Advanced Experience Studio
+
+Legacy redirects:
+
 - `/trading-post` Legacy redirect to `/rewards`
 
 ## Feature Flags And Lite Mode
@@ -193,9 +190,10 @@ Experience launches in **Experience Lite** by default. Lite mode keeps the app f
 - Print Experience Cards
 - Employee XP Totals
 - Rewards
+- Employee Lookup
 - Basic Settings
 
-Lite mode intentionally hides Moment History, Community, Seasons, Season Planner, Events, Leadership, TV Display, advanced Experience Studio, Scoring, and Achievements. Hidden features are not deleted; they are preserved behind feature flags and can be enabled later.
+Lite mode intentionally hides Moment History, Community, Seasons, Season Planner, Events, Leadership, Displays / TV Display, Analytics, Experience Stories, advanced Experience Studio, Scoring, and Achievements. Hidden features are not deleted; they are preserved behind feature flags and can be enabled later.
 
 Feature flags live in `src/lib/features.ts` and are editable in the app at `/admin/settings`.
 
@@ -252,10 +250,8 @@ Admin configuration:
 - Configure recognition types and excellence checks.
 - Configure Experience Card templates.
 - Configure reward inventory, costs, images, collections, tiers, and flags.
-- Configure unlimited Seasons, duplicate the active Season, edit future drafts, preview, publish one active Season, and archive completed Seasons.
-- Configure Events and Displays.
-- Configure Standards, Achievements, Leadership LP rules, Scoring, and Launch Readiness.
-- Configure skins through Skin Developer.
+- Use feature toggles to enable future modules when the team is ready.
+- Future hidden modules include Seasons, Events, Displays, Standards, Achievements, Leadership, Scoring, Launch Readiness, and skins.
 
 ## Vercel Deployment
 
@@ -289,14 +285,12 @@ vercel --prod
 
 ## Reset Demo Data
 
-Use Admin/GM tools where possible:
+Use Experience Builder tools where possible:
 
 - Employees: `/admin/employees`
-- Recognition Studio: `/admin/recognition-library`
-- Rewards: `/admin/rewards`
-- Experience Studio: `/admin/settings`
-- Season Planner: `/admin/season-planner`
-- Launch Readiness: `/admin/launch-readiness`
+- Recognition Builder: `/admin/recognition-library`
+- Rewards Builder: `/admin/rewards`
+- Settings and Feature Toggles: `/admin/settings`
 
 Browser preview state can also be reset by clearing localStorage for the local site.
 
@@ -310,6 +304,7 @@ Browser preview state can also be reset by clearing localStorage for the local s
 - Studio edits are shared through Supabase and sync best-effort normalized rows; a future hardening pass should move every Studio form to dedicated table-specific mutations.
 - Feature flags currently control UI and route visibility; advanced database objects remain installed for later rollout.
 - Uploaded reward/profile images are stored as browser data URLs in preview mode unless a storage provider is added.
+- Lite intentionally hides Moment History, Community, Displays, Leadership, Analytics, and Season planning until the core manager habit is proven.
 
 ## Screenshots
 
@@ -317,9 +312,11 @@ Preview screenshots should be kept in `screenshots/`. Recommended captures:
 
 - Employee Today
 - Manager Capture Moment
+- Experience Card Entry
+- Print Daily Experience Cards
+- Employee Lookup
 - Rewards
-- TV Dashboard
-- Admin Command Center
-- Mobile employee view
+- Experience Builder
+- Mobile manager view
 
 Sample PDFs should be kept in `output/pdf/`.

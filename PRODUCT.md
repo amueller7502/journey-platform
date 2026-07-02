@@ -16,6 +16,7 @@
 - Community goal: **Community XP**
 - Operational metric: **Experience Score**
 - Leadership metric: **Leadership Health**
+- Launch mode: **Experience Lite**
 
 Internal code and database fields may still use legacy names like `miles`, `chapter`, or `journey` until the schema is fully migrated. The user-facing product should not.
 
@@ -37,42 +38,47 @@ Every configurable object should support:
 Platform Auth roles:
 - `employee`: Employee Experience access.
 - `leader`: Leadership Experience and manager operations.
-- `experience_designer`: Admin/GM and Experience Studio access.
+- `experience_designer`: Experience Builder access.
 
 Employee Experience:
 - Today
 - My Experience
-- Community
 - Rewards
 - Profile
 
-Leadership Experience:
-- Leadership
+Manager Lite:
 - Capture Moment
 - Experience Card Entry
-- Experience Cards
-- Excellence Checks
-- Rewards Approvals
-- Today's Focus
-- Recent Moments
+- Print Daily Experience Cards
+- Employee Lookup
+- Reward Approvals
 
-Admin/GM:
-- Command Center
+Experience Builder Lite:
+- Recognition Builder
+- Rewards Builder
 - Employees
-- Photo Approvals
+- Settings
+
+Hidden future modules:
+- Community
+- Moment History
+- Leadership Experience
+- Leadership LP
+- Leadership Rewards
 - Seasons
 - Season Planner
-- Recognition
-- Rewards
 - Events
-- Standards
-- Leadership
-- Achievements
 - Displays
+- Analytics
+- Experience Stories
+- Achievements
 - Scoring
-- Launch Readiness
-- Experience Studio
-- Reports
+- Advanced Experience Studio
+
+Legacy / future manager modules:
+- Excellence Checks
+- Today's Focus
+- Recent Moments
 
 ## Core Workflows
 
@@ -105,13 +111,18 @@ Leadership Experience:
 - Leaders earn LP, not XP.
 - Leaders receive Leadership Recognition.
 - Leadership Health tracks coverage, coaching, reward handoffs, Experience Card batches, readiness checks, and employees awaiting recognition.
+- Leadership modules are preserved for later rollout and hidden during Lite launch.
 
 ## Experience Studio
 
-Experience Studio modules:
-- Seasons
+Experience Builder Lite modules:
 - Recognition
 - Rewards
+- Employees
+- Settings
+
+Future Experience Studio modules:
+- Seasons
 - Events
 - Standards
 - Leadership
@@ -132,9 +143,10 @@ Experience Lite includes:
 - Print Experience Cards
 - Employee XP Totals
 - Rewards
+- Employee Lookup
 - Basic Settings
 
-Experience Lite hides Moment History, Community, Seasons, Season Planner, Events, Leadership, TV Display, Advanced Experience Studio, Scoring, and Achievements until leadership chooses to enable those modules.
+Experience Lite hides Moment History, Community, Seasons, Season Planner, Events, Leadership, Displays / TV Display, Analytics, Experience Stories, Advanced Experience Studio, Scoring, and Achievements until leadership chooses to enable those modules.
 
 Presets:
 - Experience Lite

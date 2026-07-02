@@ -9,6 +9,7 @@ export const liteFeatureIds: FeatureFlagId[] = [
   "capture_moment",
   "experience_cards",
   "card_printing_pdf",
+  "employee_lookup",
   "employee_xp_totals",
   "rewards",
   "basic_settings",
@@ -33,6 +34,8 @@ export const futurePlatformFeatureIds: FeatureFlagId[] = [
   "leadership_rewards",
   "scoring",
   "experience_studio_advanced",
+  "analytics",
+  "experience_stories",
   "authentication",
   "supabase_persistence",
 ];
@@ -70,6 +73,17 @@ export const defaultFeatureFlags: FeatureFlag[] = [
     visibleInNavigation: true,
     launchPhase: "Launch",
     sortOrder: 30,
+  },
+  {
+    id: "employee_lookup",
+    enabled: true,
+    label: "Employee Lookup",
+    description: "Fast manager lookup for current XP, profile basics, and quick actions.",
+    category: "Manager Operations",
+    minimumRole: "manager",
+    visibleInNavigation: true,
+    launchPhase: "Launch",
+    sortOrder: 35,
   },
   {
     id: "employee_xp_totals",
@@ -118,8 +132,8 @@ export const defaultFeatureFlags: FeatureFlag[] = [
   {
     id: "tv_display",
     enabled: false,
-    label: "TV Display",
-    description: "Digital signage loop for community progress and recognition.",
+    label: "Displays",
+    description: "Digital signage, TV display loops, and future display controls.",
     category: "Displays",
     minimumRole: "manager",
     visibleInNavigation: true,
@@ -235,6 +249,28 @@ export const defaultFeatureFlags: FeatureFlag[] = [
     visibleInNavigation: true,
     launchPhase: "Future Platform",
     sortOrder: 350,
+  },
+  {
+    id: "analytics",
+    enabled: false,
+    label: "Analytics",
+    description: "Advanced recognition reporting, leaderboard views, and platform analytics.",
+    category: "Platform",
+    minimumRole: "admin",
+    visibleInNavigation: true,
+    launchPhase: "Future Platform",
+    sortOrder: 355,
+  },
+  {
+    id: "experience_stories",
+    enabled: false,
+    label: "Experience Stories",
+    description: "Storytelling surfaces for richer employee recognition narratives.",
+    category: "Employee Experience",
+    minimumRole: "employee",
+    visibleInNavigation: true,
+    launchPhase: "Future Platform",
+    sortOrder: 358,
   },
   {
     id: "authentication",
@@ -359,13 +395,15 @@ const routeRules: Array<{
     prefixes: ["/manager/cards"],
   },
   {
+    featureId: "employee_lookup",
+    prefixes: ["/manager/employees"],
+  },
+  {
     featureId: "employee_xp_totals",
     prefixes: [
       "/home",
-      "/leaderboard",
-      "/manager/leaderboard",
-      "/admin/leaderboard",
-      "/admin/dashboard",
+      "/my-journey",
+      "/profile",
     ],
   },
   {
@@ -383,6 +421,7 @@ const routeRules: Array<{
       "/admin/settings",
       "/admin/employees",
       "/admin/recognition-library",
+      "/admin/dashboard",
     ],
   },
   {
@@ -429,8 +468,16 @@ const routeRules: Array<{
     prefixes: [
       "/admin/studio",
       "/admin/launch-readiness",
-      "/admin/analytics",
       "/admin/standards",
+    ],
+  },
+  {
+    featureId: "analytics",
+    prefixes: [
+      "/leaderboard",
+      "/manager/leaderboard",
+      "/admin/leaderboard",
+      "/admin/analytics",
     ],
   },
   {
@@ -443,11 +490,11 @@ const routeRules: Array<{
   },
   {
     featureId: "moment_history",
-    prefixes: ["/my-journey", "/manager/recognition-feed"],
+    prefixes: ["/manager/recognition-feed"],
   },
   {
     featureId: "authentication",
-    prefixes: ["/profile", "/admin/photo-approvals"],
+    prefixes: ["/admin/photo-approvals"],
   },
 ];
 

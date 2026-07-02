@@ -8,7 +8,7 @@ export default function ManagerExperienceCardsPage() {
   return (
     <AppShell
       role="manager"
-      title="Experience Cards"
+      title="Print Daily Experience Cards"
       eyebrow="Daily print run"
       actions={<LinkButton href="/manager/passport" icon={ClipboardCheck}>Lookup Card</LinkButton>}
     >
