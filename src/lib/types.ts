@@ -213,7 +213,7 @@ export type JourneyCardArea = {
 
 export type JourneyCardShiftAssignment = {
   id: string;
-  employeeId: string;
+  employeeId?: string;
   journeyCardAreaId: string;
   shiftDate: string;
   createdAt: string;

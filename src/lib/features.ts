@@ -380,7 +380,7 @@ const routeRules: Array<{
 }> = [
   {
     featureId: "capture_moment",
-    prefixes: ["/manager/recognize"],
+    prefixes: ["/manager/recognize", "/manager/ourpeople"],
   },
   {
     featureId: "experience_cards",

@@ -2032,6 +2032,7 @@ export const employeeNav: NavItem[] = [
 
 export const managerNav: NavItem[] = [
   { label: "Capture Moment", href: "/manager/recognize", icon: HandHeart },
+  { label: "OurPeople Intake", href: "/manager/ourpeople", icon: Megaphone },
   { label: "Experience Card Entry", href: "/manager/passport", icon: ClipboardCheck },
   { label: "Print Daily Experience Cards", href: "/manager/cards", icon: BookOpen },
   { label: "Employee Lookup", href: "/manager/employees", icon: Search },

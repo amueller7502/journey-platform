@@ -30,6 +30,14 @@ function initialEmployeeFromUrl(crew: Array<{ id: string }>) {
     : crew[0]?.id ?? "";
 }
 
+function initialNoteFromUrl() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return new URLSearchParams(window.location.search).get("note") ?? "";
+}
+
 export function RecognitionForm() {
   const formId = useId();
   const { state } = useJourneyState();
@@ -59,7 +67,7 @@ export function RecognitionForm() {
     recognitionOptions[0]?.id ?? "",
   );
   const [miles, setMiles] = useState(recognitionOptions[0]?.milesValue ?? 0);
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(() => initialNoteFromUrl());
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");

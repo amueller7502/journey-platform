@@ -1,6 +1,14 @@
 "use client";
 
-import { ClipboardList, Plus, Save, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
+import {
+  ClipboardList,
+  ListChecks,
+  Plus,
+  Save,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { ArchiveFilterControls } from "@/components/ui/ArchiveFilterControls";
 import { Button } from "@/components/ui/Button";
@@ -27,6 +35,90 @@ function sortTasks(a: RecognitionType, b: RecognitionType) {
   return a.sortOrder - b.sortOrder;
 }
 
+function taskAppearsOnArea(task: RecognitionType, areaId?: string) {
+  if (!areaId || !task.journeyCardEligible) {
+    return false;
+  }
+
+  return !task.journeyCardAreaIds?.length || task.journeyCardAreaIds.includes(areaId);
+}
+
+function CardTemplatePreview({
+  area,
+  tasks,
+}: {
+  area: JourneyCardArea;
+  tasks: RecognitionType[];
+}) {
+  const totalXp = tasks.reduce((total, task) => total + task.milesValue, 0);
+
+  return (
+    <div className="rounded-lg border border-journey-line bg-journey-white p-4">
+      <div className="rounded-md border-2 border-journey-black bg-journey-white">
+        <div className="border-b-4 border-journey-red bg-journey-black px-4 py-3 text-journey-white">
+          <p className="text-[10px] font-black uppercase text-journey-red">
+            Experience Card
+          </p>
+          <h3 className="mt-1 text-lg font-black">More Than A Movie Starts With Us</h3>
+        </div>
+        <div className="grid gap-4 p-4">
+          <div>
+            <p className="text-[10px] font-black uppercase text-journey-red">
+              Crew Member Name
+            </p>
+            <div className="mt-3 h-0.5 w-full bg-journey-black" />
+            <p className="mt-2 text-xs font-bold text-journey-steel">
+              Write name clearly, then turn in to a manager.
+            </p>
+          </div>
+          <div className="rounded-md border border-journey-line bg-journey-mist p-3">
+            <p className="text-xs font-black uppercase text-journey-red">
+              {area.name}
+            </p>
+            <p className="mt-1 text-sm font-bold leading-5 text-journey-steel">
+              {area.description}
+            </p>
+          </div>
+          <div className="grid gap-2">
+            {!tasks.length ? (
+              <p className="rounded-md border border-dashed border-journey-line p-3 text-sm font-bold text-journey-steel">
+                Add tasks to show the printed checklist.
+              </p>
+            ) : null}
+            {tasks.slice(0, 6).map((task) => (
+              <div
+                key={task.id}
+                className="grid grid-cols-[18px_1fr_auto] items-start gap-2 rounded-md border border-journey-line p-2"
+              >
+                <span className="mt-0.5 h-4 w-4 rounded-sm border border-journey-black" />
+                <span>
+                  <span className="block text-sm font-black text-journey-black">
+                    {task.name}
+                  </span>
+                  <span className="block text-xs leading-5 text-journey-steel">
+                    {task.description}
+                  </span>
+                </span>
+                <span className="text-xs font-black text-journey-red">
+                  +{task.milesValue}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-journey-line pt-3">
+            <p className="text-xs font-black uppercase text-journey-steel">
+              Manager initials
+            </p>
+            <p className="text-sm font-black text-journey-black">
+              {tasks.length} items / {totalXp} XP
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function JourneyCardDesigner() {
   const { state, updateState } = useJourneyState();
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>("active");
@@ -40,6 +132,7 @@ export function JourneyCardDesigner() {
   );
   const [selectedAreaId, setSelectedAreaId] = useState(allAreas[0]?.id ?? "");
   const [saved, setSaved] = useState(false);
+  const [showOnlySelectedTasks, setShowOnlySelectedTasks] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const [toast, setToast] = useState<StatusToastState | null>(null);
   const selectedArea =
@@ -54,6 +147,17 @@ export function JourneyCardDesigner() {
       employee.role === "employee" &&
       employee.active !== false &&
       employee.journeyCardAreaId === selectedArea?.id,
+  );
+  const selectedAreaTasks = cardTasks.filter((task) =>
+    taskAppearsOnArea(task, selectedArea?.id),
+  );
+  const visibleCardTasks = showOnlySelectedTasks ? selectedAreaTasks : cardTasks;
+  const enabledSelectedAreaTasks = selectedAreaTasks.filter(
+    (task) => task.enabled && !isArchived(task),
+  );
+  const selectedAreaXp = enabledSelectedAreaTasks.reduce(
+    (total, task) => total + task.milesValue,
+    0,
   );
 
   function updateArea(id: string, patch: Partial<JourneyCardArea>) {
@@ -312,9 +416,9 @@ export function JourneyCardDesigner() {
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-3xl text-sm font-bold leading-6 text-journey-steel">
-          Build reusable card templates by work area. Daily print runs can assign
-          any active employee to any card type based on where they are scheduled
-          that shift.
+          Build reusable write-in card templates by work area. Staff write their
+          name on the paper card, and managers choose the employee when the card
+          is entered.
         </p>
         <div className="flex flex-wrap gap-2">
           <ArchiveFilterControls value={archiveFilter} onChange={setArchiveFilter} />
@@ -356,13 +460,50 @@ export function JourneyCardDesigner() {
               </p>
               <h3 className="mt-1 text-lg font-black">{area.name}</h3>
               <p className="mt-2 text-xs font-bold opacity-80">
-                {state.employees.filter((employee) => employee.journeyCardAreaId === area.id).length} default
+                {cardTasks.filter((task) => taskAppearsOnArea(task, area.id)).length} tasks
               </p>
             </button>
           ))}
         </div>
 
         <div className="grid gap-5">
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-lg border border-journey-line bg-journey-white p-4">
+              <p className="text-xs font-black uppercase text-journey-red">
+                On This Card
+              </p>
+              <p className="mt-1 text-3xl font-black text-journey-black">
+                {enabledSelectedAreaTasks.length}
+              </p>
+              <p className="text-sm font-bold text-journey-steel">
+                enabled checklist items
+              </p>
+            </div>
+            <div className="rounded-lg border border-journey-line bg-journey-white p-4">
+              <p className="text-xs font-black uppercase text-journey-red">
+                Possible XP
+              </p>
+              <p className="mt-1 text-3xl font-black text-journey-black">
+                {selectedAreaXp}
+              </p>
+              <p className="text-sm font-bold text-journey-steel">
+                if every item is verified
+              </p>
+            </div>
+            <div className="rounded-lg border border-journey-line bg-journey-white p-4">
+              <p className="text-xs font-black uppercase text-journey-red">
+                Default Crew
+              </p>
+              <p className="mt-1 text-3xl font-black text-journey-black">
+                {assignedEmployees.length}
+              </p>
+              <p className="text-sm font-bold text-journey-steel">
+                by employee setup only
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
           <div className="rounded-lg border border-journey-line bg-journey-white p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -461,6 +602,30 @@ export function JourneyCardDesigner() {
             </p>
           </div>
 
+          <CardTemplatePreview area={selectedArea} tasks={enabledSelectedAreaTasks} />
+          </div>
+
+          <div className="rounded-lg border border-journey-line bg-journey-white p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase text-journey-red">
+                  Card task library
+                </p>
+                <h3 className="mt-1 text-xl font-black text-journey-black">
+                  {showOnlySelectedTasks ? "Tasks on this card" : "All card tasks"}
+                </h3>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                icon={showOnlySelectedTasks ? ClipboardList : ListChecks}
+                onClick={() => setShowOnlySelectedTasks((current) => !current)}
+              >
+                {showOnlySelectedTasks ? "Show All Tasks" : "Show On Card"}
+              </Button>
+            </div>
+          </div>
+
           <div className="overflow-x-auto rounded-lg border border-journey-line">
             <table className="w-full min-w-[1040px] border-collapse bg-journey-white text-left">
               <thead>
@@ -475,8 +640,8 @@ export function JourneyCardDesigner() {
                 </tr>
               </thead>
               <tbody>
-                {cardTasks.map((task) => {
-                  const onCard = task.journeyCardAreaIds?.includes(selectedArea.id) ?? false;
+                {visibleCardTasks.map((task) => {
+                  const onCard = taskAppearsOnArea(task, selectedArea.id);
                   return (
                     <tr key={task.id} className="border-b border-journey-line align-top">
                       <td className="p-3">

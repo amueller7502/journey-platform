@@ -151,9 +151,11 @@ async function drawExperienceCard({
     bold: Awaited<ReturnType<PDFDocument["embedFont"]>>;
   };
 }) {
-  const entryPath = `/manager/passport/${encodeURIComponent(
-    employee?.passportId ?? "card-id",
-  )}?area=${encodeURIComponent(assignment.journeyCardAreaId)}`;
+  const entryPath = employee
+    ? `/manager/passport/${encodeURIComponent(employee.passportId)}?area=${encodeURIComponent(
+        assignment.journeyCardAreaId,
+      )}`
+    : `/manager/passport?area=${encodeURIComponent(assignment.journeyCardAreaId)}`;
 
   drawCropMarks(page, x, y);
   page.drawRectangle({
@@ -187,9 +189,9 @@ async function drawExperienceCard({
     color: red,
   });
 
-  const employeeName = employee?.name ?? "Crew Member";
   const areaName = area?.name ?? "Experience Card";
   const seasonTitle = season?.seasonTitle ?? "The Odyssey";
+  const isGenericCard = !employee;
 
   page.drawText("EXPERIENCE CARD", {
     x: x + 18,
@@ -214,20 +216,43 @@ async function drawExperienceCard({
   });
 
   const infoTop = y + cardHeight - 82;
-  page.drawText(employeeName, {
-    x: x + 18,
-    y: infoTop,
-    size: 20,
-    font: fonts.bold,
-    color: black,
-  });
-  page.drawText(`${employee?.title ?? "Employee"} / ${areaName}`, {
-    x: x + 18,
-    y: infoTop - 17,
-    size: 9,
-    font: fonts.bold,
-    color: gray,
-  });
+  if (isGenericCard) {
+    page.drawText("Crew Member Name", {
+      x: x + 18,
+      y: infoTop + 4,
+      size: 8,
+      font: fonts.bold,
+      color: red,
+    });
+    page.drawLine({
+      start: { x: x + 18, y: infoTop - 8 },
+      end: { x: x + 292, y: infoTop - 8 },
+      thickness: 1,
+      color: black,
+    });
+    page.drawText("Write name clearly, then turn this card in to a manager.", {
+      x: x + 18,
+      y: infoTop - 22,
+      size: 8.5,
+      font: fonts.bold,
+      color: gray,
+    });
+  } else {
+    page.drawText(employee.name, {
+      x: x + 18,
+      y: infoTop,
+      size: 20,
+      font: fonts.bold,
+      color: black,
+    });
+    page.drawText(`${employee.title} / ${areaName}`, {
+      x: x + 18,
+      y: infoTop - 17,
+      size: 9,
+      font: fonts.bold,
+      color: gray,
+    });
+  }
   page.drawText(`Shift Date: ${shiftDate}`, {
     x: x + 18,
     y: infoTop - 32,
@@ -235,7 +260,7 @@ async function drawExperienceCard({
     font: fonts.regular,
     color: gray,
   });
-  page.drawText(`Experience Card ID: ${employee?.passportId ?? "Unassigned"}`, {
+  page.drawText(isGenericCard ? `Card Type: ${areaName}` : `Experience Card ID: ${employee.passportId}`, {
     x: x + 18,
     y: infoTop - 45,
     size: 8.5,
@@ -345,7 +370,7 @@ async function drawExperienceCard({
   });
 
   const footerY = y + 18;
-  page.drawText("Employee initials", { x: x + 18, y: footerY + 14, size: 7.5, font: fonts.bold, color: gray });
+  page.drawText("Crew confirmed", { x: x + 18, y: footerY + 14, size: 7.5, font: fonts.bold, color: gray });
   page.drawLine({ start: { x: x + 18, y: footerY + 8 }, end: { x: x + 150, y: footerY + 8 }, thickness: 0.7, color: black });
   page.drawText("Manager initials", { x: x + 190, y: footerY + 14, size: 7.5, font: fonts.bold, color: gray });
   page.drawLine({ start: { x: x + 190, y: footerY + 8 }, end: { x: x + 322, y: footerY + 8 }, thickness: 0.7, color: black });
@@ -370,6 +395,7 @@ export function JourneyCardPrintList() {
     .sort((a, b) => a.name.localeCompare(b.name));
   const [shiftDate, setShiftDate] = useState(todayString());
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
+  const [genericCardCount, setGenericCardCount] = useState(12);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [toast, setToast] = useState<StatusToastState | null>(null);
@@ -379,12 +405,21 @@ export function JourneyCardPrintList() {
     .filter((assignment) => assignment.shiftDate === shiftDate)
     .slice()
     .sort((a, b) => {
+      const areaA = areas.find((area) => area.id === a.journeyCardAreaId);
+      const areaB = areas.find((area) => area.id === b.journeyCardAreaId);
       const employeeA = state.employees.find((employee) => employee.id === a.employeeId);
       const employeeB = state.employees.find((employee) => employee.id === b.employeeId);
-      return (employeeA?.name ?? "").localeCompare(employeeB?.name ?? "");
+      return `${areaA?.sortOrder ?? 999}:${employeeA?.name ?? a.id}`.localeCompare(
+        `${areaB?.sortOrder ?? 999}:${employeeB?.name ?? b.id}`,
+      );
     });
 
   const selectedArea = areas.find((area) => area.id === areaId) ?? areas[0];
+  const selectedAreaTasks = selectedArea ? tasksForArea(selectedArea.id) : [];
+  const selectedAreaPossibleXp = selectedAreaTasks.reduce(
+    (total, task) => total + task.milesValue,
+    0,
+  );
 
   function tasksForArea(currentAreaId: string) {
     return state.recognitionTypes
@@ -405,7 +440,9 @@ export function JourneyCardPrintList() {
   function assignmentLabel(assignment: JourneyCardShiftAssignment) {
     const employee = state.employees.find((item) => item.id === assignment.employeeId);
     const area = areas.find((item) => item.id === assignment.journeyCardAreaId);
-    return `${employee?.name ?? "Crew Member"} - ${area?.name ?? "Experience Card"}`;
+    return employee
+      ? `${employee.name} - ${area?.name ?? "Experience Card"}`
+      : `Generic ${area?.name ?? "Experience Card"}`;
   }
 
   function toggleEmployee(employeeId: string) {
@@ -413,6 +450,36 @@ export function JourneyCardPrintList() {
       current.includes(employeeId)
         ? current.filter((id) => id !== employeeId)
         : [...current, employeeId],
+    );
+  }
+
+  function createGenericCards() {
+    if (!selectedArea || genericCardCount < 1) {
+      setMessage("Choose a card type and how many blank cards to print.");
+      return;
+    }
+
+    const now = new Date().toISOString();
+    updateState((current) => {
+      const nextAssignments = Array.from({ length: genericCardCount }, (_, index) => ({
+        id: `generic-card-${shiftDate}-${selectedArea.id}-${Date.now()}-${index}`,
+        journeyCardAreaId: selectedArea.id,
+        shiftDate,
+        createdAt: now,
+      }));
+
+      return {
+        ...current,
+        journeyCardAssignments: [
+          ...current.journeyCardAssignments,
+          ...nextAssignments,
+        ],
+      };
+    });
+    setMessage(
+      `Created ${genericCardCount} generic ${selectedArea.name} card${
+        genericCardCount === 1 ? "" : "s"
+      } for ${shiftDate}.`,
     );
   }
 
@@ -427,7 +494,7 @@ export function JourneyCardPrintList() {
       const existingKeys = new Set(
         current.journeyCardAssignments.map(
           (assignment) =>
-            `${assignment.shiftDate}:${assignment.employeeId}:${assignment.journeyCardAreaId}`,
+            `${assignment.shiftDate}:${assignment.employeeId ?? "generic"}:${assignment.journeyCardAreaId}`,
         ),
       );
       const nextAssignments = selectedEmployees
@@ -567,6 +634,9 @@ export function JourneyCardPrintList() {
   function openManagerEntry(assignment: JourneyCardShiftAssignment) {
     const employee = state.employees.find((item) => item.id === assignment.employeeId);
     if (!employee) {
+      router.push(
+        `/manager/passport?area=${encodeURIComponent(assignment.journeyCardAreaId)}`,
+      );
       return;
     }
 
@@ -621,13 +691,56 @@ export function JourneyCardPrintList() {
                   ))}
                 </select>
               </label>
+              <label className="grid gap-2 text-sm font-bold text-journey-black">
+                Generic Cards To Print
+                <input
+                  type="number"
+                  min="1"
+                  max="200"
+                  value={genericCardCount}
+                  onChange={(event) =>
+                    setGenericCardCount(Math.max(1, Number(event.target.value) || 1))
+                  }
+                  className="focus-ring min-h-11 rounded-md border border-journey-line bg-journey-white px-3 text-lg font-black"
+                />
+              </label>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-black text-journey-black">
-                {selectedEmployees.length} selected
+            <div className="mt-4 rounded-md border border-journey-line bg-journey-white p-3">
+              <p className="text-xs font-black uppercase text-journey-red">
+                Generic write-in cards
               </p>
-              <div className="flex flex-wrap gap-2">
+              <p className="mt-1 text-sm font-bold leading-6 text-journey-steel">
+                Print blank cards by area. Staff write their name on the card, turn it
+                in, and a manager selects the employee during entry.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-black text-journey-black">
+                  {selectedAreaTasks.length} checklist items /{" "}
+                  {formatXp(selectedAreaPossibleXp)} possible
+                </p>
+                <Button type="button" icon={ClipboardCheck} onClick={createGenericCards}>
+                  Create Generic Cards
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-md border border-journey-line bg-journey-white p-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase text-journey-red">
+                    Optional roster shortcut
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-journey-steel">
+                    Use this only when the manager already knows who should receive
+                    each card.
+                  </p>
+                </div>
+                <p className="text-sm font-black text-journey-black">
+                  {selectedEmployees.length} selected
+                </p>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
                 <Button
                   type="button"
                   variant="secondary"
@@ -637,7 +750,7 @@ export function JourneyCardPrintList() {
                   Select All
                 </Button>
                 <Button type="button" icon={ClipboardCheck} onClick={assignCards}>
-                  Create Cards
+                  Create Assigned Cards
                 </Button>
               </div>
             </div>
@@ -651,7 +764,7 @@ export function JourneyCardPrintList() {
               <StatusToast toast={toast} />
             </div>
 
-            <div className="mt-4 grid max-h-[520px] gap-2 overflow-y-auto pr-1">
+            <div className="mt-4 grid max-h-[360px] gap-2 overflow-y-auto pr-1">
               {activeCrew.map((employee) => (
                 <label
                   key={employee.id}
@@ -689,12 +802,15 @@ export function JourneyCardPrintList() {
             <div className="mt-4 grid gap-3">
               {!assignments.length ? (
                 <p className="rounded-lg border border-dashed border-journey-line p-4 text-sm font-bold text-journey-steel">
-                  Select employees, choose the card type they are scheduled for today,
-                  then create cards.
+                  Choose a card type and quantity, then create generic cards for staff
+                  to write their name on and turn in.
                 </p>
               ) : null}
               {assignments.map((assignment) => {
                 const tasks = tasksForArea(assignment.journeyCardAreaId);
+                const employee = state.employees.find(
+                  (item) => item.id === assignment.employeeId,
+                );
                 return (
                   <div
                     key={assignment.id}
@@ -705,7 +821,7 @@ export function JourneyCardPrintList() {
                         {assignmentLabel(assignment)}
                       </p>
                       <p className="mt-1 text-sm font-bold text-journey-steel">
-                        {tasks.length} checklist items /{" "}
+                        {employee ? "Assigned card" : "Write-in card"} / {tasks.length} checklist items /{" "}
                         {formatXp(tasks.reduce((total, task) => total + task.milesValue, 0))} XP
                       </p>
                     </div>
@@ -738,7 +854,7 @@ export function JourneyCardPrintList() {
       <Panel className="mt-5">
         <PanelHeader title="Export Preview" eyebrow="Copy-ready rows" />
         <pre className="overflow-x-auto rounded-lg bg-journey-black p-4 text-xs font-bold text-journey-white">
-{`shift_date,employee,experience_card_id,card_type,possible_xp
+{`shift_date,card_mode,employee,experience_card_id,card_type,possible_xp
 ${assignments
   .map((assignment) => {
     const employee = state.employees.find((item) => item.id === assignment.employeeId);
@@ -750,6 +866,7 @@ ${assignments
 
     return [
       assignment.shiftDate,
+      employee ? "assigned" : "generic",
       employee?.name ?? "",
       employee?.passportId ?? "",
       area?.name ?? "",

@@ -17,12 +17,12 @@ export default function ManagerExperienceCardsPage() {
           Paper-to-digital shift workflow
         </p>
         <h2 className="mt-2 text-3xl font-black">
-          Choose who is working where today, print the cards, then enter verified
-          items after shift handoff.
+          Print generic cards by work area, let staff write their name, then enter
+          verified items after shift handoff.
         </h2>
         <p className="mt-3 max-w-3xl text-sm font-bold leading-6 text-journey-line">
-          Employees can work different areas on different days. Select the card type
-          based on the scheduled assignment, not the employee&apos;s default department.
+          Managers choose the employee when the card is turned in, so staff do not
+          need to log in or receive a personalized card before the shift starts.
         </p>
       </Panel>
       <JourneyCardPrintList />
