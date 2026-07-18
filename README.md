@@ -82,8 +82,8 @@ Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` after the Experience Builder log
 
 The launch surface is intentionally limited to two flows:
 
-1. `/manage` is the single unlisted manager operations area. Managers can capture Odyssey points, process Crew Quest cards, redeem rewards, add or rename managers and crew, archive inactive people, and import an Excel/CSV employee list. There is no manager login for this Lite flow, and the manager route is not linked from the employee page.
-2. `/` is the public, read-only crew leaderboard. It shows every active employee's points earned, points pending for rewards, points redeemed, and points still available. Employees need no account, code, token, or special link.
+1. `/manage` is the single unlisted manager operations area. Managers can capture Odyssey points with a required note, process Crew Quest cards without choosing an area, review each person's point ledger, correct points, redeem or unredeem rewards, add or rename managers and crew, archive inactive people, and import an Excel/CSV employee list. People are managed by name and role only. There is no manager login for this Lite flow, and the manager route is not linked from the employee page.
+2. `/` is the public, read-only crew leaderboard. It shows every active employee's lifetime points earned, points pending for rewards, points redeemed, and points still available. Employees need no account, code, token, or special link. The page can export the current leaderboard as a formatted `.xlsx` workbook.
 
 Legacy `/points/<unique-employee-token>` links redirect to the shared leaderboard so old bookmarks do not break. Builder and advanced feature work is preserved behind authentication and feature flags. Staff can sign in at the unadvertised `/staff-access` route.
 
@@ -145,6 +145,7 @@ The app now writes operational state to Supabase through server routes:
 
 - Capture Moment writes the shared operating state and `experience_moments`.
 - Experience Card batch entry writes the shared operating state, `experience_card_batches`, and `experience_moments`.
+- Point History reads saved `experience_moments` and manager point corrections per employee.
 - Reward requests and approvals write the shared operating state and `reward_redemptions`.
 - Recognition Studio, Rewards Studio, Season Planner, Standards, Displays, Scoring, and related Studio edits write the shared operating state and best-effort normalized config rows.
 

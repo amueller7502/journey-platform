@@ -114,7 +114,7 @@ export function RecognitionForm() {
       className="grid gap-5"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (!employee || !recognitionType) {
+        if (!employee || !recognitionType || !note.trim()) {
           return;
         }
 
@@ -271,7 +271,7 @@ export function RecognitionForm() {
 
       <div className="grid gap-4 lg:grid-cols-[1fr_0.35fr]">
         <label className="grid gap-2 text-sm font-bold text-journey-black">
-          Optional Moment Note
+          Moment Note (required)
           <textarea
             value={note}
             onChange={(event) => {
@@ -279,8 +279,9 @@ export function RecognitionForm() {
               setSubmitted(false);
             }}
             rows={3}
+            required
             className="focus-ring resize-none rounded-md border border-journey-line bg-journey-white px-3 py-3"
-            placeholder="What Moment mattered? Optional."
+            placeholder="Describe exactly what the employee did."
           />
         </label>
 
@@ -326,7 +327,7 @@ export function RecognitionForm() {
           <Button
             icon={Send}
             type="submit"
-            disabled={submitting || submitted || !recognitionOptions.length}
+            disabled={submitting || submitted || !recognitionOptions.length || !note.trim()}
           >
             {submitting ? "Capturing..." : submitted ? "Moment Captured" : "Capture Moment"}
           </Button>

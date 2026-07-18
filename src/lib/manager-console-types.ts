@@ -32,6 +32,18 @@ export type ManagerConsoleRedemption = {
   fulfilledAt: string;
 };
 
+export type ManagerConsolePointHistory = {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  managerName: string;
+  label: string;
+  points: number;
+  note: string;
+  source: "moment" | "crew_quest" | "correction";
+  createdAt: string;
+};
+
 export type ManagerConsoleDepartment = {
   id: DepartmentId;
   name: string;

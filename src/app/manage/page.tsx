@@ -6,6 +6,7 @@ import { ODYSSEY_RECOGNITION_TYPE_IDS } from "@/lib/odyssey-config";
 import { readExperienceState } from "@/lib/server/experience-state";
 import {
   managerConsolePeople,
+  managerConsolePointHistory,
   managerConsoleRedemptions,
   managerConsoleRewards,
 } from "@/lib/server/manager-console";
@@ -27,6 +28,7 @@ export default async function ManagerSubmissionPage() {
   const people = managerConsolePeople(state);
   const rewards = managerConsoleRewards(state);
   const redemptions = managerConsoleRedemptions(state);
+  const pointHistory = await managerConsolePointHistory(state);
   const odysseyTypeIds = new Set<string>(ODYSSEY_RECOGNITION_TYPE_IDS);
   const recognitionTypes = state.recognitionTypes
     .filter(
@@ -36,10 +38,6 @@ export default async function ManagerSubmissionPage() {
         !isArchived(type),
     )
     .sort((a, b) => a.sortOrder - b.sortOrder);
-  const cardAreas = state.journeyCardAreas
-    .filter((area) => area.enabled && !isArchived(area))
-    .sort((a, b) => a.sortOrder - b.sortOrder);
-
   return (
     <main className="odyssey-public-shell min-h-screen px-3 py-3 text-[#fff8e7] sm:px-6 sm:py-6">
       <div className="odyssey-public-frame mx-auto max-w-5xl p-4 sm:p-7">
@@ -62,12 +60,8 @@ export default async function ManagerSubmissionPage() {
             initialPeople={people}
             initialRewards={rewards}
             initialRedemptions={redemptions}
-            departments={state.departments.map((department) => ({
-              id: department.id,
-              name: department.name,
-            }))}
+            initialPointHistory={pointHistory}
             recognitionTypes={recognitionTypes}
-            cardAreas={cardAreas}
             persistenceReady={mode === "supabase" && Boolean(submissionCredential)}
             persistenceMessage={
               mode !== "supabase"

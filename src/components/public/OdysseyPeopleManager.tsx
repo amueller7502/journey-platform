@@ -4,7 +4,6 @@ import { readSheet, type Row } from "read-excel-file/browser";
 import { FileSpreadsheet, LoaderCircle, Plus, Save, Trash2, Users } from "lucide-react";
 import { useRef, useState } from "react";
 import type {
-  ManagerConsoleDepartment,
   ManagerConsolePerson,
   ManagerRosterInput,
 } from "@/lib/manager-console-types";
@@ -61,7 +60,6 @@ function importRowsFromMatrix(matrix: Row[]): ManagerRosterInput[] {
     "first_name",
     "last_name",
     "role",
-    "department",
     "title",
     "email",
   ]);
@@ -88,7 +86,6 @@ function importRowsFromMatrix(matrix: Row[]): ManagerRosterInput[] {
       return {
         name,
         role: String(record.role ?? "").toLowerCase() === "manager" ? "manager" : "employee",
-        department: record.department,
         title: record.title,
         email: record.email,
       } satisfies ManagerRosterInput;
@@ -98,13 +95,11 @@ function importRowsFromMatrix(matrix: Row[]): ManagerRosterInput[] {
 
 function PersonEditor({
   person,
-  departments,
   disabled,
   onSave,
   onArchive,
 }: {
   person: ManagerConsolePerson;
-  departments: ManagerConsoleDepartment[];
   disabled: boolean;
   onSave: (person: ManagerRosterInput) => Promise<void>;
   onArchive: (person: ManagerConsolePerson) => Promise<void>;
@@ -113,10 +108,9 @@ function PersonEditor({
   const [role, setRole] = useState<"employee" | "manager">(
     person.role === "employee" ? "employee" : "manager",
   );
-  const [department, setDepartment] = useState(person.department);
 
   return (
-    <div className="grid gap-3 rounded-lg border border-[#ded2a7] bg-white p-4 sm:grid-cols-[1.35fr_.75fr_1fr_auto] sm:items-end">
+    <div className="grid gap-3 rounded-lg border border-[#ded2a7] bg-white p-4 sm:grid-cols-[1.5fr_.8fr_auto] sm:items-end">
       <label className="grid gap-1 text-xs font-black uppercase tracking-[0.12em] text-[#8b712f]">
         Name
         <input
@@ -138,19 +132,6 @@ function PersonEditor({
           <option value="manager">Manager</option>
         </select>
       </label>
-      <label className="grid gap-1 text-xs font-black uppercase tracking-[0.12em] text-[#8b712f]">
-        Department
-        <select
-          value={department}
-          onChange={(event) => setDepartment(event.target.value as typeof department)}
-          disabled={person.role === "admin" || role === "manager"}
-          className="min-h-11 rounded-md border border-[#d4c27e] px-3 text-sm font-bold normal-case tracking-normal text-[#102631] disabled:bg-[#f0ecdf]"
-        >
-          {departments.map((item) => (
-            <option key={item.id} value={item.id}>{item.name}</option>
-          ))}
-        </select>
-      </label>
       {person.role === "admin" ? (
         <span className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#102631] px-4 text-xs font-black uppercase tracking-[0.12em] text-[#f3d878]">
           Builder
@@ -160,7 +141,7 @@ function PersonEditor({
           <button
             type="button"
             disabled={disabled || !name.trim()}
-            onClick={() => void onSave({ id: person.id, name, role, department })}
+            onClick={() => void onSave({ id: person.id, name, role })}
             className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-md bg-[#102631] px-3 text-sm font-black text-[#f3d878] disabled:opacity-45"
           >
             <Save className="h-4 w-4" aria-hidden="true" />
@@ -184,20 +165,17 @@ function PersonEditor({
 export function OdysseyPeopleManager({
   submissionCredential,
   people,
-  departments,
   persistenceReady,
   onPeopleChange,
 }: {
   submissionCredential: string;
   people: ManagerConsolePerson[];
-  departments: ManagerConsoleDepartment[];
   persistenceReady: boolean;
   onPeopleChange: (people: ManagerConsolePerson[]) => void;
 }) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState<"employee" | "manager">("employee");
-  const [newDepartment, setNewDepartment] = useState(departments[0]?.id ?? "floor");
   const [status, setStatus] = useState<PeopleStatus>({ kind: "idle" });
   const [importPreview, setImportPreview] = useState<ManagerRosterInput[]>([]);
   const blocked = !persistenceReady || status.kind === "working";
@@ -368,12 +346,12 @@ export function OdysseyPeopleManager({
           Excel columns
         </p>
         <p className="mt-1 text-sm font-bold text-[#526875]">
-          Name is required. Optional columns: Role, Department, Title, Email. A one-column
+          Name is required. Optional columns: Role, Title, Email. A one-column
           spreadsheet containing names also works.
         </p>
       </div>
 
-      <div className="mt-5 grid gap-3 rounded-lg border border-[#ded2a7] bg-white p-4 sm:grid-cols-[1.2fr_.8fr_1fr_auto] sm:items-end">
+      <div className="mt-5 grid gap-3 rounded-lg border border-[#ded2a7] bg-white p-4 sm:grid-cols-[1.4fr_.8fr_auto] sm:items-end">
         <label className="grid gap-1 text-xs font-black uppercase tracking-[0.12em] text-[#8b712f]">
           Name
           <input
@@ -394,24 +372,11 @@ export function OdysseyPeopleManager({
             <option value="manager">Manager</option>
           </select>
         </label>
-        <label className="grid gap-1 text-xs font-black uppercase tracking-[0.12em] text-[#8b712f]">
-          Department
-          <select
-            value={newDepartment}
-            onChange={(event) => setNewDepartment(event.target.value as typeof newDepartment)}
-            disabled={newRole === "manager"}
-            className="min-h-11 rounded-md border border-[#d4c27e] px-3 text-sm font-bold normal-case tracking-normal text-[#102631] disabled:bg-[#f0ecdf]"
-          >
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>{department.name}</option>
-            ))}
-          </select>
-        </label>
         <button
           type="button"
           disabled={blocked || !newName.trim()}
           onClick={() => {
-            void savePeople([{ name: newName, role: newRole, department: newDepartment }]);
+            void savePeople([{ name: newName, role: newRole }]);
             setNewName("");
           }}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#d71920] px-4 text-sm font-black text-white disabled:opacity-45"
@@ -445,7 +410,6 @@ export function OdysseyPeopleManager({
             <PersonEditor
               key={`${person.id}:${person.name}:${person.role}:${person.department}`}
               person={person}
-              departments={departments}
               disabled={blocked}
               onSave={(input) => savePeople([input])}
               onArchive={archivePerson}

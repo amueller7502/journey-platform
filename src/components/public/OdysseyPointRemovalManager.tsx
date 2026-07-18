@@ -2,7 +2,10 @@
 
 import { LoaderCircle, MinusCircle } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { ManagerConsolePerson } from "@/lib/manager-console-types";
+import type {
+  ManagerConsolePerson,
+  ManagerConsolePointHistory,
+} from "@/lib/manager-console-types";
 
 type RemovalStatus =
   | { kind: "idle" }
@@ -16,12 +19,14 @@ export function OdysseyPointRemovalManager({
   managerId,
   persistenceReady,
   onPeopleChange,
+  onHistoryAdd,
 }: {
   submissionCredential: string;
   people: ManagerConsolePerson[];
   managerId: string;
   persistenceReady: boolean;
   onPeopleChange: (people: ManagerConsolePerson[]) => void;
+  onHistoryAdd: (entry: ManagerConsolePointHistory) => void;
 }) {
   const crew = useMemo(
     () => people.filter((person) => person.role === "employee"),
@@ -71,12 +76,16 @@ export function OdysseyPointRemovalManager({
         error?: string;
         message?: string;
         people?: ManagerConsolePerson[];
+        historyEntry?: ManagerConsolePointHistory;
       };
       if (!response.ok || !payload.people) {
         throw new Error(payload.error ?? "The points could not be removed.");
       }
 
       onPeopleChange(payload.people);
+      if (payload.historyEntry) {
+        onHistoryAdd(payload.historyEntry);
+      }
       setPoints("");
       setReason("");
       setStatus({ kind: "success", message: payload.message ?? "Points removed." });

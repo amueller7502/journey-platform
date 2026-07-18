@@ -24,9 +24,10 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as CaptureMomentBody;
-  if (!body.employeeId || !body.recognitionTypeId) {
+  const submittedNote = body.note?.trim() ?? "";
+  if (!body.employeeId || !body.recognitionTypeId || !submittedNote) {
     return NextResponse.json(
-      { error: "Employee and recognition type are required." },
+      { error: "Employee, recognition type, and a manager note are required." },
       { status: 400 },
     );
   }
@@ -52,9 +53,7 @@ export async function POST(request: Request) {
     recognitionType.id === "manager_above_beyond" && body.xp
       ? body.xp
       : recognitionType.milesValue;
-  const note =
-    body.note?.trim() ||
-    `${employee.name} created an Experience Moment through ${recognitionType.name.toLowerCase()}.`;
+  const note = submittedNote;
   const moment = {
     id: `moment-${employee.id}-${recognitionType.id}-${Date.now()}`,
     employeeId: employee.id,

@@ -104,6 +104,17 @@ export async function POST(request: Request) {
     {
       ...result,
       people: managerConsolePeople(result.state),
+      historyEntry: {
+        id: adjustment.id,
+        employeeId: employee.id,
+        employeeName: employee.name,
+        managerName: manager.name,
+        label: "Point correction",
+        points: -points,
+        note: reason,
+        source: "correction",
+        createdAt,
+      },
       message: `${points} points were removed from ${employee.name}.`,
     },
     { status: result.ok ? 200 : 500 },

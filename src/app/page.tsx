@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Anchor, Coins, Gift, Users } from "lucide-react";
+import { Anchor, Coins, FileSpreadsheet, Gift, Users } from "lucide-react";
 import { OdysseyMasthead } from "@/components/public/OdysseyMasthead";
 import { readExperienceState } from "@/lib/server/experience-state";
-import type { Redemption } from "@/lib/types";
+import { crewLeaderboardRows } from "@/lib/server/leaderboard";
 
 export const dynamic = "force-dynamic";
 
@@ -12,57 +12,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-function isPendingRedemption(status: Redemption["status"]) {
-  return (
-    status === "Requested" ||
-    status === "Approved" ||
-    status === "Pending" ||
-    status === "Ready"
-  );
-}
-
 export default async function LeaderboardPage() {
   const { state } = await readExperienceState();
-  const rewardCostById = new Map(
-    state.rewards.map((reward) => [reward.id, reward.milesCost]),
-  );
-  const rows = state.employees
-    .filter((employee) => employee.role === "employee" && employee.active !== false)
-    .map((employee) => {
-      const employeeRedemptions = state.redemptions.filter(
-        (redemption) => redemption.employeeId === employee.id,
-      );
-      const redeemed = employeeRedemptions
-        .filter((redemption) => redemption.status === "Fulfilled")
-        .reduce(
-          (total, redemption) =>
-            total + (redemption.pointsCost ?? rewardCostById.get(redemption.rewardId) ?? 0),
-          0,
-        );
-      const pending = employeeRedemptions
-        .filter((redemption) => isPendingRedemption(redemption.status))
-        .reduce(
-          (total, redemption) =>
-            total + (redemption.pointsCost ?? rewardCostById.get(redemption.rewardId) ?? 0),
-          0,
-        );
-
-      return {
-        id: employee.id,
-        name: employee.name,
-        earned: employee.miles,
-        pending,
-        redeemed,
-        available: Math.max(0, employee.miles - pending - redeemed),
-      };
-    })
-    .sort(
-      (a, b) =>
-        b.earned - a.earned ||
-        b.available - a.available ||
-        a.name.localeCompare(b.name),
-    )
-    .map((row, index) => ({ ...row, rank: index + 1 }));
+  const rows = crewLeaderboardRows(state);
 
   const totalEarned = rows.reduce((total, row) => total + row.earned, 0);
   const totalRedeemed = rows.reduce((total, row) => total + row.redeemed, 0);
@@ -108,6 +60,16 @@ export default async function LeaderboardPage() {
             <p className="mt-1 text-3xl font-black">{totalRedeemed.toLocaleString()}</p>
           </div>
         </section>
+
+        <div className="relative z-10 mt-4 flex justify-end">
+          <a
+            href="/api/experience/leaderboard-export"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#f3d878] px-5 text-sm font-black text-[#102631] shadow-[0_12px_30px_rgba(0,0,0,.2)]"
+          >
+            <FileSpreadsheet className="h-5 w-5 text-[#b41920]" aria-hidden="true" />
+            Export Leaderboard to Excel
+          </a>
+        </div>
 
         <section className="relative z-10 mt-5 overflow-hidden rounded-xl border border-[#c8a958]/70 bg-[#fffaf0] text-[#102631] shadow-[0_22px_60px_rgba(0,0,0,.25)]">
           <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#d7c78d] p-5 sm:p-6">

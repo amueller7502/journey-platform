@@ -5,6 +5,7 @@ import {
   Check,
   ClipboardCheck,
   Gift,
+  History,
   LoaderCircle,
   MinusCircle,
   Search,
@@ -13,16 +14,17 @@ import {
 } from "lucide-react";
 import { OdysseyPeopleManager } from "@/components/public/OdysseyPeopleManager";
 import { OdysseyPointRemovalManager } from "@/components/public/OdysseyPointRemovalManager";
+import { OdysseyPointHistory } from "@/components/public/OdysseyPointHistory";
 import { OdysseyRedemptionManager } from "@/components/public/OdysseyRedemptionManager";
 import type {
-  ManagerConsoleDepartment,
   ManagerConsolePerson,
+  ManagerConsolePointHistory,
   ManagerConsoleRedemption,
   ManagerConsoleReward,
 } from "@/lib/manager-console-types";
-import type { JourneyCardArea, RecognitionType } from "@/lib/types";
+import type { RecognitionType } from "@/lib/types";
 
-type Mode = "moment" | "card" | "redeem" | "remove" | "people";
+type Mode = "moment" | "card" | "redeem" | "remove" | "history" | "people";
 
 type SubmissionStatus =
   | { kind: "idle" }
@@ -35,9 +37,8 @@ export function OdysseyManagerSubmission({
   initialPeople,
   initialRewards,
   initialRedemptions,
-  departments,
+  initialPointHistory,
   recognitionTypes,
-  cardAreas,
   persistenceReady,
   persistenceMessage,
 }: {
@@ -45,9 +46,8 @@ export function OdysseyManagerSubmission({
   initialPeople: ManagerConsolePerson[];
   initialRewards: ManagerConsoleReward[];
   initialRedemptions: ManagerConsoleRedemption[];
-  departments: ManagerConsoleDepartment[];
+  initialPointHistory: ManagerConsolePointHistory[];
   recognitionTypes: RecognitionType[];
-  cardAreas: JourneyCardArea[];
   persistenceReady: boolean;
   persistenceMessage?: string;
 }) {
@@ -55,6 +55,7 @@ export function OdysseyManagerSubmission({
   const [people, setPeople] = useState(initialPeople);
   const [rewards, setRewards] = useState(initialRewards);
   const [redemptions, setRedemptions] = useState(initialRedemptions);
+  const [pointHistory, setPointHistory] = useState(initialPointHistory);
   const [search, setSearch] = useState("");
   const [employeeId, setEmployeeId] = useState(
     initialPeople.find((person) => person.role === "employee")?.id ?? "",
@@ -64,11 +65,6 @@ export function OdysseyManagerSubmission({
   );
   const [recognitionTypeId, setRecognitionTypeId] = useState(
     recognitionTypes.find((type) => !type.journeyCardEligible)?.id ?? "",
-  );
-  const [cardAreaId, setCardAreaId] = useState(
-    initialPeople.find((person) => person.role === "employee")?.journeyCardAreaId ??
-      cardAreas[0]?.id ??
-      "",
   );
   const [selectedCardTypeIds, setSelectedCardTypeIds] = useState<string[]>(() => {
     const firstCardType = recognitionTypes.find((type) => type.journeyCardEligible);
@@ -111,9 +107,7 @@ export function OdysseyManagerSubmission({
   const selectedRecognition =
     momentTypes.find((type) => type.id === recognitionTypeId) ?? momentTypes[0];
   const availableCardTypes = recognitionTypes.filter(
-    (type) =>
-      type.journeyCardEligible &&
-      (!type.journeyCardAreaIds?.length || type.journeyCardAreaIds.includes(cardAreaId)),
+    (type) => type.journeyCardEligible,
   );
   const selectedCardTypes = availableCardTypes.filter((type) =>
     selectedCardTypeIds.includes(type.id),
@@ -125,10 +119,6 @@ export function OdysseyManagerSubmission({
 
   function chooseEmployee(nextEmployeeId: string) {
     setEmployeeId(nextEmployeeId);
-    const employee = crew.find((item) => item.id === nextEmployeeId);
-    if (employee?.journeyCardAreaId) {
-      setCardAreaId(employee.journeyCardAreaId);
-    }
     setStatus({ kind: "idle" });
   }
 
@@ -147,7 +137,7 @@ export function OdysseyManagerSubmission({
   }
 
   async function submitMoment() {
-    if (!selectedEmployee || !selectedRecognition || !activeManagerId) {
+    if (!selectedEmployee || !selectedRecognition || !activeManagerId || !note.trim()) {
       return;
     }
 
@@ -166,12 +156,39 @@ export function OdysseyManagerSubmission({
           note,
         }),
       });
-      const payload = (await response.json()) as { error?: string };
+      const payload = (await response.json()) as {
+        error?: string;
+        moment?: {
+          id: string;
+          employeeId: string;
+          recognitionTypeName: string;
+          miles: number;
+          note: string;
+          createdAt: string;
+          managerName: string;
+        };
+      };
       if (!response.ok) {
         throw new Error(payload.error ?? "The points could not be saved.");
       }
 
       addPoints(selectedEmployee, selectedRecognition.milesValue);
+      if (payload.moment) {
+        setPointHistory((current) => [
+          {
+            id: payload.moment!.id,
+            employeeId: payload.moment!.employeeId,
+            employeeName: selectedEmployee.name,
+            managerName: payload.moment!.managerName,
+            label: payload.moment!.recognitionTypeName,
+            points: payload.moment!.miles,
+            note: payload.moment!.note,
+            source: "moment",
+            createdAt: payload.moment!.createdAt,
+          },
+          ...current,
+        ]);
+      }
       setNote("");
       setStatus({
         kind: "success",
@@ -186,7 +203,7 @@ export function OdysseyManagerSubmission({
   }
 
   async function submitCard() {
-    if (!selectedEmployee || !activeManagerId || !cardAreaId || !selectedCardTypes.length) {
+    if (!selectedEmployee || !activeManagerId || !selectedCardTypes.length) {
       return;
     }
 
@@ -201,18 +218,45 @@ export function OdysseyManagerSubmission({
         body: JSON.stringify({
           employeeId: selectedEmployee.id,
           managerId: activeManagerId,
-          areaId: cardAreaId,
           recognitionTypeIds: selectedCardTypes.map((type) => type.id),
           note,
         }),
       });
-      const payload = (await response.json()) as { error?: string; totalXp?: number };
+      const payload = (await response.json()) as {
+        error?: string;
+        totalXp?: number;
+        moments?: Array<{
+          id: string;
+          employeeId: string;
+          recognitionTypeName: string;
+          miles: number;
+          note: string;
+          createdAt: string;
+          managerName: string;
+        }>;
+      };
       if (!response.ok) {
         throw new Error(payload.error ?? "The Crew Quest card could not be saved.");
       }
 
       const points = payload.totalXp ?? selectedCardPoints;
       addPoints(selectedEmployee, points);
+      if (payload.moments?.length) {
+        setPointHistory((current) => [
+          ...payload.moments!.map((moment) => ({
+            id: moment.id,
+            employeeId: moment.employeeId,
+            employeeName: selectedEmployee.name,
+            managerName: moment.managerName,
+            label: moment.recognitionTypeName,
+            points: moment.miles,
+            note: moment.note,
+            source: "crew_quest" as const,
+            createdAt: moment.createdAt,
+          })),
+          ...current,
+        ]);
+      }
       setNote("");
       setStatus({
         kind: "success",
@@ -236,12 +280,13 @@ export function OdysseyManagerSubmission({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)] sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)] sm:grid-cols-3 lg:grid-cols-6">
         {([
           ["moment", "Capture Points", Sparkles],
           ["card", "Crew Quest", ClipboardCheck],
           ["redeem", "Redeem Points", Gift],
           ["remove", "Remove Points", MinusCircle],
+          ["history", "Point History", History],
           ["people", "People", Users],
         ] as const).map(([id, label, Icon]) => (
           <button
@@ -267,10 +312,11 @@ export function OdysseyManagerSubmission({
         <OdysseyPeopleManager
           submissionCredential={submissionCredential}
           people={people}
-          departments={departments}
           persistenceReady={persistenceReady}
           onPeopleChange={setPeople}
         />
+      ) : mode === "history" ? (
+        <OdysseyPointHistory people={people} history={pointHistory} />
       ) : mode === "redeem" ? (
         <OdysseyRedemptionManager
           submissionCredential={submissionCredential}
@@ -292,6 +338,7 @@ export function OdysseyManagerSubmission({
           managerId={activeManagerId}
           persistenceReady={persistenceReady}
           onPeopleChange={setPeople}
+          onHistoryAdd={(entry) => setPointHistory((current) => [entry, ...current])}
         />
       ) : (
       <section className="rounded-xl border border-[#ccb567] bg-[#fffaf0] p-4 shadow-[0_16px_45px_rgba(8,27,36,.14)] sm:p-6">
@@ -382,21 +429,6 @@ export function OdysseyManagerSubmission({
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#b41920]">Turned-in card</p>
               <h2 className="mt-1 font-serif text-3xl font-bold text-[#102631]">Process Crew Quest</h2>
             </div>
-            <label className="grid gap-2 text-sm font-black text-[#102631]">
-              Area worked
-              <select
-                value={cardAreaId}
-                onChange={(event) => {
-                  setCardAreaId(event.target.value);
-                  setSelectedCardTypeIds([]);
-                }}
-                className="min-h-12 rounded-lg border-2 border-[#d4c27e] bg-white px-3 outline-none focus:border-[#d71920]"
-              >
-                {cardAreas.map((area) => (
-                  <option key={area.id} value={area.id}>{area.name}</option>
-                ))}
-              </select>
-            </label>
             {availableCardTypes.map((type) => {
               const checked = selectedCardTypeIds.includes(type.id);
               return (
@@ -420,7 +452,6 @@ export function OdysseyManagerSubmission({
                   />
                   <span className="flex-1">
                     <span className="block font-black text-[#102631]">{type.name}</span>
-                    <span className="mt-1 block text-sm font-semibold text-[#526875]">{type.description}</span>
                   </span>
                   <span className="font-black text-[#b41920]">+{type.milesValue}</span>
                 </label>
@@ -430,13 +461,13 @@ export function OdysseyManagerSubmission({
         ) : null}
 
         <label className="mt-5 grid gap-2 text-sm font-black text-[#102631]">
-          Optional manager note
+          {mode === "moment" ? "Manager note (required)" : "Optional manager note"}
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
             rows={3}
             className="resize-none rounded-lg border-2 border-[#d4c27e] bg-white p-3 outline-none focus:border-[#d71920]"
-            placeholder="Add a detail only when it helps tell the story."
+            placeholder={mode === "moment" ? "Describe exactly what the crew member did." : "Add a detail only when it helps tell the story."}
           />
         </label>
 
@@ -466,7 +497,7 @@ export function OdysseyManagerSubmission({
             blocked ||
             !selectedEmployee ||
             !activeManagerId ||
-            (mode === "moment" ? !selectedRecognition : !selectedCardTypes.length)
+            (mode === "moment" ? !selectedRecognition || !note.trim() : !selectedCardTypes.length)
           }
           onClick={mode === "moment" ? submitMoment : submitCard}
           className="mt-5 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-[#d71920] px-5 text-base font-black text-white shadow-[0_12px_28px_rgba(215,25,32,.24)] transition hover:bg-[#ad1017] disabled:cursor-not-allowed disabled:opacity-45"

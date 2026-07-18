@@ -137,7 +137,11 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const department = departmentFor(input.department, role, validDepartments);
+    const department = departmentFor(
+      input.department ?? existing?.department,
+      role,
+      validDepartments,
+    );
     const journeyCardAreaId =
       state.journeyCardAreas.find((area) => area.departmentIds.includes(department))?.id ??
       state.journeyCardAreas.find((area) => area.enabled)?.id;

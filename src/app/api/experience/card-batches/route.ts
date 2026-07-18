@@ -26,9 +26,9 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as CardBatchBody;
   const selectedIds = body.recognitionTypeIds ?? [];
-  if (!body.employeeId || !body.areaId || !selectedIds.length) {
+  if (!body.employeeId || !selectedIds.length) {
     return NextResponse.json(
-      { error: "Employee, card area, and verified items are required." },
+      { error: "Employee and verified Crew Quest items are required." },
       { status: 400 },
     );
   }
@@ -38,16 +38,20 @@ export async function POST(request: Request) {
   const manager =
     state.employees.find((item) => item.id === body.managerId) ??
     state.employees.find((item) => item.role === "manager" && item.active !== false);
-  const cardArea = state.journeyCardAreas.find(
-    (area) => area.id === body.areaId && area.enabled && !isArchived(area),
-  );
+  const cardArea =
+    state.journeyCardAreas.find(
+      (area) =>
+        area.id === employee?.journeyCardAreaId &&
+        area.enabled &&
+        !isArchived(area),
+    ) ??
+    state.journeyCardAreas.find((area) => area.enabled && !isArchived(area));
   const selectedTypes = state.recognitionTypes.filter(
     (type) =>
       selectedIds.includes(type.id) &&
       type.enabled &&
       !isArchived(type) &&
-      type.journeyCardEligible &&
-      (!type.journeyCardAreaIds?.length || type.journeyCardAreaIds.includes(body.areaId!)),
+      type.journeyCardEligible,
   );
 
   if (!employee || employee.role !== "employee" || !manager || !cardArea || !selectedTypes.length) {
