@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   managerConsolePeople,
+  managerConsoleRedemptions,
   managerConsoleRewards,
 } from "@/lib/server/manager-console";
 import {
@@ -14,6 +15,7 @@ import type { Redemption } from "@/lib/types";
 type ManagerRedemptionBody = {
   employeeId?: string;
   rewardId?: string;
+  redemptionId?: string;
   managerId?: string;
 };
 
@@ -89,6 +91,7 @@ export async function POST(request: Request) {
     employeeId: employee.id,
     rewardId: reward.id,
     pointsCost: reward.milesCost,
+    inventoryDebited: reward.inventoryCount > 0,
     status: "Fulfilled",
     requestedAt: fulfilledAt,
     reviewedAt: fulfilledAt,
@@ -113,7 +116,71 @@ export async function POST(request: Request) {
       redemption,
       people: managerConsolePeople(result.state),
       rewards: managerConsoleRewards(result.state),
+      redemptions: managerConsoleRedemptions(result.state),
       message: `${employee.name} redeemed ${reward.milesCost} points for ${reward.name}.`,
+    },
+    { status: result.ok ? 200 : 500 },
+  );
+}
+
+export async function PATCH(request: Request) {
+  if (!(await requestCanSubmitExperience(request))) {
+    return NextResponse.json({ error: "This manager page is not authorized." }, { status: 401 });
+  }
+
+  const body = (await request.json()) as ManagerRedemptionBody;
+  if (!body.redemptionId) {
+    return NextResponse.json({ error: "A redemption is required." }, { status: 400 });
+  }
+
+  const { state } = await readExperienceState();
+  const redemption = state.redemptions.find((item) => item.id === body.redemptionId);
+  const manager =
+    state.employees.find(
+      (item) => item.id === body.managerId && item.role !== "employee" && item.active !== false,
+    ) ??
+    state.employees.find((item) => item.role !== "employee" && item.active !== false);
+
+  if (!redemption || redemption.status !== "Fulfilled" || !manager) {
+    return NextResponse.json(
+      { error: "That fulfilled redemption could not be reversed." },
+      { status: 404 },
+    );
+  }
+
+  const employee = state.employees.find((item) => item.id === redemption.employeeId);
+  const reward = state.rewards.find((item) => item.id === redemption.rewardId);
+  const reviewedAt = new Date().toISOString();
+  const reversed: Redemption = {
+    ...redemption,
+    status: "Cancelled",
+    reviewedAt,
+  };
+  const nextState = {
+    ...state,
+    redemptions: state.redemptions.map((item) =>
+      item.id === redemption.id ? reversed : item,
+    ),
+    rewards: state.rewards.map((item) =>
+      item.id === redemption.rewardId && redemption.inventoryDebited
+        ? { ...item, inventoryCount: item.inventoryCount + 1 }
+        : item,
+    ),
+    updatedAt: reviewedAt,
+  };
+  const result = await writeExperienceState(nextState, { syncConfig: true });
+  await recordRewardRedemption(reversed, result.syncIssues);
+  const pointsCost =
+    redemption.pointsCost ?? reward?.milesCost ?? 0;
+
+  return NextResponse.json(
+    {
+      ...result,
+      redemption: reversed,
+      people: managerConsolePeople(result.state),
+      rewards: managerConsoleRewards(result.state),
+      redemptions: managerConsoleRedemptions(result.state),
+      message: `${employee?.name ?? "Crew member"}'s ${reward?.name ?? "reward"} redemption was reversed. ${pointsCost} points are available again.`,
     },
     { status: result.ok ? 200 : 500 },
   );

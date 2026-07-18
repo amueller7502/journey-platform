@@ -1,6 +1,7 @@
 import { isArchived } from "@/lib/archive";
 import type {
   ManagerConsolePerson,
+  ManagerConsoleRedemption,
   ManagerConsoleReward,
 } from "@/lib/manager-console-types";
 import { ODYSSEY_REWARD_IDS } from "@/lib/odyssey-config";
@@ -85,4 +86,38 @@ export function managerConsoleRewards(
       pointsCost: reward.milesCost,
       inventoryCount: reward.inventoryCount,
     }));
+}
+
+export function managerConsoleRedemptions(
+  state: ExperienceOperatingState,
+): ManagerConsoleRedemption[] {
+  const employeeById = new Map(
+    state.employees.map((employee) => [employee.id, employee.name]),
+  );
+  const rewardById = new Map(
+    state.rewards.map((reward) => [
+      reward.id,
+      { name: reward.name, pointsCost: reward.milesCost },
+    ]),
+  );
+
+  return state.redemptions
+    .filter((redemption) => redemption.status === "Fulfilled")
+    .map((redemption) => {
+      const reward = rewardById.get(redemption.rewardId);
+      return {
+        id: redemption.id,
+        employeeId: redemption.employeeId,
+        employeeName: employeeById.get(redemption.employeeId) ?? "Former crew member",
+        rewardId: redemption.rewardId,
+        rewardName: reward?.name ?? "Archived reward",
+        pointsCost: redemption.pointsCost ?? reward?.pointsCost ?? 0,
+        fulfilledAt:
+          redemption.fulfilledAt ?? redemption.reviewedAt ?? redemption.requestedAt,
+      };
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.fulfilledAt).getTime() - new Date(a.fulfilledAt).getTime(),
+    );
 }

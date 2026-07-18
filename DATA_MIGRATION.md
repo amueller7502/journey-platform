@@ -8,7 +8,7 @@ Experience is now connected to Supabase-backed shared state. Treat production da
 - Do not run `supabase/seed.sql` in production unless you intentionally want sample Celebration Cinema North data in that environment.
 - For an existing Supabase project, apply only migration files from `supabase/migrations/`, in filename order.
 - Back up production data before applying migrations.
-- Keep `SUPABASE_SERVICE_ROLE_KEY` server-only. Never expose it through a `NEXT_PUBLIC_` environment variable.
+- Keep `SUPABASE_SECRET_KEY` or the legacy `SUPABASE_SERVICE_ROLE_KEY` server-only. Never expose either through a `NEXT_PUBLIC_` environment variable.
 
 ## Fresh Preview Environment
 
@@ -42,6 +42,10 @@ Run it before launching the Odyssey starter configuration. The current Lite flow
 ## Redemption Point Snapshot Migration
 
 `202607180002_redemption_point_snapshots.sql` adds a historical `points_cost` snapshot to reward redemptions and fills existing normalized rows from their linked reward when possible. It is additive and prevents a later reward-price edit from retroactively changing points already redeemed.
+
+## Point Correction And Reward Reversal Migration
+
+`202607180003_point_adjustments_and_redemption_reversals.sql` adds a server-only audit log for manager point corrections and records whether a reward redemption reduced tracked inventory. It is additive: existing earned points and redemption statuses are left unchanged. Run it before using Remove Points or Unredeem in production.
 
 ## Current Known Compatibility Names
 

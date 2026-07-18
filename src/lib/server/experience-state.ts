@@ -816,6 +816,7 @@ export async function recordRewardRedemption(
         employee_app_id: redemption.employeeId,
         reward_app_id: redemption.rewardId,
         points_cost: redemption.pointsCost,
+        inventory_debited: redemption.inventoryDebited ?? false,
         status: redemption.status.toLowerCase(),
         requested_at: redemption.requestedAt,
         reviewed_at: redemption.reviewedAt,
@@ -824,5 +825,33 @@ export async function recordRewardRedemption(
     ],
     syncIssues,
     "app_id",
+  );
+}
+
+export async function recordPointAdjustment(
+  row: {
+    id: string;
+    employeeId: string;
+    managerId: string;
+    amount: number;
+    reason: string;
+    createdAt: string;
+  },
+  syncIssues: SyncIssue[],
+) {
+  await bestEffortUpsert(
+    "point_adjustments",
+    [
+      {
+        id: row.id,
+        employee_app_id: row.employeeId,
+        manager_app_id: row.managerId,
+        direction: "remove",
+        amount: row.amount,
+        reason: row.reason,
+        created_at: row.createdAt,
+      },
+    ],
+    syncIssues,
   );
 }

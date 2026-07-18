@@ -96,7 +96,7 @@ export default async function LeaderboardPage() {
           <div className="rounded-xl border border-[#c8a958]/70 bg-[#fffaf0] p-5 text-[#102631] shadow-[0_16px_40px_rgba(0,0,0,.18)]">
             <Coins className="h-6 w-6 text-[#d71920]" aria-hidden="true" />
             <p className="mt-3 text-xs font-black uppercase tracking-[0.2em] text-[#9a7f39]">
-              Points Earned
+              Lifetime Points Earned
             </p>
             <p className="mt-1 text-3xl font-black">{totalEarned.toLocaleString()}</p>
           </div>
@@ -118,8 +118,8 @@ export default async function LeaderboardPage() {
               <h2 className="mt-1 font-serif text-3xl font-bold">Every point matters.</h2>
             </div>
             <p className="max-w-sm text-xs font-bold leading-5 text-[#526875] sm:text-right">
-              Pending points are reserved for requested or approved rewards. Available
-              points are what remain after pending and fulfilled redemptions.
+              Lifetime Earned never drops when a reward is redeemed. Available points are
+              what remain after pending and fulfilled redemptions.
             </p>
           </div>
 
@@ -132,7 +132,7 @@ export default async function LeaderboardPage() {
                 <tr className="text-xs font-black uppercase tracking-[0.14em]">
                   <th scope="col" className="px-4 py-4 text-center sm:px-6">Rank</th>
                   <th scope="col" className="px-4 py-4 sm:px-6">Crew Member</th>
-                  <th scope="col" className="px-4 py-4 text-right sm:px-6">Earned</th>
+                  <th scope="col" className="px-4 py-4 text-right sm:px-6">Lifetime Earned</th>
                   <th scope="col" className="px-4 py-4 text-right sm:px-6">Pending</th>
                   <th scope="col" className="px-4 py-4 text-right sm:px-6">Redeemed</th>
                   <th scope="col" className="px-4 py-4 text-right sm:px-6">Available</th>

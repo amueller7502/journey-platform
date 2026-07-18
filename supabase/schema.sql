@@ -1,6 +1,7 @@
 create extension if not exists pgcrypto;
 
 drop table if exists public.daily_spotlights cascade;
+drop table if exists public.point_adjustments cascade;
 drop table if exists public.journey_operating_state cascade;
 drop table if exists public.leadership_reward_redemptions cascade;
 drop table if exists public.leadership_points cascade;
@@ -1105,6 +1106,7 @@ alter table public.reward_redemptions
   add column if not exists employee_app_id text,
   add column if not exists reward_app_id text,
   add column if not exists fulfilled_at timestamptz,
+  add column if not exists inventory_debited boolean not null default false,
   alter column chapter_id drop not null,
   alter column employee_id drop not null,
   alter column reward_id drop not null;
@@ -1166,6 +1168,16 @@ create table public.experience_moments (
   created_at timestamptz not null default now()
 );
 
+create table public.point_adjustments (
+  id text primary key,
+  employee_app_id text not null,
+  manager_app_id text not null,
+  direction text not null default 'remove' check (direction in ('add', 'remove')),
+  amount integer not null check (amount > 0),
+  reason text not null,
+  created_at timestamptz not null default now()
+);
+
 create table public.display_settings (
   id text primary key,
   season_id text references public.experience_seasons (id) on delete cascade,
@@ -1203,6 +1215,8 @@ create index experience_moments_created_idx
   on public.experience_moments (created_at desc);
 create index experience_moments_employee_idx
   on public.experience_moments (employee_id, created_at desc);
+create index point_adjustments_employee_idx
+  on public.point_adjustments (employee_app_id, created_at desc);
 create index display_settings_season_idx
   on public.display_settings (season_id, enabled, sort_order);
 create index scoring_settings_season_idx
@@ -1220,6 +1234,7 @@ $$;
 
 alter table public.experience_standards enable row level security;
 alter table public.experience_moments enable row level security;
+alter table public.point_adjustments enable row level security;
 alter table public.display_settings enable row level security;
 alter table public.scoring_settings enable row level security;
 

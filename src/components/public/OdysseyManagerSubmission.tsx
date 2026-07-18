@@ -6,20 +6,23 @@ import {
   ClipboardCheck,
   Gift,
   LoaderCircle,
+  MinusCircle,
   Search,
   Sparkles,
   Users,
 } from "lucide-react";
 import { OdysseyPeopleManager } from "@/components/public/OdysseyPeopleManager";
+import { OdysseyPointRemovalManager } from "@/components/public/OdysseyPointRemovalManager";
 import { OdysseyRedemptionManager } from "@/components/public/OdysseyRedemptionManager";
 import type {
   ManagerConsoleDepartment,
   ManagerConsolePerson,
+  ManagerConsoleRedemption,
   ManagerConsoleReward,
 } from "@/lib/manager-console-types";
 import type { JourneyCardArea, RecognitionType } from "@/lib/types";
 
-type Mode = "moment" | "card" | "redeem" | "people";
+type Mode = "moment" | "card" | "redeem" | "remove" | "people";
 
 type SubmissionStatus =
   | { kind: "idle" }
@@ -31,22 +34,27 @@ export function OdysseyManagerSubmission({
   submissionCredential,
   initialPeople,
   initialRewards,
+  initialRedemptions,
   departments,
   recognitionTypes,
   cardAreas,
   persistenceReady,
+  persistenceMessage,
 }: {
   submissionCredential: string;
   initialPeople: ManagerConsolePerson[];
   initialRewards: ManagerConsoleReward[];
+  initialRedemptions: ManagerConsoleRedemption[];
   departments: ManagerConsoleDepartment[];
   recognitionTypes: RecognitionType[];
   cardAreas: JourneyCardArea[];
   persistenceReady: boolean;
+  persistenceMessage?: string;
 }) {
   const [mode, setMode] = useState<Mode>("moment");
   const [people, setPeople] = useState(initialPeople);
   const [rewards, setRewards] = useState(initialRewards);
+  const [redemptions, setRedemptions] = useState(initialRedemptions);
   const [search, setSearch] = useState("");
   const [employeeId, setEmployeeId] = useState(
     initialPeople.find((person) => person.role === "employee")?.id ?? "",
@@ -224,16 +232,16 @@ export function OdysseyManagerSubmission({
     <div className="grid gap-5">
       {!persistenceReady ? (
         <div className="rounded-lg border border-[#d71920]/45 bg-[#fff1ed] p-4 text-sm font-bold text-[#8f1217]">
-          Supabase is not connected in this environment. The screen is available for preview,
-          but submissions are paused so points cannot be lost.
+          {persistenceMessage ?? "Shared data is not connected in this environment. Submissions are paused so points cannot be lost."}
         </div>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)] sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)] sm:grid-cols-5">
         {([
           ["moment", "Capture Points", Sparkles],
           ["card", "Crew Quest", ClipboardCheck],
           ["redeem", "Redeem Points", Gift],
+          ["remove", "Remove Points", MinusCircle],
           ["people", "People", Users],
         ] as const).map(([id, label, Icon]) => (
           <button
@@ -268,12 +276,22 @@ export function OdysseyManagerSubmission({
           submissionCredential={submissionCredential}
           people={people}
           rewards={rewards}
+          redemptions={redemptions}
           managerId={activeManagerId}
           persistenceReady={persistenceReady}
-          onChange={(nextPeople, nextRewards) => {
+          onChange={(nextPeople, nextRewards, nextRedemptions) => {
             setPeople(nextPeople);
             setRewards(nextRewards);
+            setRedemptions(nextRedemptions);
           }}
+        />
+      ) : mode === "remove" ? (
+        <OdysseyPointRemovalManager
+          submissionCredential={submissionCredential}
+          people={people}
+          managerId={activeManagerId}
+          persistenceReady={persistenceReady}
+          onPeopleChange={setPeople}
         />
       ) : (
       <section className="rounded-xl border border-[#ccb567] bg-[#fffaf0] p-4 shadow-[0_16px_45px_rgba(8,27,36,.14)] sm:p-6">

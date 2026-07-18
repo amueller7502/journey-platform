@@ -1,9 +1,10 @@
 "use client";
 
-import { Gift, LoaderCircle } from "lucide-react";
+import { Gift, LoaderCircle, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
 import type {
   ManagerConsolePerson,
+  ManagerConsoleRedemption,
   ManagerConsoleReward,
 } from "@/lib/manager-console-types";
 
@@ -17,6 +18,7 @@ export function OdysseyRedemptionManager({
   submissionCredential,
   people,
   rewards,
+  redemptions,
   managerId,
   persistenceReady,
   onChange,
@@ -24,9 +26,14 @@ export function OdysseyRedemptionManager({
   submissionCredential: string;
   people: ManagerConsolePerson[];
   rewards: ManagerConsoleReward[];
+  redemptions: ManagerConsoleRedemption[];
   managerId: string;
   persistenceReady: boolean;
-  onChange: (people: ManagerConsolePerson[], rewards: ManagerConsoleReward[]) => void;
+  onChange: (
+    people: ManagerConsolePerson[],
+    rewards: ManagerConsoleReward[],
+    redemptions: ManagerConsoleRedemption[],
+  ) => void;
 }) {
   const crew = useMemo(
     () => people.filter((person) => person.role === "employee"),
@@ -69,17 +76,57 @@ export function OdysseyRedemptionManager({
         message?: string;
         people?: ManagerConsolePerson[];
         rewards?: ManagerConsoleReward[];
+        redemptions?: ManagerConsoleRedemption[];
       };
-      if (!response.ok || !payload.people || !payload.rewards) {
+      if (!response.ok || !payload.people || !payload.rewards || !payload.redemptions) {
         throw new Error(payload.error ?? "The redemption could not be saved.");
       }
 
-      onChange(payload.people, payload.rewards);
+      onChange(payload.people, payload.rewards, payload.redemptions);
       setStatus({ kind: "success", message: payload.message ?? "Redemption saved." });
     } catch (error) {
       setStatus({
         kind: "error",
         message: error instanceof Error ? error.message : "The redemption could not be saved.",
+      });
+    }
+  }
+
+  async function unredeem(redemption: ManagerConsoleRedemption) {
+    if (!persistenceReady || status.kind === "working") {
+      return;
+    }
+    if (!window.confirm(`Reverse ${redemption.employeeName}'s ${redemption.rewardName} redemption and return ${redemption.pointsCost} available points?`)) {
+      return;
+    }
+
+    setStatus({ kind: "working", message: "Reversing the redemption..." });
+    try {
+      const response = await fetch("/api/experience/manager-redemptions", {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          "x-experience-manager-key": submissionCredential,
+        },
+        body: JSON.stringify({ redemptionId: redemption.id, managerId }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        message?: string;
+        people?: ManagerConsolePerson[];
+        rewards?: ManagerConsoleReward[];
+        redemptions?: ManagerConsoleRedemption[];
+      };
+      if (!response.ok || !payload.people || !payload.rewards || !payload.redemptions) {
+        throw new Error(payload.error ?? "The redemption could not be reversed.");
+      }
+
+      onChange(payload.people, payload.rewards, payload.redemptions);
+      setStatus({ kind: "success", message: payload.message ?? "Redemption reversed." });
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "The redemption could not be reversed.",
       });
     }
   }
@@ -133,7 +180,7 @@ export function OdysseyRedemptionManager({
       {employee ? (
         <div className="mt-5 grid grid-cols-3 gap-2 rounded-lg bg-[#102631] p-4 text-center text-white">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-white/55">Earned</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-white/55">Lifetime earned</p>
             <p className="mt-1 text-xl font-black text-[#f3d878]">{employee.points}</p>
           </div>
           <div>
@@ -172,6 +219,42 @@ export function OdysseyRedemptionManager({
           {employee.name} needs {reward.pointsCost - employee.availablePoints} more available points.
         </p>
       ) : null}
+
+      <div className="mt-8 border-t border-[#d7c78d] pt-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#b41920]">Corrections</p>
+            <h3 className="mt-1 font-serif text-2xl font-bold">Recent redemptions</h3>
+          </div>
+          <p className="text-xs font-bold text-[#526875]">Unredeem returns the points to Available. Lifetime Earned stays unchanged.</p>
+        </div>
+        <div className="mt-4 grid gap-3">
+          {redemptions.slice(0, 25).map((redemption) => (
+            <div key={redemption.id} className="flex flex-col gap-3 rounded-lg border border-[#ded2a7] bg-white p-4 sm:flex-row sm:items-center">
+              <div className="min-w-0 flex-1">
+                <p className="font-black text-[#102631]">{redemption.employeeName}</p>
+                <p className="mt-1 text-sm font-semibold text-[#526875]">
+                  {redemption.rewardName} · {redemption.pointsCost} points · {new Date(redemption.fulfilledAt).toLocaleDateString()}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={!persistenceReady || status.kind === "working"}
+                onClick={() => void unredeem(redemption)}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border-2 border-[#d71920] px-4 text-sm font-black text-[#b41920] disabled:opacity-45"
+              >
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                Unredeem
+              </button>
+            </div>
+          ))}
+          {!redemptions.length ? (
+            <div className="rounded-lg border border-dashed border-[#d4c27e] bg-white p-5 text-center text-sm font-bold text-[#526875]">
+              No fulfilled rewards yet.
+            </div>
+          ) : null}
+        </div>
+      </div>
     </section>
   );
 }

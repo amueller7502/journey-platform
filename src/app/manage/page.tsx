@@ -6,9 +6,11 @@ import { ODYSSEY_RECOGNITION_TYPE_IDS } from "@/lib/odyssey-config";
 import { readExperienceState } from "@/lib/server/experience-state";
 import {
   managerConsolePeople,
+  managerConsoleRedemptions,
   managerConsoleRewards,
 } from "@/lib/server/manager-console";
 import { createManagerSubmissionCredential } from "@/lib/server/public-access";
+import { supabaseAdminEnvStatus } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +22,11 @@ export const metadata: Metadata = {
 
 export default async function ManagerSubmissionPage() {
   const submissionCredential = createManagerSubmissionCredential();
+  const supabaseStatus = supabaseAdminEnvStatus();
   const { state, mode } = await readExperienceState();
   const people = managerConsolePeople(state);
   const rewards = managerConsoleRewards(state);
+  const redemptions = managerConsoleRedemptions(state);
   const odysseyTypeIds = new Set<string>(ODYSSEY_RECOGNITION_TYPE_IDS);
   const recognitionTypes = state.recognitionTypes
     .filter(
@@ -57,6 +61,7 @@ export default async function ManagerSubmissionPage() {
             submissionCredential={submissionCredential ?? ""}
             initialPeople={people}
             initialRewards={rewards}
+            initialRedemptions={redemptions}
             departments={state.departments.map((department) => ({
               id: department.id,
               name: department.name,
@@ -64,6 +69,13 @@ export default async function ManagerSubmissionPage() {
             recognitionTypes={recognitionTypes}
             cardAreas={cardAreas}
             persistenceReady={mode === "supabase" && Boolean(submissionCredential)}
+            persistenceMessage={
+              mode !== "supabase"
+                ? `Supabase is not connected. Add ${supabaseStatus.urlConfigured ? "a Supabase server secret" : "the Supabase URL and server secret"} in Vercel, then redeploy.`
+                : !submissionCredential
+                  ? "The manager signing secret is missing in Vercel. Add EXPERIENCE_MANAGER_LINK_KEY, then redeploy."
+                  : undefined
+            }
           />
         </div>
       </div>

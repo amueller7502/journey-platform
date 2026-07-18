@@ -87,7 +87,7 @@ function importRowsFromMatrix(matrix: Row[]): ManagerRosterInput[] {
 
       return {
         name,
-        role: record.role.toLowerCase() === "manager" ? "manager" : "employee",
+        role: String(record.role ?? "").toLowerCase() === "manager" ? "manager" : "employee",
         department: record.department,
         title: record.title,
         email: record.email,
@@ -199,6 +199,7 @@ export function OdysseyPeopleManager({
   const [newRole, setNewRole] = useState<"employee" | "manager">("employee");
   const [newDepartment, setNewDepartment] = useState(departments[0]?.id ?? "floor");
   const [status, setStatus] = useState<PeopleStatus>({ kind: "idle" });
+  const [importPreview, setImportPreview] = useState<ManagerRosterInput[]>([]);
   const blocked = !persistenceReady || status.kind === "working";
 
   async function sendRoster(payload: object) {
@@ -227,6 +228,7 @@ export function OdysseyPeopleManager({
     setStatus({ kind: "working", message: "Saving the roster..." });
     try {
       await sendRoster({ action: "upsert", people: inputs });
+      setImportPreview([]);
     } catch (error) {
       setStatus({
         kind: "error",
@@ -271,7 +273,11 @@ export function OdysseyPeopleManager({
       if (!rows.length) {
         throw new Error("No employee names were found in that file.");
       }
-      await sendRoster({ action: "upsert", people: rows });
+      setImportPreview(rows);
+      setStatus({
+        kind: "success",
+        message: `${rows.length} ${rows.length === 1 ? "person" : "people"} found. Review the preview, then import.`,
+      });
     } catch (error) {
       setStatus({
         kind: "error",
@@ -293,7 +299,7 @@ export function OdysseyPeopleManager({
         </div>
         <button
           type="button"
-          disabled={blocked}
+          disabled={status.kind === "working"}
           onClick={() => fileRef.current?.click()}
           className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#102631] px-4 text-sm font-black text-[#f3d878] disabled:opacity-45"
         >
@@ -314,6 +320,48 @@ export function OdysseyPeopleManager({
           }}
         />
       </div>
+
+      {importPreview.length ? (
+        <div className="mt-5 rounded-lg border-2 border-[#d4c27e] bg-white p-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#8b712f]">Import preview</p>
+              <p className="mt-1 text-sm font-bold text-[#526875]">
+                {importPreview.slice(0, 5).map((person) => person.name).join(", ")}
+                {importPreview.length > 5 ? ` and ${importPreview.length - 5} more` : ""}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={status.kind === "working"}
+                onClick={() => {
+                  setImportPreview([]);
+                  setStatus({ kind: "idle" });
+                }}
+                className="min-h-11 rounded-md border border-[#d4c27e] px-4 text-sm font-black text-[#526875] disabled:opacity-45"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={blocked}
+                onClick={() => {
+                  void savePeople(importPreview);
+                }}
+                className="min-h-11 rounded-md bg-[#d71920] px-4 text-sm font-black text-white disabled:opacity-45"
+              >
+                Import {importPreview.length}
+              </button>
+            </div>
+          </div>
+          {!persistenceReady ? (
+            <p className="mt-3 rounded-md bg-[#fff1ed] p-3 text-sm font-bold text-[#9f1117]">
+              The file was read successfully. Connect Supabase before importing so the roster is saved.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-5 rounded-lg border border-[#d4c27e] bg-[#fff5cf] p-4">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-[#8b712f]">

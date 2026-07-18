@@ -22,6 +22,16 @@ export type ManagerConsoleReward = {
   inventoryCount: number;
 };
 
+export type ManagerConsoleRedemption = {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  rewardId: string;
+  rewardName: string;
+  pointsCost: number;
+  fulfilledAt: string;
+};
+
 export type ManagerConsoleDepartment = {
   id: DepartmentId;
   name: string;

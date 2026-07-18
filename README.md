@@ -63,6 +63,8 @@ Supabase variables:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_URL=
+SUPABASE_SECRET_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 EXPERIENCE_APP_URL=https://your-vercel-domain.vercel.app
 EXPERIENCE_SETUP_KEY=
@@ -70,7 +72,7 @@ EXPERIENCE_MANAGER_LINK_KEY=use-a-long-random-value-here
 NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
+The manager console accepts either Supabase's current `SUPABASE_SECRET_KEY` or the legacy `SUPABASE_SERVICE_ROLE_KEY`; configure one, not both. `SUPABASE_URL` is also accepted as the server-only URL alias, while browser-authenticated features still use `NEXT_PUBLIC_SUPABASE_URL`. Server keys must never be exposed in client code.
 `EXPERIENCE_APP_URL` should be the deployed Vercel URL with no trailing slash. Password reset emails use this value so links do not point at localhost.
 `EXPERIENCE_SETUP_KEY` is optional but recommended after launch. It allows an owner to repair Builder access at `/setup/access` if a Builder login already exists.
 `EXPERIENCE_MANAGER_LINK_KEY` is a server-only signing secret for submissions from the simple `/manage` page. Use at least 32 URL-safe random characters (for example, `openssl rand -hex 24`). The secret is never placed in the URL or browser bundle.
@@ -112,9 +114,10 @@ For an existing Supabase project, do not re-run `supabase/schema.sql` or `supaba
 -- supabase/migrations/202607020003_auth_access_repair.sql
 -- supabase/migrations/202607180001_odyssey_public_flows.sql
 -- supabase/migrations/202607180002_redemption_point_snapshots.sql
+-- supabase/migrations/202607180003_point_adjustments_and_redemption_reversals.sql
 ```
 
-The Odyssey public-flow migration is additive. It inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions. Its server-only employee-token table remains harmless backward-compatible data; the current launch flow does not require those tokens. The following redemption-point migration preserves each reward's point price at redemption time so later reward edits cannot change historical balances.
+The Odyssey public-flow migration is additive. It inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions. Its server-only employee-token table remains harmless backward-compatible data; the current launch flow does not require those tokens. The following migrations preserve each reward's point price at redemption time and add an audit log for point corrections and reward reversals.
 
 After running the migration:
 
@@ -136,7 +139,7 @@ If Builder access still shows `permission denied for table profiles`, run:
 -- supabase/migrations/202607020003_auth_access_repair.sql
 ```
 
-Then confirm Vercel has the real `SUPABASE_SERVICE_ROLE_KEY`, not the anon key. The service role key must be server-only and should never use a `NEXT_PUBLIC_` prefix.
+Then confirm Vercel has a real `SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`, not the anon key. The server key must never use a `NEXT_PUBLIC_` prefix.
 
 The app now writes operational state to Supabase through server routes:
 

@@ -436,6 +436,7 @@ export type Redemption = {
   requestedAt: string;
   reviewedAt?: string;
   fulfilledAt?: string;
+  inventoryDebited?: boolean;
 };
 
 export type RecognitionBatch = {
