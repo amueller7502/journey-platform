@@ -815,6 +815,7 @@ export async function recordRewardRedemption(
         app_id: redemption.id,
         employee_app_id: redemption.employeeId,
         reward_app_id: redemption.rewardId,
+        points_cost: redemption.pointsCost,
         status: redemption.status.toLowerCase(),
         requested_at: redemption.requestedAt,
         reviewed_at: redemption.reviewedAt,

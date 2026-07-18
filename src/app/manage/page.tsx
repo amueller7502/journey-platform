@@ -4,6 +4,10 @@ import { OdysseyMasthead } from "@/components/public/OdysseyMasthead";
 import { isArchived } from "@/lib/archive";
 import { ODYSSEY_RECOGNITION_TYPE_IDS } from "@/lib/odyssey-config";
 import { readExperienceState } from "@/lib/server/experience-state";
+import {
+  managerConsolePeople,
+  managerConsoleRewards,
+} from "@/lib/server/manager-console";
 import { createManagerSubmissionCredential } from "@/lib/server/public-access";
 
 export const dynamic = "force-dynamic";
@@ -17,21 +21,8 @@ export const metadata: Metadata = {
 export default async function ManagerSubmissionPage() {
   const submissionCredential = createManagerSubmissionCredential();
   const { state, mode } = await readExperienceState();
-  const crew = state.employees
-    .filter((employee) => employee.role === "employee" && employee.active !== false)
-    .map((employee) => ({
-      id: employee.id,
-      name: employee.name,
-      title: employee.title,
-      passportId: employee.passportId,
-      journeyCardAreaId: employee.journeyCardAreaId,
-      points: employee.miles,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  const leaders = state.employees
-    .filter((employee) => employee.role !== "employee" && employee.active !== false)
-    .map((employee) => ({ id: employee.id, name: employee.name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const people = managerConsolePeople(state);
+  const rewards = managerConsoleRewards(state);
   const odysseyTypeIds = new Set<string>(ODYSSEY_RECOGNITION_TYPE_IDS);
   const recognitionTypes = state.recognitionTypes
     .filter(
@@ -57,15 +48,19 @@ export default async function ManagerSubmissionPage() {
             Capture the crew&apos;s voyage.
           </h1>
           <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-[#fff8e7]/70 sm:text-base">
-            Award an Experience Moment or process a turned-in Crew Quest card. This
-            unlisted page is the only manager link needed for the incentive.
+            Award points, process Crew Quest cards, redeem rewards, and keep the manager
+            and employee roster current from one unlisted page.
           </p>
         </section>
         <div className="relative z-10 pb-6">
           <OdysseyManagerSubmission
             submissionCredential={submissionCredential ?? ""}
-            initialCrew={crew}
-            leaders={leaders}
+            initialPeople={people}
+            initialRewards={rewards}
+            departments={state.departments.map((department) => ({
+              id: department.id,
+              name: department.name,
+            }))}
             recognitionTypes={recognitionTypes}
             cardAreas={cardAreas}
             persistenceReady={mode === "supabase" && Boolean(submissionCredential)}

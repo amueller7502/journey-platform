@@ -80,7 +80,7 @@ Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` after the Experience Builder log
 
 The launch surface is intentionally limited to two flows:
 
-1. `/manage` is the single unlisted manager submission area. Managers can capture Odyssey points and process Crew Quest cards. There is no manager login for this Lite flow, and the manager route is not linked from the employee page.
+1. `/manage` is the single unlisted manager operations area. Managers can capture Odyssey points, process Crew Quest cards, redeem rewards, add or rename managers and crew, archive inactive people, and import an Excel/CSV employee list. There is no manager login for this Lite flow, and the manager route is not linked from the employee page.
 2. `/` is the public, read-only crew leaderboard. It shows every active employee's points earned, points pending for rewards, points redeemed, and points still available. Employees need no account, code, token, or special link.
 
 Legacy `/points/<unique-employee-token>` links redirect to the shared leaderboard so old bookmarks do not break. Builder and advanced feature work is preserved behind authentication and feature flags. Staff can sign in at the unadvertised `/staff-access` route.
@@ -111,9 +111,10 @@ For an existing Supabase project, do not re-run `supabase/schema.sql` or `supaba
 -- supabase/migrations/202607020002_api_grants.sql
 -- supabase/migrations/202607020003_auth_access_repair.sql
 -- supabase/migrations/202607180001_odyssey_public_flows.sql
+-- supabase/migrations/202607180002_redemption_point_snapshots.sql
 ```
 
-The Odyssey public-flow migration is additive. It inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions. Its server-only employee-token table remains harmless backward-compatible data; the current launch flow does not require those tokens.
+The Odyssey public-flow migration is additive. It inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions. Its server-only employee-token table remains harmless backward-compatible data; the current launch flow does not require those tokens. The following redemption-point migration preserves each reward's point price at redemption time so later reward edits cannot change historical balances.
 
 After running the migration:
 
@@ -121,7 +122,9 @@ After running the migration:
 2. Redeploy the current Git commit.
 3. Open `https://your-domain/manage` and verify Supabase shows as connected.
 4. Capture one test Moment and confirm the points update on `/`.
-5. Share the root leaderboard URL with employees. Keep `/manage` in manager communication only.
+5. Test one reward redemption and confirm Available decreases while Redeemed increases.
+6. Import a small `.xlsx` employee list from **People**. Supported columns are Name, Role, Department, Title, and Email; only Name is required.
+7. Share the root leaderboard URL with employees. Keep `/manage` in manager communication only.
 
 If account creation shows `permission denied for table profiles`, run `supabase/migrations/202607020002_api_grants.sql`. That migration grants Supabase API access to the public tables while row-level security still controls which rows each role can read or write.
 
@@ -213,7 +216,7 @@ Experience Builders can also reset a staff member's temporary password from **Em
 Experience Lite launch:
 
 - `/` Public read-only crew leaderboard with earned, pending, redeemed, and available points
-- `/manage` Unlisted manager points and Crew Quest submission area
+- `/manage` Unlisted manager console for points, Crew Quest cards, reward redemptions, managers, and employee imports
 - `/points/<unique-token>` Backward-compatible redirect to the public leaderboard
 - `/staff-access` Unadvertised authenticated access for Experience Builder and preserved advanced tools
 

@@ -4,27 +4,22 @@ import { useMemo, useState } from "react";
 import {
   Check,
   ClipboardCheck,
+  Gift,
   LoaderCircle,
   Search,
   Sparkles,
+  Users,
 } from "lucide-react";
+import { OdysseyPeopleManager } from "@/components/public/OdysseyPeopleManager";
+import { OdysseyRedemptionManager } from "@/components/public/OdysseyRedemptionManager";
+import type {
+  ManagerConsoleDepartment,
+  ManagerConsolePerson,
+  ManagerConsoleReward,
+} from "@/lib/manager-console-types";
 import type { JourneyCardArea, RecognitionType } from "@/lib/types";
 
-type CrewMember = {
-  id: string;
-  name: string;
-  title: string;
-  passportId: string;
-  journeyCardAreaId?: string;
-  points: number;
-};
-
-type Leader = {
-  id: string;
-  name: string;
-};
-
-type Mode = "moment" | "card";
+type Mode = "moment" | "card" | "redeem" | "people";
 
 type SubmissionStatus =
   | { kind: "idle" }
@@ -34,29 +29,38 @@ type SubmissionStatus =
 
 export function OdysseyManagerSubmission({
   submissionCredential,
-  initialCrew,
-  leaders,
+  initialPeople,
+  initialRewards,
+  departments,
   recognitionTypes,
   cardAreas,
   persistenceReady,
 }: {
   submissionCredential: string;
-  initialCrew: CrewMember[];
-  leaders: Leader[];
+  initialPeople: ManagerConsolePerson[];
+  initialRewards: ManagerConsoleReward[];
+  departments: ManagerConsoleDepartment[];
   recognitionTypes: RecognitionType[];
   cardAreas: JourneyCardArea[];
   persistenceReady: boolean;
 }) {
   const [mode, setMode] = useState<Mode>("moment");
-  const [crew, setCrew] = useState(initialCrew);
+  const [people, setPeople] = useState(initialPeople);
+  const [rewards, setRewards] = useState(initialRewards);
   const [search, setSearch] = useState("");
-  const [employeeId, setEmployeeId] = useState(initialCrew[0]?.id ?? "");
-  const [managerId, setManagerId] = useState(leaders[0]?.id ?? "");
+  const [employeeId, setEmployeeId] = useState(
+    initialPeople.find((person) => person.role === "employee")?.id ?? "",
+  );
+  const [managerId, setManagerId] = useState(
+    initialPeople.find((person) => person.role !== "employee")?.id ?? "",
+  );
   const [recognitionTypeId, setRecognitionTypeId] = useState(
     recognitionTypes.find((type) => !type.journeyCardEligible)?.id ?? "",
   );
   const [cardAreaId, setCardAreaId] = useState(
-    initialCrew[0]?.journeyCardAreaId ?? cardAreas[0]?.id ?? "",
+    initialPeople.find((person) => person.role === "employee")?.journeyCardAreaId ??
+      cardAreas[0]?.id ??
+      "",
   );
   const [selectedCardTypeIds, setSelectedCardTypeIds] = useState<string[]>(() => {
     const firstCardType = recognitionTypes.find((type) => type.journeyCardEligible);
@@ -64,6 +68,21 @@ export function OdysseyManagerSubmission({
   });
   const [note, setNote] = useState("");
   const [status, setStatus] = useState<SubmissionStatus>({ kind: "idle" });
+  const crew = useMemo(
+    () => people.filter((person) => person.role === "employee"),
+    [people],
+  );
+  const leaders = useMemo(
+    () => people.filter((person) => person.role !== "employee"),
+    [people],
+  );
+
+  const activeEmployeeId = crew.some((employee) => employee.id === employeeId)
+    ? employeeId
+    : crew[0]?.id ?? "";
+  const activeManagerId = leaders.some((leader) => leader.id === managerId)
+    ? managerId
+    : leaders[0]?.id ?? "";
 
   const filteredCrew = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -78,7 +97,8 @@ export function OdysseyManagerSubmission({
     );
   }, [crew, search]);
 
-  const selectedEmployee = crew.find((employee) => employee.id === employeeId) ?? crew[0];
+  const selectedEmployee =
+    crew.find((employee) => employee.id === activeEmployeeId) ?? crew[0];
   const momentTypes = recognitionTypes.filter((type) => !type.journeyCardEligible);
   const selectedRecognition =
     momentTypes.find((type) => type.id === recognitionTypeId) ?? momentTypes[0];
@@ -104,16 +124,22 @@ export function OdysseyManagerSubmission({
     setStatus({ kind: "idle" });
   }
 
-  function addPoints(employee: CrewMember, points: number) {
-    setCrew((current) =>
+  function addPoints(employee: ManagerConsolePerson, points: number) {
+    setPeople((current) =>
       current.map((item) =>
-        item.id === employee.id ? { ...item, points: item.points + points } : item,
+        item.id === employee.id
+          ? {
+              ...item,
+              points: item.points + points,
+              availablePoints: item.availablePoints + points,
+            }
+          : item,
       ),
     );
   }
 
   async function submitMoment() {
-    if (!selectedEmployee || !selectedRecognition || !managerId) {
+    if (!selectedEmployee || !selectedRecognition || !activeManagerId) {
       return;
     }
 
@@ -128,7 +154,7 @@ export function OdysseyManagerSubmission({
         body: JSON.stringify({
           employeeId: selectedEmployee.id,
           recognitionTypeId: selectedRecognition.id,
-          managerId,
+          managerId: activeManagerId,
           note,
         }),
       });
@@ -152,7 +178,7 @@ export function OdysseyManagerSubmission({
   }
 
   async function submitCard() {
-    if (!selectedEmployee || !managerId || !cardAreaId || !selectedCardTypes.length) {
+    if (!selectedEmployee || !activeManagerId || !cardAreaId || !selectedCardTypes.length) {
       return;
     }
 
@@ -166,7 +192,7 @@ export function OdysseyManagerSubmission({
         },
         body: JSON.stringify({
           employeeId: selectedEmployee.id,
-          managerId,
+          managerId: activeManagerId,
           areaId: cardAreaId,
           recognitionTypeIds: selectedCardTypes.map((type) => type.id),
           note,
@@ -203,10 +229,12 @@ export function OdysseyManagerSubmission({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)]">
+      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)] sm:grid-cols-4">
         {([
           ["moment", "Capture Points", Sparkles],
           ["card", "Crew Quest", ClipboardCheck],
+          ["redeem", "Redeem Points", Gift],
+          ["people", "People", Users],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
@@ -227,12 +255,33 @@ export function OdysseyManagerSubmission({
         ))}
       </div>
 
+      {mode === "people" ? (
+        <OdysseyPeopleManager
+          submissionCredential={submissionCredential}
+          people={people}
+          departments={departments}
+          persistenceReady={persistenceReady}
+          onPeopleChange={setPeople}
+        />
+      ) : mode === "redeem" ? (
+        <OdysseyRedemptionManager
+          submissionCredential={submissionCredential}
+          people={people}
+          rewards={rewards}
+          managerId={activeManagerId}
+          persistenceReady={persistenceReady}
+          onChange={(nextPeople, nextRewards) => {
+            setPeople(nextPeople);
+            setRewards(nextRewards);
+          }}
+        />
+      ) : (
       <section className="rounded-xl border border-[#ccb567] bg-[#fffaf0] p-4 shadow-[0_16px_45px_rgba(8,27,36,.14)] sm:p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-2 text-sm font-black text-[#102631]">
             Manager submitting
             <select
-              value={managerId}
+              value={activeManagerId}
               onChange={(event) => setManagerId(event.target.value)}
               className="min-h-12 rounded-lg border-2 border-[#d4c27e] bg-white px-3 outline-none focus:border-[#d71920]"
             >
@@ -398,7 +447,7 @@ export function OdysseyManagerSubmission({
           disabled={
             blocked ||
             !selectedEmployee ||
-            !managerId ||
+            !activeManagerId ||
             (mode === "moment" ? !selectedRecognition : !selectedCardTypes.length)
           }
           onClick={mode === "moment" ? submitMoment : submitCard}
@@ -416,6 +465,7 @@ export function OdysseyManagerSubmission({
             : `Process Card · ${selectedCardPoints} Points`}
         </button>
       </section>
+      )}
     </div>
   );
 }

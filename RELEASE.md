@@ -1,5 +1,17 @@
 # Experience Release Notes
 
+## V1.15 Manager Roster, Excel Import, And Redemptions
+
+- Expanded the single `/manage` page with Capture Points, Crew Quest, Redeem Points, and People tabs.
+- Added managers directly from the People tab so point awards can be attributed to the correct leader without creating login accounts.
+- Added employee creation, inline name/role/department editing, and safe archival while preserving point and redemption history.
+- Added `.xlsx`, CSV, and TSV employee import with support for a simple one-column name list or optional Name, Role, Department, Title, and Email headers.
+- Added manager-side reward fulfillment that records an auditable redemption, reduces Available points immediately, increases Redeemed points, and preserves lifetime Earned points for the leaderboard.
+- Added server-side available-balance and per-reward-limit validation to prevent duplicate or overspent redemptions.
+- Added additive migration `202607180002_redemption_point_snapshots.sql` so historical redemption costs do not change when reward prices are edited later.
+- Synchronized normalized employee XP rows when managers capture points or process Crew Quest cards so totals persist correctly across reloads.
+- Kept all roster and redemption writes in the shared Supabase operating state with normalized-table sync.
+
 ## V1.14 Simple Manager Link And Public Leaderboard
 
 - Replaced the keyed manager URL with one unlisted `/manage` route.

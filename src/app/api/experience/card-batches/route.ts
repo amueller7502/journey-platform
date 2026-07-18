@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     updatedAt: createdAt,
   };
 
-  const result = await writeExperienceState(nextState);
+  const result = await writeExperienceState(nextState, { syncConfig: true });
   const seasonId = state.seasons.find((season) => season.active)?.id ?? state.chapter.id;
   await recordExperienceCardBatch(
     {

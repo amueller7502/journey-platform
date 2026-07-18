@@ -431,6 +431,7 @@ export type Redemption = {
   id: string;
   employeeId: string;
   rewardId: string;
+  pointsCost?: number;
   status: "Requested" | "Approved" | "Fulfilled" | "Cancelled" | "Pending" | "Ready";
   requestedAt: string;
   reviewedAt?: string;

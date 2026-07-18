@@ -56,7 +56,8 @@ export async function POST(request: Request) {
         redemption.employeeId === employee.id && redemption.status !== "Cancelled",
     )
     .reduce(
-      (total, redemption) => total + (rewardCostById.get(redemption.rewardId) ?? 0),
+      (total, redemption) =>
+        total + (redemption.pointsCost ?? rewardCostById.get(redemption.rewardId) ?? 0),
       0,
     );
   const availablePoints = Math.max(0, employee.miles - committedPoints);
@@ -83,6 +84,7 @@ export async function POST(request: Request) {
     id: `redemption-${employee.id}-${reward.id}-${Date.now()}`,
     employeeId: employee.id,
     rewardId: reward.id,
+    pointsCost: reward.milesCost,
     status: "Requested",
     requestedAt: new Date().toISOString(),
   };

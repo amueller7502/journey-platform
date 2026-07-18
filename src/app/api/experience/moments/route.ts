@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     updatedAt: createdAt,
   };
 
-  const result = await writeExperienceState(nextState);
+  const result = await writeExperienceState(nextState, { syncConfig: true });
   await recordExperienceMoments(
     [
       {

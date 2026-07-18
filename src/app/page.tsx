@@ -35,13 +35,15 @@ export default async function LeaderboardPage() {
       const redeemed = employeeRedemptions
         .filter((redemption) => redemption.status === "Fulfilled")
         .reduce(
-          (total, redemption) => total + (rewardCostById.get(redemption.rewardId) ?? 0),
+          (total, redemption) =>
+            total + (redemption.pointsCost ?? rewardCostById.get(redemption.rewardId) ?? 0),
           0,
         );
       const pending = employeeRedemptions
         .filter((redemption) => isPendingRedemption(redemption.status))
         .reduce(
-          (total, redemption) => total + (rewardCostById.get(redemption.rewardId) ?? 0),
+          (total, redemption) =>
+            total + (redemption.pointsCost ?? rewardCostById.get(redemption.rewardId) ?? 0),
           0,
         );
 

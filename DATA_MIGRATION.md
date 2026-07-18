@@ -39,6 +39,10 @@ For an existing database:
 
 Run it before launching the Odyssey starter configuration. The current Lite flow uses `/manage` for managers and `/` for the public crew leaderboard; the legacy token rows are preserved but are not required.
 
+## Redemption Point Snapshot Migration
+
+`202607180002_redemption_point_snapshots.sql` adds a historical `points_cost` snapshot to reward redemptions and fills existing normalized rows from their linked reward when possible. It is additive and prevents a later reward-price edit from retroactively changing points already redeemed.
+
 ## Current Known Compatibility Names
 
 Some database objects still use legacy compatibility names while the product UI uses Experience language. Keep those names until a dedicated database rename migration is planned and tested.

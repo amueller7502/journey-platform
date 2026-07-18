@@ -366,6 +366,7 @@ create table public.reward_redemptions (
   chapter_id uuid not null references public.chapters (id) on delete cascade,
   employee_id uuid not null references public.employees (id),
   reward_id uuid not null references public.rewards (id),
+  points_cost integer check (points_cost >= 0),
   status public.reward_redemption_status not null default 'pending',
   requested_at timestamptz not null default now(),
   reviewed_by uuid references public.employees (id),
