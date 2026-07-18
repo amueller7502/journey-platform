@@ -28,16 +28,16 @@ For an existing database:
 3. Do not re-run seed data.
 4. Smoke test sign-in, Capture Moment, Experience Card entry, Rewards, and Builder edits.
 
-## Odyssey Public-Flow Migration
+## Odyssey Starter-Configuration Migration
 
 `202607180001_odyssey_public_flows.sql` is additive and safe for an existing Experience database. It:
 
-- creates `employee_points_links`, a server-only table of random private lookup tokens;
-- creates a token for every active employee with an `app_id`;
+- creates `employee_points_links`, a server-only backward-compatibility table of random lookup tokens;
+- creates a legacy token for every active employee with an `app_id`;
 - inserts the Odyssey poster's recognition and reward starter records when an active legacy chapter exists;
 - does not reset employee XP, Experience Moments, card batches, redemptions, operating state, or existing custom records.
 
-Run it before sharing employee points links. After it succeeds, test the manager URL and one employee URL in a private browser window.
+Run it before launching the Odyssey starter configuration. The current Lite flow uses `/manage` for managers and `/` for the public crew leaderboard; the legacy token rows are preserved but are not required.
 
 ## Current Known Compatibility Names
 

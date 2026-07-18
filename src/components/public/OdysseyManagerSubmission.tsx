@@ -4,11 +4,9 @@ import { useMemo, useState } from "react";
 import {
   Check,
   ClipboardCheck,
-  Copy,
   LoaderCircle,
   Search,
   Sparkles,
-  UserRoundCheck,
 } from "lucide-react";
 import type { JourneyCardArea, RecognitionType } from "@/lib/types";
 
@@ -18,7 +16,6 @@ type CrewMember = {
   title: string;
   passportId: string;
   journeyCardAreaId?: string;
-  pointsLookupToken?: string;
   points: number;
 };
 
@@ -27,7 +24,7 @@ type Leader = {
   name: string;
 };
 
-type Mode = "moment" | "card" | "links";
+type Mode = "moment" | "card";
 
 type SubmissionStatus =
   | { kind: "idle" }
@@ -36,14 +33,14 @@ type SubmissionStatus =
   | { kind: "error"; message: string };
 
 export function OdysseyManagerSubmission({
-  managerKey,
+  submissionCredential,
   initialCrew,
   leaders,
   recognitionTypes,
   cardAreas,
   persistenceReady,
 }: {
-  managerKey: string;
+  submissionCredential: string;
   initialCrew: CrewMember[];
   leaders: Leader[];
   recognitionTypes: RecognitionType[];
@@ -126,7 +123,7 @@ export function OdysseyManagerSubmission({
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-experience-manager-key": managerKey,
+          "x-experience-manager-key": submissionCredential,
         },
         body: JSON.stringify({
           employeeId: selectedEmployee.id,
@@ -165,7 +162,7 @@ export function OdysseyManagerSubmission({
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-experience-manager-key": managerKey,
+          "x-experience-manager-key": submissionCredential,
         },
         body: JSON.stringify({
           employeeId: selectedEmployee.id,
@@ -195,20 +192,6 @@ export function OdysseyManagerSubmission({
     }
   }
 
-  async function copyPointsLink() {
-    if (!selectedEmployee?.pointsLookupToken) {
-      setStatus({ kind: "error", message: "Run the points-link database migration first." });
-      return;
-    }
-
-    const link = `${window.location.origin}/points/${selectedEmployee.pointsLookupToken}`;
-    await navigator.clipboard.writeText(link);
-    setStatus({
-      kind: "success",
-      message: `Private points link copied for ${selectedEmployee.name}.`,
-    });
-  }
-
   const blocked = !persistenceReady || status.kind === "working";
 
   return (
@@ -220,11 +203,10 @@ export function OdysseyManagerSubmission({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)]">
+      <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#ccb567] bg-[#fffaf0] p-2 shadow-[0_12px_35px_rgba(8,27,36,.12)]">
         {([
           ["moment", "Capture Points", Sparkles],
           ["card", "Crew Quest", ClipboardCheck],
-          ["links", "Points Links", Copy],
         ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
@@ -380,38 +362,16 @@ export function OdysseyManagerSubmission({
           </div>
         ) : null}
 
-        {mode === "links" ? (
-          <div className="mt-6 rounded-xl border-2 border-[#d4c27e] bg-white p-5">
-            <UserRoundCheck className="h-8 w-8 text-[#d71920]" aria-hidden="true" />
-            <h2 className="mt-3 font-serif text-3xl font-bold text-[#102631]">Private points link</h2>
-            <p className="mt-2 text-sm font-semibold leading-6 text-[#526875]">
-              Copy and send this crew member their unique link. It shows only their current
-              total and the reward ladder—never the employee list or another person&apos;s points.
-            </p>
-            <button
-              type="button"
-              onClick={copyPointsLink}
-              disabled={!selectedEmployee?.pointsLookupToken}
-              className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#102631] px-4 font-black text-[#f4d678] disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              <Copy className="h-5 w-5" aria-hidden="true" />
-              Copy {selectedEmployee?.name ?? "Employee"}&apos;s Link
-            </button>
-          </div>
-        ) : null}
-
-        {mode !== "links" ? (
-          <label className="mt-5 grid gap-2 text-sm font-black text-[#102631]">
-            Optional manager note
-            <textarea
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              rows={3}
-              className="resize-none rounded-lg border-2 border-[#d4c27e] bg-white p-3 outline-none focus:border-[#d71920]"
-              placeholder="Add a detail only when it helps tell the story."
-            />
-          </label>
-        ) : null}
+        <label className="mt-5 grid gap-2 text-sm font-black text-[#102631]">
+          Optional manager note
+          <textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            rows={3}
+            className="resize-none rounded-lg border-2 border-[#d4c27e] bg-white p-3 outline-none focus:border-[#d71920]"
+            placeholder="Add a detail only when it helps tell the story."
+          />
+        </label>
 
         {status.kind !== "idle" ? (
           <div
@@ -433,30 +393,28 @@ export function OdysseyManagerSubmission({
           </div>
         ) : null}
 
-        {mode !== "links" ? (
-          <button
-            type="button"
-            disabled={
-              blocked ||
-              !selectedEmployee ||
-              !managerId ||
-              (mode === "moment" ? !selectedRecognition : !selectedCardTypes.length)
-            }
-            onClick={mode === "moment" ? submitMoment : submitCard}
-            className="mt-5 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-[#d71920] px-5 text-base font-black text-white shadow-[0_12px_28px_rgba(215,25,32,.24)] transition hover:bg-[#ad1017] disabled:cursor-not-allowed disabled:opacity-45"
-          >
-            {status.kind === "working" ? (
-              <LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" />
-            ) : mode === "moment" ? (
-              <Sparkles className="h-5 w-5" aria-hidden="true" />
-            ) : (
-              <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
-            )}
-            {mode === "moment"
-              ? `Award ${selectedRecognition?.milesValue ?? 0} Points`
-              : `Process Card · ${selectedCardPoints} Points`}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          disabled={
+            blocked ||
+            !selectedEmployee ||
+            !managerId ||
+            (mode === "moment" ? !selectedRecognition : !selectedCardTypes.length)
+          }
+          onClick={mode === "moment" ? submitMoment : submitCard}
+          className="mt-5 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-lg bg-[#d71920] px-5 text-base font-black text-white shadow-[0_12px_28px_rgba(215,25,32,.24)] transition hover:bg-[#ad1017] disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          {status.kind === "working" ? (
+            <LoaderCircle className="h-5 w-5 animate-spin" aria-hidden="true" />
+          ) : mode === "moment" ? (
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
+          )}
+          {mode === "moment"
+            ? `Award ${selectedRecognition?.milesValue ?? 0} Points`
+            : `Process Card · ${selectedCardPoints} Points`}
+        </button>
       </section>
     </div>
   );

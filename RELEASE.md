@@ -1,5 +1,16 @@
 # Experience Release Notes
 
+## V1.14 Simple Manager Link And Public Leaderboard
+
+- Replaced the keyed manager URL with one unlisted `/manage` route.
+- Kept manager submissions protected with a short-lived, server-signed credential so the long-term secret is never exposed in the URL or browser bundle.
+- Removed points-link distribution from the manager workflow, leaving only Capture Points and Crew Quest card processing.
+- Replaced employee codes and tokens with a public, no-login crew leaderboard.
+- Added earned, pending, redeemed, and available point columns plus crew-wide totals.
+- Redirected legacy employee token links and valid keyed manager bookmarks to their new simple routes.
+- Preserved all existing Supabase data, token records, Builder tools, and advanced modules.
+- Prevented new reward requests from committing more points than an employee has available after existing redemptions.
+
 ## V1.13 Odyssey Public Flows
 
 - Replaced the public login-first launch surface with an Odyssey-styled private points-code entry.

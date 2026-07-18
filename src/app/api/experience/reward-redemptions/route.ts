@@ -47,7 +47,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Reward request could not be created." }, { status: 404 });
   }
 
-  if (employee.miles < reward.milesCost) {
+  const rewardCostById = new Map(
+    state.rewards.map((availableReward) => [availableReward.id, availableReward.milesCost]),
+  );
+  const committedPoints = state.redemptions
+    .filter(
+      (redemption) =>
+        redemption.employeeId === employee.id && redemption.status !== "Cancelled",
+    )
+    .reduce(
+      (total, redemption) => total + (rewardCostById.get(redemption.rewardId) ?? 0),
+      0,
+    );
+  const availablePoints = Math.max(0, employee.miles - committedPoints);
+
+  if (availablePoints < reward.milesCost) {
     return NextResponse.json({ error: "Not enough XP for that reward yet." }, { status: 400 });
   }
 

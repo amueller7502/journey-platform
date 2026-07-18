@@ -73,17 +73,17 @@ NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true
 `SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
 `EXPERIENCE_APP_URL` should be the deployed Vercel URL with no trailing slash. Password reset emails use this value so links do not point at localhost.
 `EXPERIENCE_SETUP_KEY` is optional but recommended after launch. It allows an owner to repair Builder access at `/setup/access` if a Builder login already exists.
-`EXPERIENCE_MANAGER_LINK_KEY` creates the unlisted, no-login manager URL. Use at least 32 URL-safe random characters (for example, `openssl rand -hex 24`) and never post that URL in an employee channel.
-Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` after the Experience Builder login has been tested. The public points and unlisted manager routes remain available without employee authentication.
+`EXPERIENCE_MANAGER_LINK_KEY` is a server-only signing secret for submissions from the simple `/manage` page. Use at least 32 URL-safe random characters (for example, `openssl rand -hex 24`). The secret is never placed in the URL or browser bundle.
+Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` after the Experience Builder login has been tested. The public leaderboard and unlisted manager route remain available without employee authentication.
 
 ## Experience Lite Public Flows
 
 The launch surface is intentionally limited to two flows:
 
-1. `/manage/<EXPERIENCE_MANAGER_LINK_KEY>` is the unlisted manager submission area. Managers can capture Odyssey points, process Crew Quest cards, and copy each employee's private points link. There is no employee login and the manager link is not shown on the public site.
-2. `/points/<unique-employee-token>` shows one employee's current points and the Odyssey reward ladder. Tokens are random UUIDs stored in a server-only table; there is no employee roster or name search.
+1. `/manage` is the single unlisted manager submission area. Managers can capture Odyssey points and process Crew Quest cards. There is no manager login for this Lite flow, and the manager route is not linked from the employee page.
+2. `/` is the public, read-only crew leaderboard. It shows every active employee's points earned, points pending for rewards, points redeemed, and points still available. Employees need no account, code, token, or special link.
 
-The root route `/` accepts a private employee code or complete points link. Builder and advanced feature work is preserved behind authentication and feature flags. Staff can sign in at the unadvertised `/staff-access` route.
+Legacy `/points/<unique-employee-token>` links redirect to the shared leaderboard so old bookmarks do not break. Builder and advanced feature work is preserved behind authentication and feature flags. Staff can sign in at the unadvertised `/staff-access` route.
 
 ## Supabase Setup
 
@@ -100,7 +100,7 @@ For a brand-new preview Supabase project:
 7. Open `/setup/access` to create the first Experience Builder account.
 8. Sign in at `/staff-access` and confirm the account can open Experience Builder.
 9. Import or create employees in Employees Builder. Employees do not need Auth accounts for Experience Lite.
-10. Run `supabase/migrations/202607180001_odyssey_public_flows.sql`, then test one private employee link from the manager page.
+10. Run `supabase/migrations/202607180001_odyssey_public_flows.sql`, then test `/manage` and the public leaderboard.
 
 For an existing Supabase project, do not re-run `supabase/schema.sql` or `supabase/seed.sql`. Apply only migration files that have not been run yet:
 
@@ -113,15 +113,15 @@ For an existing Supabase project, do not re-run `supabase/schema.sql` or `supaba
 -- supabase/migrations/202607180001_odyssey_public_flows.sql
 ```
 
-The Odyssey public-flow migration is additive. It creates server-only employee points links and inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions.
+The Odyssey public-flow migration is additive. It inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions. Its server-only employee-token table remains harmless backward-compatible data; the current launch flow does not require those tokens.
 
 After running the migration:
 
 1. Add `EXPERIENCE_MANAGER_LINK_KEY` to Vercel for Production, Preview, and Development as appropriate.
 2. Redeploy the current Git commit.
-3. Open `https://your-domain/manage/<your-key>` and verify Supabase shows as connected.
-4. Use **Points Links** in that manager screen to copy each employee's unique URL.
-5. Send each points URL privately. Use OurPeople for announcements and program conversation, not for posting the shared manager key.
+3. Open `https://your-domain/manage` and verify Supabase shows as connected.
+4. Capture one test Moment and confirm the points update on `/`.
+5. Share the root leaderboard URL with employees. Keep `/manage` in manager communication only.
 
 If account creation shows `permission denied for table profiles`, run `supabase/migrations/202607020002_api_grants.sql`. That migration grants Supabase API access to the public tables while row-level security still controls which rows each role can read or write.
 
@@ -212,9 +212,9 @@ Experience Builders can also reset a staff member's temporary password from **Em
 
 Experience Lite launch:
 
-- `/` Private employee code entry
-- `/points/<unique-token>` One employee's read-only points and reward ladder
-- `/manage/<manager-key>` Unlocked manager points and Crew Quest submission area
+- `/` Public read-only crew leaderboard with earned, pending, redeemed, and available points
+- `/manage` Unlisted manager points and Crew Quest submission area
+- `/points/<unique-token>` Backward-compatible redirect to the public leaderboard
 - `/staff-access` Unadvertised authenticated access for Experience Builder and preserved advanced tools
 
 Experience Builder:
