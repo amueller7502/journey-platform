@@ -28,6 +28,17 @@ For an existing database:
 3. Do not re-run seed data.
 4. Smoke test sign-in, Capture Moment, Experience Card entry, Rewards, and Builder edits.
 
+## Odyssey Public-Flow Migration
+
+`202607180001_odyssey_public_flows.sql` is additive and safe for an existing Experience database. It:
+
+- creates `employee_points_links`, a server-only table of random private lookup tokens;
+- creates a token for every active employee with an `app_id`;
+- inserts the Odyssey poster's recognition and reward starter records when an active legacy chapter exists;
+- does not reset employee XP, Experience Moments, card batches, redemptions, operating state, or existing custom records.
+
+Run it before sharing employee points links. After it succeeds, test the manager URL and one employee URL in a private browser window.
+
 ## Current Known Compatibility Names
 
 Some database objects still use legacy compatibility names while the product UI uses Experience language. Keep those names until a dedicated database rename migration is planned and tested.

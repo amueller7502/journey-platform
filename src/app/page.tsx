@@ -1,79 +1,55 @@
-import {
-  Clapperboard,
-} from "lucide-react";
-import { BrandLockup } from "@/components/BrandLockup";
-import { PreviewModeBadge } from "@/components/PreviewModeBadge";
-import { WorkspaceLoginPanel } from "@/components/WorkspaceLoginPanel";
-import { chapter, filmFacts } from "@/lib/data";
-import { productLanguage } from "@/lib/product-language";
-import { formatDate } from "@/lib/utils";
+import { Anchor, KeyRound, Ship } from "lucide-react";
+import { OdysseyMasthead } from "@/components/public/OdysseyMasthead";
+import { PointsLookupForm } from "@/components/public/PointsLookupForm";
 
 export default function WelcomePage() {
   return (
-    <main className="cinema-surface film-grain relative min-h-screen text-journey-white">
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-8 film-perf opacity-30" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 film-perf opacity-30" />
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-6 sm:px-8">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <BrandLockup size="md" />
-          <div className="flex flex-wrap items-center gap-2">
-            <PreviewModeBadge />
-            <div className="rounded-sm border border-journey-steel px-3 py-2 text-sm font-bold text-journey-line">
-              Celebration Cinema North
-            </div>
-          </div>
-        </header>
+    <main className="odyssey-public-shell min-h-screen px-4 py-5 text-[#fff8e7] sm:px-7 sm:py-7">
+      <div className="odyssey-public-frame mx-auto min-h-[calc(100vh-2.5rem)] max-w-5xl p-4 sm:min-h-[calc(100vh-3.5rem)] sm:p-7">
+        <OdysseyMasthead />
 
-        <section className="grid flex-1 items-center gap-8 py-12 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="relative z-10 grid items-center gap-9 py-10 lg:grid-cols-[1.08fr_.92fr] lg:py-16">
           <div>
-            <p className="text-sm font-black uppercase text-journey-red">
-              {productLanguage.platformName}
+            <p className="text-xs font-black uppercase tracking-[0.32em] text-[#d71920]">
+              The Odyssey Incentive
             </p>
-            <h1 className="mt-3 max-w-3xl text-5xl font-black leading-none text-journey-white sm:text-7xl">
-              {productLanguage.productName}
+            <h1 className="mt-4 font-serif text-5xl font-bold leading-[.92] text-[#f3d878] sm:text-7xl">
+              How far has your crew journeyed?
             </h1>
-            <p className="mt-5 text-2xl font-black text-journey-white">
-              Celebration Cinema North
+            <p className="mt-6 max-w-xl text-lg font-semibold leading-8 text-[#fff8e7]/75">
+              Use the private code or link your manager shared with you. Your page shows only
+              your own point total—never a browsable crew list.
             </p>
-            <p className="mt-3 max-w-2xl text-lg font-bold text-journey-line">
-              {productLanguage.mission}
-            </p>
-            <p className="mt-4 max-w-xl text-lg font-bold text-journey-line">
-              {formatDate(chapter.startDate)} - {formatDate(chapter.endDate)}
-            </p>
-            <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
-              <div className="projection-sweep rounded-lg border border-journey-steel bg-journey-coal p-5">
-                <p className="text-xs font-black uppercase text-journey-red">Season XP Goal</p>
-                <p className="mt-2 text-4xl font-black text-journey-white">15,700 XP</p>
-              </div>
-              <div className="rounded-lg border border-journey-steel bg-journey-coal p-5">
-                <p className="text-xs font-black uppercase text-journey-red">Season Note</p>
-                <p className="mt-2 text-xl font-black text-journey-white">
-                  {chapter.themeNote}
-                </p>
-              </div>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {filmFacts.map((fact) => (
-                <span
-                  key={fact}
-                  className="rounded-sm border border-journey-steel px-2 py-1 text-xs font-black uppercase text-journey-line"
-                >
-                  {fact}
-                </span>
-              ))}
+            <div className="mt-8 flex flex-wrap gap-3 text-sm font-black uppercase tracking-[0.12em] text-[#f3d878]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#c8a958]/55 px-4 py-2">
+                <Anchor className="h-4 w-4 text-[#d71920]" aria-hidden="true" />
+                Earn points
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#c8a958]/55 px-4 py-2">
+                <Ship className="h-4 w-4 text-[#d71920]" aria-hidden="true" />
+                Claim rewards
+              </span>
             </div>
           </div>
 
-          <WorkspaceLoginPanel />
+          <div className="rounded-xl border-2 border-[#c8a958] bg-[#fffaf0] p-5 text-[#102631] shadow-[0_22px_60px_rgba(0,0,0,.3)] sm:p-7">
+            <KeyRound className="h-9 w-9 text-[#d71920]" aria-hidden="true" />
+            <p className="mt-4 text-xs font-black uppercase tracking-[0.25em] text-[#a0802f]">
+              Private crew access
+            </p>
+            <h2 className="mt-2 font-serif text-3xl font-bold">Check my points</h2>
+            <p className="mt-3 text-sm font-semibold leading-6 text-[#526875]">
+              You can paste the whole link or just the unique code at the end.
+            </p>
+            <div className="mt-6">
+              <PointsLookupForm />
+            </div>
+          </div>
         </section>
 
-        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-journey-steel pt-5 text-sm font-bold text-journey-line">
-          <span>{chapter.imaxReference}</span>
-          <span className="inline-flex items-center gap-2">
-            <Clapperboard className="h-4 w-4 text-journey-red" aria-hidden="true" />
-            {productLanguage.productName} Platform
-          </span>
+        <footer className="relative z-10 flex flex-wrap items-center justify-between gap-3 border-t border-[#c8a958]/45 pt-5 text-sm font-bold text-[#fff8e7]/65">
+          <span>July 17 – August 12</span>
+          <span className="font-serif italic text-[#f3d878]">The higher the sea, the greater the treasure.</span>
         </footer>
       </div>
     </main>

@@ -70,6 +70,67 @@ textarea {
   color: #ffffff;
 }
 
+.odyssey-public-shell {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 50% -8%, rgba(207, 174, 83, 0.16), transparent 33%),
+    linear-gradient(180deg, #102c38 0%, #09222d 48%, #061923 100%);
+}
+
+.odyssey-public-shell::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.35;
+  background-image:
+    repeating-radial-gradient(ellipse at 12% 102%, transparent 0 23px, rgba(231, 207, 131, 0.13) 24px 25px, transparent 26px 48px),
+    repeating-radial-gradient(ellipse at 82% 108%, transparent 0 31px, rgba(255, 255, 255, 0.06) 32px 33px, transparent 34px 62px);
+  background-size: 210px 86px, 270px 110px;
+  animation: odysseySeaDrift 28s linear infinite;
+}
+
+.odyssey-public-shell::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.08;
+  background-image:
+    radial-gradient(circle at 18% 22%, #fff 0 1px, transparent 1px),
+    radial-gradient(circle at 72% 18%, #f4d678 0 1px, transparent 1px),
+    radial-gradient(circle at 48% 62%, #fff 0 1px, transparent 1px);
+  background-size: 43px 43px, 67px 67px, 91px 91px;
+}
+
+.odyssey-public-frame {
+  position: relative;
+  border: 1px solid rgba(207, 174, 83, 0.82);
+  box-shadow:
+    inset 0 0 0 4px #0c2632,
+    inset 0 0 0 5px rgba(207, 174, 83, 0.52),
+    0 26px 80px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes odysseySeaDrift {
+  from {
+    background-position: 0 100%, 0 100%;
+  }
+  to {
+    background-position: 210px 100%, -270px 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .odyssey-public-shell::before {
+    animation: none;
+  }
+}
+
 .cinema-surface {
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),

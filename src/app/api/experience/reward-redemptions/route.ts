@@ -5,6 +5,7 @@ import {
   writeExperienceState,
 } from "@/lib/server/experience-state";
 import type { Redemption } from "@/lib/types";
+import { getRequestAuthContext, requestUserCanAccess } from "@/lib/server/request-auth";
 
 type RewardRequestBody = {
   employeeId?: string;
@@ -26,6 +27,11 @@ function isOpenStatus(status: Redemption["status"]) {
 }
 
 export async function POST(request: Request) {
+  const context = await getRequestAuthContext(request);
+  if (!requestUserCanAccess(context, "employee")) {
+    return NextResponse.json({ error: "Account access is required." }, { status: 401 });
+  }
+
   const body = (await request.json()) as RewardRequestBody;
   if (!body.employeeId || !body.rewardId) {
     return NextResponse.json(
@@ -82,6 +88,11 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const context = await getRequestAuthContext(request);
+  if (!requestUserCanAccess(context, "manager")) {
+    return NextResponse.json({ error: "Manager access is required." }, { status: 401 });
+  }
+
   const body = (await request.json()) as RewardPatchBody;
   if (!body.redemptionId || !body.status) {
     return NextResponse.json(

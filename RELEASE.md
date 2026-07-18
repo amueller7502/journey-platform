@@ -1,5 +1,17 @@
 # Experience Release Notes
 
+## V1.13 Odyssey Public Flows
+
+- Replaced the public login-first launch surface with an Odyssey-styled private points-code entry.
+- Added an unlisted, no-login manager route for Capture Points, Crew Quest card processing, and private-link distribution.
+- Added per-employee UUID points links backed by a server-only Supabase table with no anonymous or authenticated client access.
+- Added the Odyssey poster's nine point-earning options and sixteen reward values as editable starter configuration.
+- Protected point and card mutations with either the unlisted manager key or an authenticated manager session.
+- Protected the full shared-state API so public visitors cannot retrieve the employee roster or configuration payload.
+- Preserved authenticated Builder access and advanced modules behind existing feature flags.
+- Added mobile Odyssey styling based on the supplied navy, gold, red, and ivory poster treatment.
+- Added additive migration `202607180001_odyssey_public_flows.sql` and deployment/setup notes.
+
 ## V1.12 Experience Lite Cleanup
 
 - Tightened Experience Lite language around XP, Rewards, Seasons, Experience Cards, and Experience Moments.

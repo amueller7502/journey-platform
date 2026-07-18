@@ -6,7 +6,7 @@ Mission: **Experience exists to recognize the people who create extraordinary mo
 
 Product promise: **Experience makes recognizing great work easier than overlooking it.**
 
-Season One is **The Odyssey**, running **July 16-August 12, 2026**. The management preview date is **July 9, 2026** and the employee launch date is **July 16, 2026**. The Season One community goal is **15,700 XP**.
+Season One is **The Odyssey**, running **July 17-August 12, 2026**. The Season One community goal is **15,700 XP**.
 
 Campaign phrase: **More Than A Movie Starts With Us.**
 
@@ -56,7 +56,7 @@ Run all three before pushing to GitHub or deploying to Vercel.
 
 ## Environment Variables
 
-Experience Lite uses Supabase for live account creation, sign-in, and shared state.
+Experience Lite uses Supabase for shared points, Experience Moments, Crew Quest cards, editable recognition, and editable rewards. Employees do not create accounts for the Lite launch.
 
 Supabase variables:
 
@@ -66,13 +66,24 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 EXPERIENCE_APP_URL=https://your-vercel-domain.vercel.app
 EXPERIENCE_SETUP_KEY=
-NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=false
+EXPERIENCE_MANAGER_LINK_KEY=use-a-long-random-value-here
+NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is server-only. Do not expose it in client code.
 `EXPERIENCE_APP_URL` should be the deployed Vercel URL with no trailing slash. Password reset emails use this value so links do not point at localhost.
 `EXPERIENCE_SETUP_KEY` is optional but recommended after launch. It allows an owner to repair Builder access at `/setup/access` if a Builder login already exists.
-Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` only after at least one Experience Builder account exists and has been tested.
+`EXPERIENCE_MANAGER_LINK_KEY` creates the unlisted, no-login manager URL. Use at least 32 URL-safe random characters (for example, `openssl rand -hex 24`) and never post that URL in an employee channel.
+Set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` after the Experience Builder login has been tested. The public points and unlisted manager routes remain available without employee authentication.
+
+## Experience Lite Public Flows
+
+The launch surface is intentionally limited to two flows:
+
+1. `/manage/<EXPERIENCE_MANAGER_LINK_KEY>` is the unlisted manager submission area. Managers can capture Odyssey points, process Crew Quest cards, and copy each employee's private points link. There is no employee login and the manager link is not shown on the public site.
+2. `/points/<unique-employee-token>` shows one employee's current points and the Odyssey reward ladder. Tokens are random UUIDs stored in a server-only table; there is no employee roster or name search.
+
+The root route `/` accepts a private employee code or complete points link. Builder and advanced feature work is preserved behind authentication and feature flags. Staff can sign in at the unadvertised `/staff-access` route.
 
 ## Supabase Setup
 
@@ -86,10 +97,10 @@ For a brand-new preview Supabase project:
 4. Run `supabase/seed.sql` only if you want sample Celebration Cinema North data.
 5. Add the environment variables above to `.env.local`.
 6. Restart the dev server.
-7. Open the Welcome screen and use **Create** to create the first Experience Builder account.
-8. Sign in with that account and confirm it can open Experience Builder.
-9. Create manager and employee accounts from the Welcome screen or Employees Builder.
-10. After accounts are tested, set `NEXT_PUBLIC_EXPERIENCE_AUTH_REQUIRED=true` when you are ready to block direct route access for signed-out users.
+7. Open `/setup/access` to create the first Experience Builder account.
+8. Sign in at `/staff-access` and confirm the account can open Experience Builder.
+9. Import or create employees in Employees Builder. Employees do not need Auth accounts for Experience Lite.
+10. Run `supabase/migrations/202607180001_odyssey_public_flows.sql`, then test one private employee link from the manager page.
 
 For an existing Supabase project, do not re-run `supabase/schema.sql` or `supabase/seed.sql`. Apply only migration files that have not been run yet:
 
@@ -98,7 +109,19 @@ For an existing Supabase project, do not re-run `supabase/schema.sql` or `supaba
 -- Paste and run:
 -- supabase/migrations/202607020001_experience_shared_state.sql
 -- supabase/migrations/202607020002_api_grants.sql
+-- supabase/migrations/202607020003_auth_access_repair.sql
+-- supabase/migrations/202607180001_odyssey_public_flows.sql
 ```
+
+The Odyssey public-flow migration is additive. It creates server-only employee points links and inserts the poster's nine recognition options and sixteen reward values without resetting existing employees, XP, moments, cards, rewards, or redemptions.
+
+After running the migration:
+
+1. Add `EXPERIENCE_MANAGER_LINK_KEY` to Vercel for Production, Preview, and Development as appropriate.
+2. Redeploy the current Git commit.
+3. Open `https://your-domain/manage/<your-key>` and verify Supabase shows as connected.
+4. Use **Points Links** in that manager screen to copy each employee's unique URL.
+5. Send each points URL privately. Use OurPeople for announcements and program conversation, not for posting the shared manager key.
 
 If account creation shows `permission denied for table profiles`, run `supabase/migrations/202607020002_api_grants.sql`. That migration grants Supabase API access to the public tables while row-level security still controls which rows each role can read or write.
 
@@ -131,15 +154,14 @@ Experience uses platform roles in `user_roles`:
 
 The app still supports the legacy `employees.role` values `employee`, `manager`, and `admin` as a fallback while accounts are being migrated.
 
-## Account Creation
+## Staff Account Creation
 
-The Welcome screen includes Sign In, Create Account, and Reset Password tabs:
+Employees do not create accounts in Experience Lite. Experience Builder and any future authenticated staff tools remain available at the unadvertised `/staff-access` route:
 
-- Sign In opens the correct tools automatically based on the account role.
-- Create Account creates a starter Employee account.
-- Experience Builder access can promote roles from Employees or be repaired at `/setup/access`.
+- Sign In opens the correct staff tools based on role.
+- Experience Builder access can promote staff roles from Employees or be repaired at `/setup/access`.
 
-Creating an account creates:
+Creating a staff account creates:
 
 - Supabase Auth user
 - `profiles` row
@@ -188,22 +210,12 @@ Experience Builders can also reset a staff member's temporary password from **Em
 
 ## Main Routes
 
-Visible in Experience Lite:
+Experience Lite launch:
 
-Employee:
-
-- `/home` Today
-- `/my-journey` My Experience, using the current compatibility URL
-- `/rewards` Rewards
-- `/profile` Profile
-
-Manager:
-
-- `/manager/recognize` Capture Moment
-- `/manager/passport` Experience Card Entry
-- `/manager/cards` Print Daily Experience Cards
-- `/manager/employees` Employee Lookup
-- `/manager/pending-rewards` Rewards Approvals
+- `/` Private employee code entry
+- `/points/<unique-token>` One employee's read-only points and reward ladder
+- `/manage/<manager-key>` Unlocked manager points and Crew Quest submission area
+- `/staff-access` Unadvertised authenticated access for Experience Builder and preserved advanced tools
 
 Experience Builder:
 

@@ -362,7 +362,18 @@ async function readNormalizedEmployees() {
     return [];
   }
 
-  return (data as SupabaseEmployeeRow[]).map(mapEmployeeRow);
+  const employees = (data as SupabaseEmployeeRow[]).map(mapEmployeeRow);
+  const { data: pointLinks } = await supabase
+    .from("employee_points_links")
+    .select("employee_app_id, lookup_token");
+  const tokenByEmployee = new Map(
+    (pointLinks ?? []).map((row) => [row.employee_app_id, row.lookup_token]),
+  );
+
+  return employees.map((employee) => ({
+    ...employee,
+    pointsLookupToken: tokenByEmployee.get(employee.id) ?? employee.pointsLookupToken,
+  }));
 }
 
 async function readProfilePeople(existingPeople: Employee[]) {
@@ -521,6 +532,20 @@ export async function syncConfigTables(
     })),
     syncIssues,
     "app_id",
+  );
+
+  await bestEffortUpsert(
+    "employee_points_links",
+    state.employees
+      .filter((employee) => employee.role === "employee")
+      .map((employee) => ({
+        employee_app_id: employee.id,
+        ...(employee.pointsLookupToken
+          ? { lookup_token: employee.pointsLookupToken }
+          : {}),
+      })),
+    syncIssues,
+    "employee_app_id",
   );
 
   await bestEffortUpsert(

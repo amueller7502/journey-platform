@@ -6,8 +6,14 @@ import {
   type ExperienceOperatingState,
 } from "@/lib/server/experience-state";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/admin";
+import { getRequestAuthContext, requestUserCanAccess } from "@/lib/server/request-auth";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const context = await getRequestAuthContext(request);
+  if (!requestUserCanAccess(context, "manager")) {
+    return NextResponse.json({ error: "Manager access is required." }, { status: 401 });
+  }
+
   if (!hasSupabaseAdminEnv()) {
     return NextResponse.json({ state: null, mode: "local" });
   }
@@ -24,6 +30,11 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const context = await getRequestAuthContext(request);
+  if (!requestUserCanAccess(context, "admin")) {
+    return NextResponse.json({ error: "Experience Designer access is required." }, { status: 401 });
+  }
+
   if (!hasSupabaseAdminEnv()) {
     return NextResponse.json({ ok: true, mode: "local" });
   }

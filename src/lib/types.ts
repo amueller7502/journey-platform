@@ -179,6 +179,7 @@ export type Employee = {
   journeyCardAreaId?: string;
   email?: string;
   accessCode?: string;
+  pointsLookupToken?: string;
   accountStatus?: "invited" | "active" | "disabled";
   profilePhotoUrl?: string;
   pendingProfilePhotoUrl?: string;

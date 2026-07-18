@@ -59,6 +59,10 @@ import type {
   TvPanelSetting,
 } from "./types";
 import { productLanguage } from "./product-language";
+import {
+  createOdysseyRecognitionTypes,
+  createOdysseyRewards,
+} from "./odyssey-config";
 
 export const chapter = {
   id: "chapter-one-odyssey",
@@ -317,6 +321,7 @@ export const journeyCardAreas: JourneyCardArea[] = [
 ];
 
 export const recognitionTypes: RecognitionType[] = [
+  ...createOdysseyRecognitionTypes(chapter.id),
   {
     id: "bathroom_excellence",
     chapterId: chapter.id,
@@ -796,6 +801,7 @@ export const employees: Employee[] = [
     journeyCardAreaId: "floor_lobby",
     email: "alex.rivera@north.example",
     accessCode: "AR1570",
+    pointsLookupToken: "ed59de3f-7858-4aa6-9422-312584406599",
     accountStatus: "active",
     miles: 660,
     weeklyMiles: 105,
@@ -815,6 +821,7 @@ export const employees: Employee[] = [
     journeyCardAreaId: "concessions",
     email: "maya.thompson@north.example",
     accessCode: "MT1570",
+    pointsLookupToken: "bb64e3f4-7398-4bb2-9d57-d212287d2846",
     accountStatus: "active",
     miles: 590,
     weeklyMiles: 80,
@@ -834,6 +841,7 @@ export const employees: Employee[] = [
     journeyCardAreaId: "box_guest_services",
     email: "eli.brooks@north.example",
     accessCode: "EB1570",
+    pointsLookupToken: "135ed5c9-c8ce-4f42-9e1d-f424d884c69c",
     accountStatus: "invited",
     miles: 520,
     weeklyMiles: 65,
@@ -853,6 +861,7 @@ export const employees: Employee[] = [
     journeyCardAreaId: "box_guest_services",
     email: "nora.patel@north.example",
     accessCode: "NP1570",
+    pointsLookupToken: "f926db40-52c3-476c-a9db-4d67e227b535",
     accountStatus: "active",
     miles: 450,
     weeklyMiles: 70,
@@ -872,6 +881,7 @@ export const employees: Employee[] = [
     journeyCardAreaId: "facilities_exterior",
     email: "dante.williams@north.example",
     accessCode: "DW1570",
+    pointsLookupToken: "b3d163a7-0ca9-4aa2-a980-f46db5f042d2",
     accountStatus: "active",
     miles: 410,
     weeklyMiles: 0,
@@ -891,6 +901,7 @@ export const employees: Employee[] = [
     journeyCardAreaId: "kitchen_oscars",
     email: "leah.kim@north.example",
     accessCode: "LK1570",
+    pointsLookupToken: "1d46a0b4-d384-48c6-aeb5-b9facbed57bc",
     accountStatus: "invited",
     miles: 365,
     weeklyMiles: 55,
@@ -1214,6 +1225,7 @@ export const leadershipHealth = {
 };
 
 export const rewards: Reward[] = [
+  ...createOdysseyRewards(chapter.id),
   {
     id: "reward-c-cash-5",
     chapterId: chapter.id,

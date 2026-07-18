@@ -5,6 +5,7 @@ import {
   writeExperienceState,
 } from "@/lib/server/experience-state";
 import { isArchived } from "@/lib/archive";
+import { requestCanSubmitExperience } from "@/lib/server/public-access";
 
 type CaptureMomentBody = {
   employeeId?: string;
@@ -15,6 +16,13 @@ type CaptureMomentBody = {
 };
 
 export async function POST(request: Request) {
+  if (!(await requestCanSubmitExperience(request))) {
+    return NextResponse.json(
+      { error: "This submission link is not authorized." },
+      { status: 401 },
+    );
+  }
+
   const body = (await request.json()) as CaptureMomentBody;
   if (!body.employeeId || !body.recognitionTypeId) {
     return NextResponse.json(

@@ -12,7 +12,8 @@ import type { PlatformRole, Role } from "@/lib/types";
 const publicPathPrefixes = [
   "/",
   "/tv",
-  "/api/journey-state",
+  "/manage",
+  "/points",
   "/_next",
   "/favicon.ico",
   "/brand",

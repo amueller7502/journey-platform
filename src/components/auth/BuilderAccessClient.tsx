@@ -99,7 +99,7 @@ export function BuilderAccessClient() {
         <header className="flex flex-wrap items-center justify-between gap-4">
           <BrandLockup size="md" />
           <LinkButton href="/" icon={ArrowLeft} variant="secondary">
-            Back to Login
+            Back to Points
           </LinkButton>
         </header>
 

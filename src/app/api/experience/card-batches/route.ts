@@ -6,6 +6,7 @@ import {
   writeExperienceState,
 } from "@/lib/server/experience-state";
 import { isArchived } from "@/lib/archive";
+import { requestCanSubmitExperience } from "@/lib/server/public-access";
 
 type CardBatchBody = {
   employeeId?: string;
@@ -16,6 +17,13 @@ type CardBatchBody = {
 };
 
 export async function POST(request: Request) {
+  if (!(await requestCanSubmitExperience(request))) {
+    return NextResponse.json(
+      { error: "This submission link is not authorized." },
+      { status: 401 },
+    );
+  }
+
   const body = (await request.json()) as CardBatchBody;
   const selectedIds = body.recognitionTypeIds ?? [];
   if (!body.employeeId || !body.areaId || !selectedIds.length) {
